@@ -1,0 +1,1053 @@
+[chains.ethereum-mainnet]
+name = "Ethereum Mainnet"
+id = 1
+etherscan-url = "https://etherscan.io/"
+
+# Accounts
+admin = "0xF616A4f81857CFEe54A4A049Ec187172574bd412"
+
+# Contracts
+timelock-controller = "0x0b144E07A0826182B6b59788c34b32Bfa86Fb711"
+timelock-delay = 259200
+router = "0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319"
+
+[[chains.ethereum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x94A4684d6F7085C19138Bd4f9F3295fa9943C622"
+estop = "0x08AeD6C108E500540a9544beF7a8B8a05E056e87"
+
+[[chains.ethereum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805"
+
+[[chains.ethereum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x68dC2cB4e61774873971c499D9b239ec5Ac540E3"
+stopped = true
+
+[[chains.ethereum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0xDa8f3de6fBBdb261Ac771B813a578A7aBdA6B2b1"
+stopped = true
+
+[[chains.ethereum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x1efDd13f831ceeEa14940806705A53D3211CD698"
+
+[[chains.ethereum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x9F9994Eb4Cb5200198FEfb470f8b50301662e696"
+
+###
+
+[chains.ethereum-sepolia]
+name = "Ethereum Sepolia"
+id = 11155111
+etherscan-url = "https://sepolia.etherscan.io/"
+
+# Accounts
+admin = "0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D"
+
+# Contracts
+timelock-controller = "0xB4E3306129208cC8e6E75157f75f62eAe0B920a0"
+timelock-delay = 1
+router = "0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0xd9b0d07CeCd808a8172F21fA7C97992168f045CA"
+estop = "0x7a028d6f0BD603Ad2a47e3a3B1E504C0D6234877"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x47d697328D6A80b00D796cEd9f54468931Aa1ECe"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629"
+stopped = true
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.1.0"
+selector = "0xbfca9ccb"
+verifier = "0xea6a0Ca4BfD0A6C43081D57672b3B6D43B69265F"
+estop = "0xFB4D56bdEc378e6625e6448b037EFB4E5FCE085d"
+# Build info for the set-builder guest
+set-builder-commit = "abd97bca9533d70302b41f67020f7fd1e41d9cf7"
+set-builder-image-id = "7d75250e86556132c0e10c05b0f1d823ae72a5e277a596039576b6578cb25260"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/QmXVv8FErxhzxQiSEYDqwDA5bWLu7wEn7ZWcFvjAsfqJdW"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.4.0"
+selector = "0xf443ad7b"
+verifier = "0x4d6F0158833026B07cE717043fb01b4e89f17e36"
+estop = "0x9852f4B6b6554E4C723914a5500Fc57156EDE3F7"
+# Build info for the set-builder guest
+set-builder-commit = "8eadd4812fe44ba266a0565725c4fa654e4770e5"
+set-builder-image-id = "8888bf20b2be0ca935e166325578c336cc16355f9b63e7e5279c71a0a97f4df9"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafkreih46jdbjosixps7l3obrmfh4xlusnunohva6pfhqqdcyobaac4w4a"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.5.0"
+selector = "0xf2e6e6dc"
+verifier = "0x02f4D3E76876E5262f8D07Bc2258caE593e95013"
+estop = "0xb1216C4ECA3E3D69f9542Ae9b20b03c69693CC80"
+# Build info for the set-builder guest
+set-builder-commit = "45a77235021f21ddc023d4655db0d6fd914de402"
+set-builder-image-id = "79fd473a707e7c064af3edabf63cad6c7ab9205766fd8d8160bdef97fdd15c74"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafkreiggmfeaohdbdwmhhsferpnrrjrd37h43hgwmu6yobwcd3qaavut6q"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.6.0"
+selector = "0x80479d24"
+verifier = "0xad2c6335191EA71Ffe2045A8d54b93A851ceca77"
+estop = "0x1A42D5b2fF29fbc2CB684836d222c561639b0bE4"
+# Build info for the set-builder guest
+set-builder-commit = "f584db3428af194f244e0ff74370918a649aab76"
+set-builder-image-id = "2fcedaa205bbfab6b804dec81e99cc9a22b20dea7a9701a1a7c55c7d26ef32f6"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafkreifdozdfxhgdn6mcuq2mltbx7qaq5mie4iosq7kxj5rqmm4kg4qcfy"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.7.0"
+selector = "0x0f63ffd5"
+verifier = "0x7aAB646f23D1392d4522CFaB0b7FB5eaf6821d64"
+estop = "0x46D0322760631084bFfC10b31962A47a527Ac042"
+# Build info for the set-builder guest
+set-builder-commit = "c09ee29b386d2b1486724509868d1115db36929f" # aggregation-v0.7.0
+set-builder-image-id = "a218e889a26852fd3d57a80983c76b53ff6d5fa4b469779511dd4d99329ae7aa"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafkreicn2oingurbfxdanqgzy6nwt2gexazlnh6jhj7h3k2ot47vw6fomq"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.9.0"
+selector = "0x242f9d5b"
+verifier = "0xcb9D14347b1e816831ECeE46EC199144F360B55c"
+estop = "0xA9aa32A5aAF3Bad63e5F25d1cb86040bbf883c5B"
+unroutable = true # remove when added to the router
+# Build info for the set-builder guest built with cargo-risczero v3.0.3
+set-builder-commit = "87457958a321d0f64dca3ed41309f990ea806b1e" # aggregation-v0.9.0
+set-builder-image-id = "70909b25db0db00f1d4b4016aeb876f53568a3e5a8e6397cb562d79947a02cc9"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafybeicclqbjn5ief3ycqif6wv3n3wr43szv2locrmml5h7d4fkrz4jrum"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0x9d6232CD50b5a2df431274f2633988f97bF3985f"
+stopped = true
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F"
+
+[[chains.ethereum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x724d375B5b622e15f0E64e9Deb76a4cB17877797"
+
+###
+
+[chains.ethereum-holesky]
+name = "Ethereum Holesky"
+id = 17000
+etherscan-url = "https://holesky.etherscan.io/"
+
+# Accounts
+admin = "0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D"
+
+# Contracts
+timelock-controller = "0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319"
+timelock-delay = 1
+router = "0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C"
+
+[[chains.ethereum-holesky.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x44c220f0598345195cE99AD6A57aDfFcb9Ea33e7"
+estop = "0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4"
+
+[[chains.ethereum-holesky.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x47d697328D6A80b00D796cEd9f54468931Aa1ECe"
+
+[[chains.ethereum-holesky.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629"
+stopped = true
+
+[[chains.ethereum-holesky.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0x9d6232CD50b5a2df431274f2633988f97bF3985f"
+stopped = true
+
+[[chains.ethereum-holesky.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F"
+
+[[chains.ethereum-holesky.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x724d375B5b622e15f0E64e9Deb76a4cB17877797"
+
+###
+
+[chains.ethereum-hoodi]
+name = "Ethereum Hoodi"
+id = 560048
+etherscan-url = "https://hoodi.etherscan.io/"
+
+# Accounts
+admin = "0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D"
+
+# Contracts
+timelock-controller = "0xE1CC216c5fd5EcAE1e951bDdcf951601554Be338"
+timelock-delay = 1
+router = "0x32Db7dc407AC886807277636a1633A1381748DD8"
+
+[[chains.ethereum-hoodi.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629"
+stopped = true
+
+[[chains.ethereum-hoodi.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0x9d6232CD50b5a2df431274f2633988f97bF3985f"
+stopped = true
+
+[[chains.ethereum-hoodi.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F"
+
+[[chains.ethereum-hoodi.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x724d375B5b622e15f0E64e9Deb76a4cB17877797"
+
+###
+
+[chains.arbitrum-mainnet]
+name = "Arbitrum Mainnet"
+id = 42161
+etherscan-url = "https://arbiscan.io/"
+
+# Accounts
+admin = "0xF616A4f81857CFEe54A4A049Ec187172574bd412"
+
+# Contracts
+timelock-controller = "0xdc986a09728f76110ff666ee7b20d99086501d15"
+timelock-delay = 259200
+router = "0x0b144e07a0826182b6b59788c34b32bfa86fb711"
+
+[[chains.arbitrum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF"
+estop = "0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1"
+
+[[chains.arbitrum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805"
+
+[[chains.arbitrum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x68dC2cB4e61774873971c499D9b239ec5Ac540E3"
+stopped = true
+
+[[chains.arbitrum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0xDa8f3de6fBBdb261Ac771B813a578A7aBdA6B2b1"
+stopped = true
+
+[[chains.arbitrum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x1efDd13f831ceeEa14940806705A53D3211CD698"
+
+[[chains.arbitrum-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x9F9994Eb4Cb5200198FEfb470f8b50301662e696"
+
+###
+
+[chains.arbitrum-sepolia]
+name = "Arbitrum Sepolia"
+id = 421614
+etherscan-url = "https://sepolia.arbiscan.io/"
+
+# Accounts
+admin = "0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D"
+
+# Contracts
+timelock-controller = "0xdc986a09728f76110ff666ee7b20d99086501d15"
+timelock-delay = 1
+router = "0x0b144e07a0826182b6b59788c34b32bfa86fb711"
+
+[[chains.arbitrum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF"
+estop = "0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1"
+
+[[chains.arbitrum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x47d697328D6A80b00D796cEd9f54468931Aa1ECe"
+
+[[chains.arbitrum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629"
+stopped = true
+
+[[chains.arbitrum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0x9d6232CD50b5a2df431274f2633988f97bF3985f"
+stopped = true
+
+[[chains.arbitrum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F"
+
+[[chains.arbitrum-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x724d375B5b622e15f0E64e9Deb76a4cB17877797"
+
+###
+
+[chains.avalanche-mainnet]
+name = "Avalanche Mainnet"
+id = 43114
+etherscan-url = "https://snowtrace.io"
+
+# Accounts
+admin = "0xF616A4f81857CFEe54A4A049Ec187172574bd412"
+
+# Contracts
+timelock-controller = "0xDC986a09728F76110FF666eE7b20d99086501d15"
+timelock-delay = 259200
+router = "0x0b144E07A0826182B6b59788c34b32Bfa86Fb711"
+
+[[chains.avalanche-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF"
+estop = "0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1"
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=shanghai as MCOPY is not supported.
+[[chains.avalanche-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0x8062Dc6C824F10e62E47FdC55A0ecD54C2641F2d"
+estop = "0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1"
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=shanghai as MCOPY is not supported.
+[[chains.avalanche-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x9b7112223f492dDCc5443fCe9cd38960a57cACF1"
+estop = "0x0aA83C8e32cb07087e4c9409Ae092e7d66Dd890a"
+stopped = true
+
+[[chains.avalanche-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0xDa8f3de6fBBdb261Ac771B813a578A7aBdA6B2b1"
+stopped = true
+
+[[chains.avalanche-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x1efDd13f831ceeEa14940806705A53D3211CD698"
+
+[[chains.avalanche-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x9F9994Eb4Cb5200198FEfb470f8b50301662e696"
+
+###
+
+[chains.avalanche-fuji]
+name = "Avalanche Fuji"
+id = 43113
+etherscan-url = "https://testnet.snowtrace.io"
+
+# NOTE: As of Aug 21, 2025, Fireblocks appears to have issues sending EIP-1559 transactions to Fuji
+# As a workaround, the `--legacy` flag can be used with forge script to not use EIP-1559.
+
+# Accounts
+admin = "0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D"
+
+# Contracts
+timelock-controller = "0xDC986a09728F76110FF666eE7b20d99086501d15"
+timelock-delay = 1
+router = "0x0b144E07A0826182B6b59788c34b32Bfa86Fb711"
+
+[[chains.avalanche-fuji.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF"
+estop = "0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1"
+
+[[chains.avalanche-fuji.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x47d697328D6A80b00D796cEd9f54468931Aa1ECe"
+
+[[chains.avalanche-fuji.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629"
+stopped = true
+
+[[chains.avalanche-fuji.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0x9d6232CD50b5a2df431274f2633988f97bF3985f"
+stopped = true
+
+[[chains.avalanche-fuji.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F"
+
+[[chains.avalanche-fuji.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x724d375B5b622e15f0E64e9Deb76a4cB17877797"
+
+###
+
+[chains.base-mainnet]
+name = "Base Mainnet"
+id = 8453
+etherscan-url = "https://basescan.org/"
+
+# Accounts
+admin = "0xF616A4f81857CFEe54A4A049Ec187172574bd412"
+
+# Contracts
+timelock-controller = "0xdc986a09728f76110ff666ee7b20d99086501d15"
+timelock-delay = 259200
+router = "0x0b144e07a0826182b6b59788c34b32bfa86fb711"
+
+[[chains.base-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF"
+estop = "0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1"
+
+[[chains.base-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805"
+
+[[chains.base-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x68dC2cB4e61774873971c499D9b239ec5Ac540E3"
+stopped = true
+
+[[chains.base-mainnet.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.7.0"
+selector = "0x0f63ffd5"
+verifier = "0x8C5a8b5cC272Fe2b74D18843CF9C3aCBc952a760"
+estop = "0xc0F0a64960187b83DcAA0e4bC2Ec05bfCbde9Fd7"
+# Build info for the set-builder guest
+set-builder-commit = "c09ee29b386d2b1486724509868d1115db36929f" # aggregation-v0.7.0
+set-builder-image-id = "a218e889a26852fd3d57a80983c76b53ff6d5fa4b469779511dd4d99329ae7aa"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafkreicn2oingurbfxdanqgzy6nwt2gexazlnh6jhj7h3k2ot47vw6fomq"
+
+[[chains.base-mainnet.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.9.0"
+selector = "0x242f9d5b"
+verifier = "0x1Ab08498CfF17b9723ED67143A050c8E8c2e3104"
+estop = "0x8607C0F600857E6f65Ac85b8ba730410D4771fA6"
+unroutable = true # remove when added to the router
+# Build info for the set-builder guest built with cargo-risczero v3.0.3
+set-builder-commit = "87457958a321d0f64dca3ed41309f990ea806b1e" # aggregation-v0.9.0
+set-builder-image-id = "70909b25db0db00f1d4b4016aeb876f53568a3e5a8e6397cb562d79947a02cc9"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafybeicclqbjn5ief3ycqif6wv3n3wr43szv2locrmml5h7d4fkrz4jrum"
+
+[[chains.base-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0xDa8f3de6fBBdb261Ac771B813a578A7aBdA6B2b1"
+stopped = true
+
+[[chains.base-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x1efDd13f831ceeEa14940806705A53D3211CD698"
+
+[[chains.base-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x9F9994Eb4Cb5200198FEfb470f8b50301662e696"
+
+###
+
+[chains.base-sepolia]
+name = "Base Sepolia"
+id = 84532
+etherscan-url = "https://sepolia.basescan.org/"
+
+# Accounts
+admin = "0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D"
+
+# Contracts
+timelock-controller = "0xdc986a09728f76110ff666ee7b20d99086501d15"
+timelock-delay = 1
+router = "0x0b144e07a0826182b6b59788c34b32bfa86fb711"
+
+[[chains.base-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x2DEfEA335392bb62d01f74e338697C7B31De254C"
+estop = "0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908"
+
+[[chains.base-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x47d697328D6A80b00D796cEd9f54468931Aa1ECe"
+
+[[chains.base-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629"
+stopped = true
+
+[[chains.base-sepolia.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.6.0"
+selector = "0x80479d24"
+verifier = "0x0207A34E1a113f24BE0367D9b0C0e74049E05326"
+estop = "0x226B6e6b37F92a1D620Eb41b833Cc92760268D4a"
+# Build info for the set-builder guest
+set-builder-commit = "f584db3428af194f244e0ff74370918a649aab76"
+set-builder-image-id = "2fcedaa205bbfab6b804dec81e99cc9a22b20dea7a9701a1a7c55c7d26ef32f6"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafkreifdozdfxhgdn6mcuq2mltbx7qaq5mie4iosq7kxj5rqmm4kg4qcfy"
+
+[[chains.base-sepolia.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.7.0"
+selector = "0x0f63ffd5"
+verifier = "0x8C5a8b5cC272Fe2b74D18843CF9C3aCBc952a760"
+estop = "0x5c5076c20b897F9b8dd2c5e68Bd62785BA3D319B"
+# Build info for the set-builder guest
+set-builder-commit = "c09ee29b386d2b1486724509868d1115db36929f" # aggregation-v0.7.0
+set-builder-image-id = "a218e889a26852fd3d57a80983c76b53ff6d5fa4b469779511dd4d99329ae7aa"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafkreicn2oingurbfxdanqgzy6nwt2gexazlnh6jhj7h3k2ot47vw6fomq"
+
+[[chains.base-sepolia.verifiers]]
+name = "RiscZeroSetVerifier"
+version = "0.9.0"
+selector = "0x242f9d5b"
+verifier = "0x1Ab08498CfF17b9723ED67143A050c8E8c2e3104"
+estop = "0xf62AbB78d7a039a7119c002fA9a5E4709472D46C"
+unroutable = true # remove when added to the router
+# Build info for the set-builder guest built with cargo-risczero v3.0.3
+set-builder-commit = "87457958a321d0f64dca3ed41309f990ea806b1e" # aggregation-v0.9.0
+set-builder-image-id = "70909b25db0db00f1d4b4016aeb876f53568a3e5a8e6397cb562d79947a02cc9"
+set-builder-elf-url = "https://gateway.pinata.cloud/ipfs/bafybeicclqbjn5ief3ycqif6wv3n3wr43szv2locrmml5h7d4fkrz4jrum"
+
+[[chains.base-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0x9d6232CD50b5a2df431274f2633988f97bF3985f"
+stopped = true
+
+[[chains.base-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F"
+
+[[chains.base-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x724d375B5b622e15f0E64e9Deb76a4cB17877797"
+
+###
+
+[chains.optimism-mainnet]
+name = "Optimism Mainnet"
+id = 10
+etherscan-url = "https://optimistic.etherscan.io/"
+
+# Accounts
+admin = "0xF616A4f81857CFEe54A4A049Ec187172574bd412"
+
+# Contracts
+timelock-controller = "0xdc986a09728f76110ff666ee7b20d99086501d15"
+timelock-delay = 259200
+router = "0x0b144e07a0826182b6b59788c34b32bfa86fb711"
+
+[[chains.optimism-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF"
+estop = "0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1"
+
+[[chains.optimism-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805"
+
+[[chains.optimism-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x68dC2cB4e61774873971c499D9b239ec5Ac540E3"
+stopped = true
+
+[[chains.optimism-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0xDa8f3de6fBBdb261Ac771B813a578A7aBdA6B2b1"
+stopped = true
+
+[[chains.optimism-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x1efDd13f831ceeEa14940806705A53D3211CD698"
+
+[[chains.optimism-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x9F9994Eb4Cb5200198FEfb470f8b50301662e696"
+
+###
+
+[chains.optimism-sepolia]
+name = "Optimism Sepolia"
+id = 11155420
+etherscan-url = "https://sepolia-optimism.etherscan.io/"
+
+# Accounts
+admin = "0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D"
+
+# Contracts
+timelock-controller = "0x2DEfEA335392bb62d01f74e338697C7B31De254C"
+timelock-delay = 1
+router = "0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908"
+
+# NOTE: 1.0 was not deployed to OP Sepolia.
+
+[[chains.optimism-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF"
+estop = "0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1"
+
+[[chains.optimism-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0xAC292cF957Dd5BA174cdA13b05C16aFC71700327"
+estop = "0x47d697328D6A80b00D796cEd9f54468931Aa1ECe"
+
+[[chains.optimism-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97"
+estop = "0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629"
+stopped = true
+
+[[chains.optimism-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0x54aCE3ED46529B4d4F3770C8Bad5dDC48717B9bF"
+estop = "0x9d6232CD50b5a2df431274f2633988f97bF3985f"
+stopped = true
+
+[[chains.optimism-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F"
+
+[[chains.optimism-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x724d375B5b622e15f0E64e9Deb76a4cB17877797"
+
+###
+
+[chains.linea-mainnet]
+name = "Linea Mainnet"
+id = 59144
+etherscan-url = "https://lineascan.build/"
+
+# Accounts
+admin = "0xF616A4f81857CFEe54A4A049Ec187172574bd412"
+
+# Contracts
+timelock-controller = "0xdc986a09728f76110ff666ee7b20d99086501d15"
+timelock-delay = 259200
+router = "0x0b144e07a0826182b6b59788c34b32bfa86fb711"
+
+[[chains.linea-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF"
+estop = "0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1"
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=paris
+[[chains.linea-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0x8C8b557C6EBDA8E6D62E7b54B7B5Ed8cFa8B48B4"
+estop = "0x6Fb722974D67A55091c70129Bd0Bb06ec025ce5D"
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=paris
+[[chains.linea-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x2Bde5B9308AAC6bA374C0D13b0Cf1ec6088F870A"
+estop = "0x6D1A82E9B9E6F35E7201b8bE398D08762735e77d"
+stopped = true
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=london
+[[chains.linea-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0xCb941DE7Fac82B1D768848ed267cc93B7AbE5AB6"
+estop = "0x8777853Dbe9694D7a146D8e17f7b6331BF75C64c"
+stopped = true
+
+[[chains.linea-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0x7F321e749E36d5646E12d6614EB0Ec2E962962A0"
+estop = "0x24496Cfa1362eB60929dBdeEF9988a3AA853EcC6"
+
+[[chains.linea-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x3d9aad871eaae3c5b847930f3Eef878D91766e46"
+estop = "0x4384e61DF16BFB392EFC1eF4B0D99F4ECC49BC40"
+
+###
+
+[chains.linea-sepolia]
+name = "Linea Sepolia"
+id = 59141
+etherscan-url = "https://sepolia.lineascan.build/"
+
+# Accounts
+admin = "0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D"
+
+# Contracts
+timelock-controller = "0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4"
+timelock-delay = 1
+router = "0x27983ee173aD10E171D17C9c5C14d5baFE997609"
+
+[[chains.linea-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C"
+estop = "0x44c220f0598345195cE99AD6A57aDfFcb9Ea33e7"
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=paris
+[[chains.linea-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0x8C8b557C6EBDA8E6D62E7b54B7B5Ed8cFa8B48B4"
+estop = "0x61b97ad01416183bd5A4F039baaAb6b75bdC99E4"
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=paris
+[[chains.linea-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x2Bde5B9308AAC6bA374C0D13b0Cf1ec6088F870A"
+estop = "0x6d196602586FC411c3551a3cDDC05EAA70bd09b5"
+stopped = true
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=paris
+[[chains.linea-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0xCb941DE7Fac82B1D768848ed267cc93B7AbE5AB6"
+estop = "0x7D2da71AFC99198eFb25dF594A13aDa3C6D9Ada2"
+stopped = true
+
+[[chains.linea-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0x7F321e749E36d5646E12d6614EB0Ec2E962962A0"
+estop = "0x0e428E8426FBc2824257736A129FF4dF9d56B9b3"
+
+[[chains.linea-sepolia.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x3d9aad871eaae3c5b847930f3Eef878D91766e46"
+estop = "0xF968911CA0b32faE4CDded83F1219b89189EB94B"
+
+###
+
+[chains.polygon-mainnet]
+name = "Polygon (POS) Mainnet"
+id = 137
+etherscan-url = "https://polygonscan.com/"
+
+# Accounts
+admin = "0xF616A4f81857CFEe54A4A049Ec187172574bd412"
+
+# Contracts
+timelock-controller = "0x15249b0ee8eCabC8AB5753763501D4AcD0B7ABAB"
+timelock-delay = 259200
+router = "0xdBAD523786971B75A7b1c1CFdCfECDeb59A764B9"
+
+[[chains.polygon-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9"
+estop = "0x1efDd13f831ceeEa14940806705A53D3211CD698"
+
+[[chains.polygon-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0x2a098988600d87650Fb061FfAff08B97149Fa84D"
+estop = "0x9F9994Eb4Cb5200198FEfb470f8b50301662e696"
+
+###
+
+[chains.polygon-zkevm-mainnet]
+name = "Polygon zkEVM Mainnet"
+id = 1101
+etherscan-url = "https://zkevm.polygonscan.com/"
+
+# Accounts
+admin = "0xF616A4f81857CFEe54A4A049Ec187172574bd412"
+
+# Contracts
+timelock-controller = "0xdc986a09728f76110ff666ee7b20d99086501d15"
+timelock-delay = 259200
+router = "0x0b144e07a0826182b6b59788c34b32bfa86fb711"
+
+[[chains.polygon-zkevm-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.1.0-rc.3"
+selector = "0x50bd1769"
+verifier = "0x84b943E31e7fAe6072ce5F75eb4694C7D5F9b0cF"
+estop = "0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1"
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=shanghai
+[[chains.polygon-zkevm-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "1.2.0"
+selector = "0xc101b42b"
+verifier = "0x8062Dc6C824F10e62E47FdC55A0ecD54C2641F2d"
+estop = "0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1"
+
+# NOTE: Deployed with FOUNDRY_EVM_VERSION=shanghai
+[[chains.polygon-zkevm-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.0.0-rc.3"
+selector = "0x9f39696c"
+verifier = "0x9b7112223f492dDCc5443fCe9cd38960a57cACF1"
+estop = "0x0aA83C8e32cb07087e4c9409Ae092e7d66Dd890a"
+stopped = true
+
+[[chains.polygon-zkevm-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.1.0"
+selector = "0xf536085a"
+verifier = "0xCb97eF56F2b3d8116b5B851bbe74ea31380fA7dD"
+estop = "0xC5cbE5B24231E3339CdD8D4F1F1F7e096D919790"
+stopped = true
+
+[[chains.polygon-zkevm-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "2.2.0"
+selector = "0xbb001d44"
+verifier = "0x65e8db061e4b967D901EcbA7D99Baa1d2E5e2de9"
+estop = "0x57880e43BA126a29d81851F3410dF23a2008bF2E"
+
+[[chains.polygon-zkevm-mainnet.verifiers]]
+name = "RiscZeroGroth16Verifier"
+version = "3.0.0"
+selector = "0x73c457ba"
+verifier = "0xBdbFbF4500fced0d5511feEc1BB6a62EEf5Cd028"
+estop = "0xf0BF916fCC8581C1c2EfA480444feDf9BdbE8A4c"
+
+###
+
+# NOTE: This is the Cardona testnet, which uses Sepolia ETH as it's native currency.
+[chains.polygon-zkevm-testnet]
+name = "Polygon zkEVM Testnet"
+id = 2442
+etherscan-url = "https://cardona-zkevm.polygonscan.com/"
+
+# Accounts
+admin = "0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D"
+
+# Contracts
+# TODO: Deploy TimelockController and router here?
+
+# NOTE: As of the 1.1.0-rc.2 deployment on August 21, deploying to polygon zkEVM testnet failed.
+# On Polygon zkEVM Cardona testnet, gave an error of "Failed to get EIP-1559 fees".

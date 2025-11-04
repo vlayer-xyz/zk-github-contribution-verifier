@@ -1,0 +1,161 @@
+# GitHub Contribution Verifier
+
+A Next.js application that uses web proofs / zkTLS to verify GitHub contributions through vlayer's Web Prover API.
+
+## Overview
+
+This tool allows users to cryptographically prove and verify their contributions to GitHub repositories. It creates tamper-proof attestations of contributor data from GitHub's API.
+
+## Prerequisites
+
+- Node.js 20+
+- npm or pnpm
+- vlayer Web Prover API credentials
+
+## Installation
+
+```bash
+npm install
+```
+
+## Configuration
+
+Create a `.env.local` file with your vlayer API credentials:
+
+```
+WEB_PROVER_API_CLIENT_ID=your_client_id
+WEB_PROVER_API_SECRET=your_api_secret
+```
+
+## Usage
+
+1. Start the development server:
+```bash
+npm run dev
+```
+
+2. Open http://localhost:3000
+
+3. Enter a GitHub API contributors URL (e.g., `https://api.github.com/repos/owner/repo/contributors`)
+
+4. For private repositories, provide a GitHub Personal Access Token
+
+5. Enter your GitHub username
+
+6. Click "Prove Contributions" to generate a cryptographic proof
+
+7. Click "Verify Proof" to verify your contributions
+
+## API Endpoints
+
+- `POST /api/prove` - Generate cryptographic proof of GitHub API data
+- `POST /api/verify` - Verify the generated proof and extract contribution data
+- `POST /api/compress` - Generate zero-knowledge proof from web proof
+
+## Smart Contracts
+
+The project includes Solidity smart contracts for storing verified GitHub contributions on-chain.
+
+### Features
+
+- On-chain verification of ZK proofs using RISC Zero
+- Store contribution records permanently on blockchain
+- Support for multiple EVM networks (Ethereum, Base, Optimism, Arbitrum, and their testnets)
+- Comprehensive test suite with Foundry
+
+### Quick Start
+
+```bash
+cd contracts
+
+# Install dependencies
+npm install
+
+# Run tests
+npm run test
+
+# Deploy to testnet
+npm run deploy:sepolia
+```
+
+For detailed documentation, see [contracts/README.md](contracts/README.md).
+
+### Supported Networks
+
+- Ethereum Mainnet & Sepolia
+- Base & Base Sepolia
+- Optimism & OP Sepolia
+- Arbitrum & Arbitrum Sepolia
+- Anvil (local testing)
+
+## Testing
+
+Test scripts are available in the `testScripts/` directory for benchmarking API performance:
+
+- `test-direct-api.sh` - Test vlayer Web Prover API directly
+- `test-nextjs-api.sh` - Test through Next.js API endpoint
+- `test-compare-both.sh` - Compare both approaches
+
+See `testScripts/TEST_SCRIPTS.md` for detailed usage instructions.
+
+### Local Anvil testing (contracts + zk proof submission)
+
+1) Start Anvil in a terminal:
+```bash
+anvil
+```
+
+2) In a new terminal, export env vars (use one private key printed by Anvil):
+```bash
+export ANVIL_RPC_URL=http://127.0.0.1:8545
+export PRIVATE_KEY=0x<one_of_anvil_accounts_private_keys>
+
+# Match these to your compressed proof (example from zk_proof_compress_*.json)
+export NOTARY_KEY_FINGERPRINT=0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af
+export QUERIES_HASH=0x52456ae0219527af75909c9c3b66452ca1535c8828a8b991aa344de023fde155
+export EXPECTED_URL=https://api.github.com
+```
+
+3) Build and deploy the contract to Anvil:
+```bash
+cd contracts
+forge build
+
+# Via npm script if available
+npm run deploy anvil
+# Or directly
+npx ts-node --transpile-only scripts/deploy.ts anvil
+```
+Note the printed contract address and optionally export it:
+```bash
+export ANVIL_CONTRACT_ADDRESS=0x<deployed_address>
+```
+
+4) Submit your compressed zk proof to the contract:
+```bash
+cd ..
+PROOF=./zk_proof_compress_YYYYMMDD_HHMMSS.json  # your file path
+
+# Via npm script if available
+npm run submit-proof anvil "$PROOF" ${ANVIL_CONTRACT_ADDRESS:-}
+# Or directly
+npx ts-node --transpile-only contracts/scripts/submitProof.ts anvil "$PROOF" ${ANVIL_CONTRACT_ADDRESS:-}
+```
+
+Expected output:
+- Simulation success, transaction hash, receipt details
+- On-chain readback of `getLatestContribution` showing stored username, contributions, repo URL
+
+Troubleshooting:
+- If you see “Contract not compiled”, run `forge build` in `contracts`.
+- If simulation reverts, ensure env vars match the proof:
+  - `NOTARY_KEY_FINGERPRINT` equals `publicOutputs.notaryKeyFingerprint`
+  - `QUERIES_HASH` equals `publicOutputs.queriesHash`
+  - `EXPECTED_URL` matches the proof domain (e.g., `https://api.github.com`)
+- If not exporting `ANVIL_CONTRACT_ADDRESS`, pass the deployed address as the 3rd arg in the submit command.
+
+## Documentation
+
+For more information about vlayer and the Web Prover API, visit the official documentation:
+
+https://docs.vlayer.xyz/
