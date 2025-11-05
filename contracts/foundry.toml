@@ -1,11 +1,21 @@
 [profile.default]
 src = "src"
 out = "out"
-libs = ["lib"]
+libs = ["lib", "dependencies"]
 solc_version = "0.8.24"
 optimizer = true
 optimizer_runs = 200
 via_ir = false
+
+[soldeer]
+# Generate remappings automatically into remappings.txt based on installed packages
+remappings_generate = true
+# Define packages to be installed into lib/ via Soldeer.
+# Pin to tags/commits as appropriate for your project.
+packages = [
+  "foundry-rs/forge-std@^1.9",
+  "risc0/risc0-ethereum@^0.2",
+]
 
 [rpc_endpoints]
 sepolia = "${SEPOLIA_RPC_URL}"
@@ -17,5 +27,9 @@ anvil = "http://localhost:8545"
 sepolia = { key = "${ETHERSCAN_API_KEY}" }
 baseSepolia = { key = "${BASESCAN_API_KEY}" }
 opSepolia = { key = "${OPTIMISTIC_ETHERSCAN_API_KEY}" }
+
+[dependencies]
+forge-std = "1.11.0"
+risc0-risc0-ethereum = "3.0.0"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
