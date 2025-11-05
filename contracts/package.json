@@ -1,0 +1,34 @@
+{
+  "name": "github-contribution-verifier-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for GitHub contribution verification using ZK proofs",
+  "scripts": {
+    "build": "forge build",
+    "clean": "forge clean",
+    "test": "forge test",
+    "test:verbose": "forge test -vvv",
+    "test:gas": "forge test --gas-report",
+    "deploy": "ts-node scripts/deploy.ts",
+    "deploy:anvil": "ts-node scripts/deploy.ts anvil",
+    "deploy:sepolia": "ts-node scripts/deploy.ts sepolia",
+    "deploy:base": "ts-node scripts/deploy.ts base",
+    "deploy:base-sepolia": "ts-node scripts/deploy.ts baseSepolia",
+    "deploy:optimism": "ts-node scripts/deploy.ts optimism",
+    "deploy:op-sepolia": "ts-node scripts/deploy.ts opSepolia",
+    "deploy:arbitrum": "ts-node scripts/deploy.ts arbitrum",
+    "deploy:arbitrum-sepolia": "ts-node scripts/deploy.ts arbitrumSepolia",
+    "deploy:mainnet": "ts-node scripts/deploy.ts mainnet",
+    "verify": "ts-node scripts/verify.ts",
+    "submit-proof": "ts-node scripts/submitProof.ts",
+    "prepare:anvil": "ts-node scripts/prepareLocal.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "viem": "^2.21.54"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
