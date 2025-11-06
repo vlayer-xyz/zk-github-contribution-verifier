@@ -24,23 +24,8 @@ contract GitHubContributionVerifier {
     /// @notice Expected URL pattern for GitHub API
     string public expectedUrlPattern;
 
-    /// @notice Contribution record structure
-    struct ContributionRecord {
-        string username;
-        uint256 contributions;
-        uint256 timestamp;
-        uint256 blockNumber;
-        string repoUrl;
-    }
-
-    /// @notice Mapping of username to their contribution records
-    mapping(string => ContributionRecord[]) public contributionHistory;
-
-    /// @notice Mapping to get latest contribution for a user
-    mapping(string => ContributionRecord) public latestContribution;
-
-    /// @notice Total number of verified contributions
-    uint256 public totalVerifiedContributions;
+    /// @notice Mapping of repo (owner/repo) => username => contributions
+    mapping(string => mapping(string => uint256)) public contributionsByRepoAndUser;
 
     /// @notice Emitted when a contribution is successfully verified
     event ContributionVerified(
@@ -78,7 +63,7 @@ contract GitHubContributionVerifier {
     /// @notice Submit and verify a GitHub contribution proof
     /// @param journalData Encoded proof data containing public outputs
     /// @param seal ZK proof seal for verification
-    /// @dev Journal data should be abi.encoded as: (notaryKeyFingerprint, url, timestamp, queriesHash, username, contributions)
+    /// @dev Journal data should be abi.encoded as: (notaryKeyFingerprint, url, timestamp, queriesHash, repoNameWithOwner, username, contributions)
     function submitContribution(
         bytes calldata journalData,
         bytes calldata seal
@@ -89,9 +74,10 @@ contract GitHubContributionVerifier {
             string memory url,
             uint256 timestamp,
             bytes32 queriesHash,
+            string memory repoNameWithOwner,
             string memory username,
             uint256 contributions
-        ) = abi.decode(journalData, (bytes32, string, uint256, bytes32, string, uint256));
+        ) = abi.decode(journalData, (bytes32, string, uint256, bytes32, string, string, uint256));
 
         // Validate notary key fingerprint
         if (notaryKeyFingerprint != EXPECTED_NOTARY_KEY_FINGERPRINT) {
@@ -103,8 +89,8 @@ contract GitHubContributionVerifier {
             revert InvalidQueriesHash();
         }
 
-        // Validate URL contains expected pattern
-        if (!_containsSubstring(url, expectedUrlPattern)) {
+        // Validate URL equals the expected endpoint pattern provided at deployment
+        if (keccak256(bytes(url)) != keccak256(bytes(expectedUrlPattern))) {
             revert InvalidUrl();
         }
 
@@ -120,18 +106,8 @@ contract GitHubContributionVerifier {
             revert ZKProofVerificationFailed();
         }
 
-        // Store the contribution record
-        ContributionRecord memory record = ContributionRecord({
-            username: username,
-            contributions: contributions,
-            timestamp: timestamp,
-            blockNumber: block.number,
-            repoUrl: url
-        });
-
-        contributionHistory[username].push(record);
-        latestContribution[username] = record;
-        totalVerifiedContributions++;
+        // Store the contribution value for the specific repo and user
+        contributionsByRepoAndUser[repoNameWithOwner][username] = contributions;
 
         emit ContributionVerified(
             username,
@@ -140,72 +116,5 @@ contract GitHubContributionVerifier {
             timestamp,
             block.number
         );
-    }
-
-    /// @notice Get all contribution records for a user
-    /// @param username GitHub username
-    /// @return Array of contribution records
-    function getContributionHistory(string memory username)
-        external
-        view
-        returns (ContributionRecord[] memory)
-    {
-        return contributionHistory[username];
-    }
-
-    /// @notice Get the latest contribution record for a user
-    /// @param username GitHub username
-    /// @return Latest contribution record
-    function getLatestContribution(string memory username)
-        external
-        view
-        returns (ContributionRecord memory)
-    {
-        return latestContribution[username];
-    }
-
-    /// @notice Get total number of records for a user
-    /// @param username GitHub username
-    /// @return Number of contribution records
-    function getContributionCount(string memory username)
-        external
-        view
-        returns (uint256)
-    {
-        return contributionHistory[username].length;
-    }
-
-    /// @notice Helper function to check if a string contains a substring
-    /// @param str The string to search in
-    /// @param substr The substring to search for
-    /// @return bool True if substring is found
-    function _containsSubstring(string memory str, string memory substr)
-        private
-        pure
-        returns (bool)
-    {
-        bytes memory strBytes = bytes(str);
-        bytes memory substrBytes = bytes(substr);
-
-        if (substrBytes.length > strBytes.length) {
-            return false;
-        }
-
-        bool found = false;
-        for (uint256 i = 0; i <= strBytes.length - substrBytes.length; i++) {
-            bool isMatch = true;
-            for (uint256 j = 0; j < substrBytes.length; j++) {
-                if (strBytes[i + j] != substrBytes[j]) {
-                    isMatch = false;
-                    break;
-                }
-            }
-            if (isMatch) {
-                found = true;
-                break;
-            }
-        }
-
-        return found;
     }
 }
