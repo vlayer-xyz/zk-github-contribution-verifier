@@ -2,6 +2,7 @@
 cache/
 out/
 dependencies/
+deployments/
 
 # Ignores development broadcast logs
 !/broadcast

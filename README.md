@@ -38,7 +38,7 @@ npm run dev
 
 2. Open http://localhost:3000
 
-3. Enter a GitHub API contributors URL (e.g., `https://api.github.com/repos/owner/repo/contributors`)
+3. Enter a GitHub org + repo name (e.g., `vlayer-xyz/vlayer`)
 
 4. For private repositories, provide a GitHub Personal Access Token
 
@@ -46,13 +46,9 @@ npm run dev
 
 6. Click "Prove Contributions" to generate a cryptographic proof
 
-7. Click "Verify Proof" to verify your contributions
+7. Click "Verify Proof" to verify your contributions with our backend
 
-## API Endpoints
-
-- `POST /api/prove` - Generate cryptographic proof of GitHub API data
-- `POST /api/verify` - Verify the generated proof and extract contribution data
-- `POST /api/compress` - Generate zero-knowledge proof from web proof
+8. Click "Generate ZK Proof" to verify your contributions on-chain
 
 ## Smart Contracts
 
@@ -63,7 +59,6 @@ The project includes Solidity smart contracts for storing verified GitHub contri
 - On-chain verification of ZK proofs using RISC Zero
 - Store contribution records permanently on blockchain
 - Supports testnets only: Sepolia, Base Sepolia, OP Sepolia, and local Anvil
-- Comprehensive test suite with Foundry
 
 ### Quick Start
 
@@ -74,12 +69,7 @@ cd contracts
 npm install
 
 # Install Foundry deps via Soldeer (forge-std, risc0-ethereum)
-cd contracts
 forge soldeer install
-cd ..
-
-# Run tests
-npm run test
 
 # Deploy to testnet
 npm run deploy:sepolia
@@ -107,30 +97,12 @@ forge soldeer install
 # Regenerate remappings.txt if needed
 forge soldeer remap
 ```
-
-Migration from vendored/submodule libs:
-
-1) Remove any submodules or vendored copies in `contracts/lib/forge-std` and `contracts/lib/risc0-ethereum`.
-2) Ensure `contracts/lib/` is ignored in `.gitignore`.
-3) Add packages via Soldeer as shown above and run `forge soldeer install`.
-4) Verify `contracts/remappings.txt` was generated (or run `forge soldeer remap`).
-
 ### Supported Networks
 
 - Sepolia (testnet)
 - Base Sepolia (testnet)
 - OP Sepolia (testnet)
 - Anvil (local testing)
-
-## Testing
-
-Test scripts are available in the `testScripts/` directory for benchmarking API performance:
-
-- `test-direct-api.sh` - Test vlayer Web Prover API directly
-- `test-nextjs-api.sh` - Test through Next.js API endpoint
-- `test-compare-both.sh` - Compare both approaches
-
-See `testScripts/TEST_SCRIPTS.md` for detailed usage instructions.
 
 ### Local Anvil testing (contracts + zk proof submission)
 
@@ -146,7 +118,7 @@ export PRIVATE_KEY=0x<one_of_anvil_accounts_private_keys>
 
 # Match these to your compressed proof (example from zk_proof_compress_*.json)
 export NOTARY_KEY_FINGERPRINT=0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af
-export QUERIES_HASH=0x52456ae0219527af75909c9c3b66452ca1535c8828a8b991aa344de023fde155
+export QUERIES_HASH=0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1faceb5c6c6
 export EXPECTED_URL=https://api.github.com/graphql
 ```
 
@@ -156,7 +128,7 @@ cd contracts
 forge build
 
 # Via npm script if available
-npm run deploy anvil
+npm run deploy:anvil
 # Or directly
 npx ts-node --transpile-only scripts/deploy.ts anvil
 ```
@@ -178,14 +150,13 @@ npx ts-node --transpile-only contracts/scripts/submitProof.ts anvil "$PROOF" ${A
 
 Expected output:
 - Simulation success, transaction hash, receipt details
-- On-chain readback of `getLatestContribution` showing stored username, contributions, repo URL
 
 Troubleshooting:
 - If you see “Contract not compiled”, run `forge build` in `contracts`.
 - If simulation reverts, ensure env vars match the proof:
   - `NOTARY_KEY_FINGERPRINT` equals `publicOutputs.notaryKeyFingerprint`
   - `QUERIES_HASH` equals `publicOutputs.queriesHash`
-  - `EXPECTED_URL` matches the proof domain (e.g., `https://api.github.com`)
+  - `EXPECTED_URL` matches the proof domain (e.g., `https://api.github.com/graphql`)
 - If not exporting `ANVIL_CONTRACT_ADDRESS`, pass the deployed address as the 3rd arg in the submit command.
 
 ## Documentation
