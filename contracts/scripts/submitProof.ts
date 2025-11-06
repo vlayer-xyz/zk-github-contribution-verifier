@@ -48,16 +48,10 @@ const contractABI = [
   { name: 'Panic', type: 'error', inputs: [{ name: 'code', type: 'uint256' }] },
 ] as const;
 
+// Accept a flexible input; we'll normalize later
 interface ZKProofData {
-  zkProof: Hex;
-  publicOutputs: {
-    notaryKeyFingerprint: Hex;
-    method: string;
-    url: string;
-    timestamp: number;
-    queriesHash: Hex;
-    values: [string, number]; // [username, contributions]
-  };
+  zkProof: string;
+  publicOutputs: Record<string, unknown>;
 }
 
 interface SubmitProofOptions {
@@ -117,15 +111,47 @@ async function submitProof(options: SubmitProofOptions) {
   });
 
   // Extract values from ZK proof (seal intentionally empty to match tests)
-  const { publicOutputs } = zkProofData;
   const seal: Hex = '0x';
-  const [username, contributions] = publicOutputs.values;
+  const po = (zkProofData.publicOutputs || {}) as Record<string, unknown>;
+  const url: string = String(po.url ?? '');
+  const tsRaw = (po as { tlsTimestamp?: unknown; timestamp?: unknown }).tlsTimestamp ?? (po as { timestamp?: unknown }).timestamp;
+  const queriesHashRaw = (po as { extractionHash?: unknown; queriesHash?: unknown }).extractionHash ?? (po as { queriesHash?: unknown }).queriesHash;
+  const valuesRaw = (po as { extractedValues?: unknown; values?: unknown }).extractedValues ?? (po as { values?: unknown }).values;
+  const notaryRaw = (po as { notaryKeyFingerprint?: unknown }).notaryKeyFingerprint;
+
+  // Normalize notary fingerprint (ensure 0x prefix)
+  const notaryKeyFingerprint: Hex = String(notaryRaw || '').startsWith('0x')
+    ? String(notaryRaw) as Hex
+    : (`0x${String(notaryRaw || '')}` as Hex);
+
+  // Normalize timestamp
+  const timestampBigInt = BigInt(typeof tsRaw === 'string' || typeof tsRaw === 'number' ? tsRaw : 0);
+
+  // Normalize queries/extraction hash (ensure 0x prefix)
+  const queriesHash: Hex = String(queriesHashRaw || '').startsWith('0x')
+    ? String(queriesHashRaw) as Hex
+    : (`0x${String(queriesHashRaw || '')}` as Hex);
+
+  // Normalize values [repo?, username, contributions]
+  let username = '';
+  let contributions: bigint = BigInt(0);
+  if (Array.isArray(valuesRaw)) {
+    if (valuesRaw.length >= 3) {
+      username = String(valuesRaw[1] ?? '');
+      const c = valuesRaw[2];
+      contributions = BigInt(typeof c === 'string' || typeof c === 'number' ? c : 0);
+    } else if (valuesRaw.length >= 2) {
+      username = String(valuesRaw[0] ?? '');
+      const c = valuesRaw[1];
+      contributions = BigInt(typeof c === 'string' || typeof c === 'number' ? c : 0);
+    }
+  }
 
   console.log(`\nProof Details:`);
   console.log(`  Username: ${username}`);
   console.log(`  Contributions: ${contributions}`);
-  console.log(`  Repo URL: ${publicOutputs.url}`);
-  console.log(`  Timestamp: ${new Date(publicOutputs.timestamp * 1000).toISOString()}`);
+  console.log(`  Repo URL: ${url}`);
+  console.log(`  Timestamp: ${new Date(Number(timestampBigInt) * 1000).toISOString()}`);
 
   // Encode journal data to match Solidity abi.decode types exactly
   // (bytes32, string, uint256, bytes32, string, uint256)
@@ -139,12 +165,12 @@ async function submitProof(options: SubmitProofOptions) {
       { type: 'uint256' },
     ],
     [
-      publicOutputs.notaryKeyFingerprint,
-      publicOutputs.url,
-      BigInt(publicOutputs.timestamp),
-      publicOutputs.queriesHash,
+      notaryKeyFingerprint,
+      url,
+      timestampBigInt,
+      queriesHash,
       username,
-      BigInt(contributions),
+      contributions,
     ]
   );
 
@@ -253,7 +279,7 @@ async function main() {
 Usage: npm run submit-proof <network> <zkProofFile> [contractAddress]
 
 Arguments:
-  network         - Target network (sepolia, base, baseSepolia, optimism, opSepolia, arbitrum, arbitrumSepolia, mainnet)
+  network         - Target network (sepolia, base, base-sepolia, optimism, opSepolia, arbitrum, arbitrumSepolia, mainnet)
   zkProofFile     - Path to JSON file containing ZK proof data
   contractAddress - (Optional) Override contract address
 

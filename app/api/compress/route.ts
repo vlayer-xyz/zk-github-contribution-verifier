@@ -22,10 +22,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build JMESPath queries to extract login and merged PRs count from GraphQL response
+    // Build JMESPath queries to extract repo nameWithOwner, login and merged PRs count from GraphQL response
     const extractConfig = {
       "response.body": {
         "jmespath": [
+          `data.repository.nameWithOwner`,
           `data.user.login`,
           `data.mergedPRs.issueCount`,
         ]

@@ -18,7 +18,7 @@ export const networks: Record<string, NetworkConfig> = {
     rpcUrl: process.env.SEPOLIA_RPC_URL || 'https://rpc.sepolia.org',
     contractAddress: process.env.SEPOLIA_CONTRACT_ADDRESS,
   },
-  baseSepolia: {
+  'base-sepolia': {
     chain: baseSepolia,
     rpcUrl: process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org',
     contractAddress: process.env.BASE_SEPOLIA_CONTRACT_ADDRESS,
