@@ -20,7 +20,7 @@ async function dotenvLoad() {
 async function main() {
   await dotenvLoad();
   const githubUrl = process.env.GITHUB_URL || 'https://api.github.com/graphql';
-  const token = process.env.GITHUB_TOKEN || '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';
+  const token = process.env.GITHUB_TOKEN || '';
   const owner = process.env.OWNER || 'vlayer-xyz';
   const name = process.env.NAME || 'vlayer';
   const login = process.env.LOGIN || 'Chmarusso';
