@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vlayer GitHub Prover",
+  title: "vlayer GitHub Prover",
   description: "Prove contributions to private GitHub repositories",
   icons: {
     icon: '/favicon.svg',
