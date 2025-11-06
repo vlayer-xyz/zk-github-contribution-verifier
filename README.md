@@ -147,7 +147,7 @@ export PRIVATE_KEY=0x<one_of_anvil_accounts_private_keys>
 # Match these to your compressed proof (example from zk_proof_compress_*.json)
 export NOTARY_KEY_FINGERPRINT=0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af
 export QUERIES_HASH=0x52456ae0219527af75909c9c3b66452ca1535c8828a8b991aa344de023fde155
-export EXPECTED_URL=https://api.github.com
+export EXPECTED_URL=https://api.github.com/graphql
 ```
 
 3) Build and deploy the contract to Anvil:

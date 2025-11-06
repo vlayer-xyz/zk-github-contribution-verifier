@@ -33,7 +33,7 @@ contract Deploy is Script {
         bytes32 queriesHash = vm.envOr("QUERIES_HASH", bytes32(0));
         string memory expectedUrl = vm.envOr(
             "EXPECTED_URL",
-            string("https://api.github.com")
+            string("https://api.github.com/graphql")
         );
 
         // Validate parameters

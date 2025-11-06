@@ -19,6 +19,7 @@ contract NetworkConfig is Script {
     uint256 constant ANVIL_CHAIN_ID = 31337;
 
     // RISC Zero Verifier Addresses (placeholders - replace with actual addresses)
+    // Check https://dev.risczero.com/api/blockchain-integration/contracts/verifier
     address constant SEPOLIA_VERIFIER = 0x0000000000000000000000000000000000000000;
     address constant BASE_SEPOLIA_VERIFIER = 0x0000000000000000000000000000000000000000;
     address constant OP_SEPOLIA_VERIFIER = 0x0000000000000000000000000000000000000000;
