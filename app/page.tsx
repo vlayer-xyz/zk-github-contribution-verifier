@@ -9,9 +9,10 @@ import { encodeAbiParameters, isHex, toBytes, toHex } from "viem";
 import { GitHubContributionVerifierAbi } from "./lib/abi";
 
 export default function Home() {
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState('vlayer-xyz/vlayer');
   const [githubToken, setGithubToken] = useState('');
   const [username, setUsername] = useState('');
+  const [isPrivateRepo, setIsPrivateRepo] = useState(false);
   const [isProving, setIsProving] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -40,18 +41,47 @@ export default function Home() {
     setResult(null);
 
     try {
+      // Parse owner/repo from the provided URL input
+      const urlStr = url.trim();
+      const ownerRepoFromApi = urlStr.match(/\/repos\/([^/]+)\/([^/]+)\b/i);
+      const ownerRepoFromGit = urlStr.match(/github\.com\/([^/]+)\/([^/]+)\b/i);
+      const ownerRepoFromPlain = urlStr.match(/^([^/]+)\/([^/]+)$/);
+
+      const owner = (ownerRepoFromApi?.[1] || ownerRepoFromGit?.[1] || ownerRepoFromPlain?.[1] || '').trim();
+      const name = (ownerRepoFromApi?.[2] || ownerRepoFromGit?.[2] || ownerRepoFromPlain?.[2] || '').trim();
+
+      if (!owner || !name) {
+        throw new Error('Could not parse owner/repo from the URL. Use formats like: owner/repo, https://github.com/owner/repo, or https://api.github.com/repos/owner/repo/contributors');
+      }
+
+      const query = `query($login: String!, $owner: String!, $name: String!, $q: String!) {
+        repository(owner: $owner, name: $name) {
+          name
+          nameWithOwner
+          owner { login }
+        }
+        mergedPRs: search(type: ISSUE, query: $q) {
+          issueCount
+        }
+        user(login: $login) { login }
+      }`;
+
+      const variables = {
+        login: username.trim() || '',
+        owner,
+        name,
+        q: `repo:${owner}/${name} is:pr is:merged author:${username.trim() || ''}`,
+      };
+
       const response = await fetch('/api/prove', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          url: url.trim(),
-          headers: [
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
-            "Accept: application/vnd.github+json",
-            ...(githubToken.trim() ? [`Authorization: Bearer ${githubToken.trim()}`] : [])
-          ]
+          query,
+          variables,
+          githubToken: githubToken.trim() || undefined,
         })
       });
 
@@ -98,29 +128,32 @@ export default function Home() {
 
       const data = await response.json();
       
-      // Parse GitHub contributors data
+      // Parse GraphQL verification response (login + merged PRs count)
       let contributionData = null;
-      if (data.response && data.response.body) {
+      const body = data?.response?.body;
+      let graph: any = null;
+      if (typeof body === 'string') {
         try {
-          const contributors = JSON.parse(data.response.body);
-          const userContributions = contributors.find((contributor: any) => 
-            contributor.login && contributor.login.toLowerCase() === username.trim().toLowerCase()
-          );
-          
-          if (userContributions) {
-            contributionData = {
-              username: userContributions.login,
-              total: userContributions.contributions,
-              avatar: userContributions.avatar_url
-            };
-          } else {
-            setError(`No contributions found for username: ${username.trim()}`);
-            return;
-          }
-        } catch (parseError) {
+          graph = JSON.parse(body);
+        } catch {
           setError('Failed to parse contribution data');
           return;
         }
+      } else if (body && typeof body === 'object') {
+        graph = body;
+      }
+
+      const userLogin = graph?.data?.user?.login;
+      const mergedCount = graph?.data?.mergedPRs?.issueCount;
+
+      if (typeof userLogin === 'string' && typeof mergedCount === 'number') {
+        contributionData = {
+          username: userLogin,
+          total: mergedCount,
+        };
+      } else {
+        setError(`No merged PR data found for username: ${username.trim()}`);
+        return;
       }
 
       setResult({ 
@@ -180,8 +213,8 @@ export default function Home() {
         publicOutputs = data.publicOutputs;
       }
 
-      if (publicOutputs && publicOutputs.values) {
-        const values = publicOutputs.values;
+      if (publicOutputs && publicOutputs.extractedValues) {
+        const values = publicOutputs.extractedValues;
         // Values are in order: login, contributions
         if (values.length >= 2 && values[0] && values[1]) {
           userData = {
@@ -299,40 +332,56 @@ export default function Home() {
           {/* GitHub URL Input */}
           <div className="space-y-4">
             <label htmlFor="url" className="block text-sm font-medium text-gray-300">
-              GitHub API Contributors URL
+              GitHub Repository (owner/repo)
             </label>
             <input
               id="url"
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://api.github.com/repos/vlayer-xyz/vlayer/contributors"
+              placeholder="owner/repo (e.g., vlayer-xyz/vlayer)"
               className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7235e5] focus:border-transparent text-white placeholder-gray-500"
               disabled={isProving || isVerifying || isCompressing}
             />
           </div>
 
-          {/* GitHub Token Input */}
-          <div className="space-y-4">
-            <label htmlFor="token" className="block text-sm font-medium text-gray-300">
-              GitHub Personal Access Token (for private repos)
+          {/* Private Repo Toggle */}
+          <div className="space-y-2">
+            <label className="inline-flex items-center gap-3 text-sm font-medium text-gray-300">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-gray-700 bg-gray-900 text-[#7235e5] focus:ring-[#7235e5]"
+                checked={isPrivateRepo}
+                onChange={(e) => setIsPrivateRepo(e.target.checked)}
+                disabled={isProving || isVerifying || isCompressing}
+              />
+              <span>Is it private repo?</span>
             </label>
-            <input
-              id="token"
-              type="password"
-              value={githubToken}
-              onChange={(e) => setGithubToken(e.target.value)}
-              placeholder="github_pat_..."
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7235e5] focus:border-transparent text-white placeholder-gray-500"
-              disabled={isProving || isVerifying || isCompressing}
-            />
-            <p className="text-xs text-gray-500">
-              Required for private repositories. Generate one at{' '}
-              <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener noreferrer" className="text-[#7235e5] hover:underline">
-                GitHub Settings → Developer settings → Personal access tokens
-              </a>
-            </p>
           </div>
+
+          {/* GitHub Token Input (visible only for private repos) */}
+          {isPrivateRepo && (
+            <div className="space-y-4">
+              <label htmlFor="token" className="block text-sm font-medium text-gray-300">
+                GitHub Personal Access Token (for private repos)
+              </label>
+              <input
+                id="token"
+                type="password"
+                value={githubToken}
+                onChange={(e) => setGithubToken(e.target.value)}
+                placeholder="github_pat_..."
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7235e5] focus:border-transparent text-white placeholder-gray-500"
+                disabled={isProving || isVerifying || isCompressing}
+              />
+              <p className="text-xs text-gray-500">
+                Required for private repositories. Generate one at{' '}
+                <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener noreferrer" className="text-[#7235e5] hover:underline">
+                  GitHub Settings → Developer settings → Personal access tokens
+                </a>
+              </p>
+            </div>
+          )}
 
           {/* Username Input */}
           <div className="space-y-4">
@@ -486,13 +535,13 @@ export default function Home() {
                         <div className="grid grid-cols-[140px_1fr] gap-2">
                           <span className="text-gray-500">Timestamp:</span>
                           <span className="text-gray-300">
-                            {new Date(zkProofResult.publicOutputs.timestamp * 1000).toLocaleString()}
+                            {new Date(zkProofResult.publicOutputs.tlsTimestamp * 1000).toLocaleString()}
                           </span>
                         </div>
                         <div className="grid grid-cols-[140px_1fr] gap-2">
                           <span className="text-gray-500">Extracted Values:</span>
                           <div className="text-gray-300">
-                            {zkProofResult.publicOutputs.values?.map((value: any, idx: number) => (
+                            {zkProofResult.publicOutputs.extractedValues?.map((value: any, idx: number) => (
                               <div key={idx} className="font-mono text-xs bg-gray-800 px-2 py-1 rounded mb-1">
                                 [{idx}]: {JSON.stringify(value)}
                               </div>
@@ -501,7 +550,7 @@ export default function Home() {
                         </div>
                         <div className="grid grid-cols-[140px_1fr] gap-2">
                           <span className="text-gray-500">Queries Hash:</span>
-                          <span className="text-gray-300 font-mono text-xs break-all">{zkProofResult.publicOutputs.queriesHash}</span>
+                          <span className="text-gray-300 font-mono text-xs break-all">{zkProofResult.publicOutputs.extractionHash}</span>
                         </div>
                         <div className="grid grid-cols-[140px_1fr] gap-2">
                           <span className="text-gray-500">Notary Fingerprint:</span>
@@ -550,16 +599,9 @@ export default function Home() {
                   {/* Detailed verification modal with profile picture */}
                   <div className="p-6 bg-gray-900 border border-gray-700 rounded-lg">
                     <h3 className="text-lg font-medium text-gray-300 mb-4">✅ Verification Successful</h3>
-                    <div className="flex items-center space-x-4 mb-4">
-                      <img 
-                        src={result.data.contributionData.avatar} 
-                        alt={result.data.contributionData.username}
-                        className="w-12 h-12 rounded-full"
-                      />
-                      <div>
-                        <p className="text-white font-medium">@{result.data.contributionData.username}</p>
-                        <p className="text-gray-400 text-sm">GitHub Contributor</p>
-                      </div>
+                    <div className="mb-4">
+                      <p className="text-white font-medium">@{result.data.contributionData.username}</p>
+                      <p className="text-gray-400 text-sm">GitHub Contributor</p>
                     </div>
                     <div className="bg-[#7235e5]/10 border border-[#7235e5]/20 rounded-lg p-4">
                       <p className="text-[#7235e5] font-semibold text-xl">

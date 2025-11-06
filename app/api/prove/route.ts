@@ -6,19 +6,45 @@ export const maxDuration = 160;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
+    const graphqlUrl = 'https://api.github.com/graphql';
+    const query = body.query as string | undefined;
+    const variables = (body.variables as Record<string, unknown>) || {};
+    const githubToken = (body.githubToken as string) || process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN || '';
+
+    if (!query || typeof query !== 'string') {
+      return NextResponse.json(
+        { error: 'Missing GraphQL query in body.query' },
+        { status: 400 }
+      );
+    }
+
+    if (!githubToken) {
+      return NextResponse.json(
+        { error: 'Missing GitHub token. Provide githubToken in body or set GITHUB_TOKEN' },
+        { status: 400 }
+      );
+    }
+
     const requestBody = {
-      url: body.url,
-      headers: body.headers || [
-        "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
-        "Accept: application/vnd.github+json"
-      ]
-    };
-    
-    console.log('Sending to vlayer API:', JSON.stringify(requestBody, null, 2));
-    console.log('URL being proved:', requestBody.url);
+      url: graphqlUrl,
+      method: 'POST',
+      headers: [
+        'User-Agent: zk-github-contribution-verifier',
+        'Accept: application/json',
+        'Content-Type: application/json',
+        `Authorization: Bearer ${githubToken}`,
+      ],
+      body: JSON.stringify({
+        query,
+        variables,
+      }),
+    } as const;
+
+    console.log('Sending to vlayer API (prove):', JSON.stringify(requestBody, null, 2));
+    console.log('Upstream URL being proved:', requestBody.url);
     console.log('Headers being sent:', requestBody.headers);
-    
+
     const response = await fetch('https://web-prover.vlayer.xyz/api/v1/prove', {
       method: 'POST',
       headers: {

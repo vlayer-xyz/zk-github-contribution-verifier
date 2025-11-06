@@ -1,0 +1,13 @@
+[[dependencies]]
+name = "forge-std"
+version = "1.11.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_11_0_09-10-2025_06:23:22_forge-std-1.11.zip"
+checksum = "0290ef84c693dc9086f98f6a9b4a69dc5c2b6aa1cfe10a989bd1def1a456c099"
+integrity = "84aa7d32f8c7329468cf16f31f0f74e68072e634fdbde98f3bb00c6b136103b2"
+
+[[dependencies]]
+name = "risc0-risc0-ethereum"
+version = "3.0.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/risc0-risc0-ethereum/3_0_0_16-10-2025_10:38:29_risc0-risc0-ethereum-3.0.zip"
+checksum = "29b6ff430b15e51f65975c5af517f4f04cba4c5093bcd38e8e9415cdcbedddab"
+integrity = "32c7be56ddd7f4456a91a25861d4173b1d7614f14557040580591b782cc33a1b"
