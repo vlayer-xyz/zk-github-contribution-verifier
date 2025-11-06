@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Vlayer API error response:', errorText);
+      console.error('vlayer API error response:', errorText);
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 

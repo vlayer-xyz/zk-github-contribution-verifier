@@ -24,7 +24,7 @@ contract GitHubContributionVerifierTest is Test {
         0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef;
     bytes32 constant TEST_QUERIES_HASH =
         0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890;
-    string constant TEST_URL_PATTERN = "https://api.github.com";
+    string constant TEST_URL_PATTERN = "https://api.github.com/graphql";
 
     function setUp() public {
         mockVerifier = new MockVerifier();
@@ -40,13 +40,13 @@ contract GitHubContributionVerifierTest is Test {
         assertEq(address(verifier.VERIFIER()), address(mockVerifier));
         assertEq(verifier.EXPECTED_NOTARY_KEY_FINGERPRINT(), TEST_NOTARY_FINGERPRINT);
         assertEq(verifier.EXPECTED_QUERIES_HASH(), TEST_QUERIES_HASH);
-        assertEq(verifier.expectedUrlPattern(), TEST_URL_PATTERN);
     }
 
     function testSubmitContributionSuccess() public {
         string memory username = "testuser";
         uint256 contributions = 100;
-        string memory url = "https://api.github.com/repos/vlayer-xyz/vlayer/contributors";
+        string memory url = "https://api.github.com/graphql";
+        string memory repoNameWithOwner = "vlayer-xyz/vlayer";
         uint256 timestamp = block.timestamp;
 
         bytes memory journalData = abi.encode(
@@ -54,6 +54,7 @@ contract GitHubContributionVerifierTest is Test {
             url,
             timestamp,
             TEST_QUERIES_HASH,
+            repoNameWithOwner,
             username,
             contributions
         );
@@ -62,26 +63,20 @@ contract GitHubContributionVerifierTest is Test {
 
         verifier.submitContribution(journalData, seal);
 
-        GitHubContributionVerifier.ContributionRecord memory record =
-            verifier.getLatestContribution(username);
-
-        assertEq(record.username, username);
-        assertEq(record.contributions, contributions);
-        assertEq(record.timestamp, timestamp);
-        assertEq(record.repoUrl, url);
-        assertEq(verifier.getContributionCount(username), 1);
-        assertEq(verifier.totalVerifiedContributions(), 1);
+        assertEq(verifier.contributionsByRepoAndUser(repoNameWithOwner, username), contributions);
     }
 
     function testSubmitMultipleContributions() public {
         string memory username = "testuser";
+        string memory repoNameWithOwner = "vlayer-xyz/vlayer";
 
         for (uint256 i = 1; i <= 3; i++) {
             bytes memory journalData = abi.encode(
                 TEST_NOTARY_FINGERPRINT,
-                "https://api.github.com/repos/vlayer-xyz/vlayer/contributors",
+                "https://api.github.com/graphql",
                 block.timestamp,
                 TEST_QUERIES_HASH,
+                repoNameWithOwner,
                 username,
                 i * 100
             );
@@ -89,13 +84,7 @@ contract GitHubContributionVerifierTest is Test {
             verifier.submitContribution(journalData, "");
         }
 
-        assertEq(verifier.getContributionCount(username), 3);
-        assertEq(verifier.totalVerifiedContributions(), 3);
-
-        GitHubContributionVerifier.ContributionRecord[] memory history =
-            verifier.getContributionHistory(username);
-        assertEq(history.length, 3);
-        assertEq(history[2].contributions, 300);
+        assertEq(verifier.contributionsByRepoAndUser(repoNameWithOwner, username), 300);
     }
 
     function testRevertInvalidNotaryFingerprint() public {
@@ -103,9 +92,10 @@ contract GitHubContributionVerifierTest is Test {
 
         bytes memory journalData = abi.encode(
             wrongFingerprint,
-            "https://api.github.com/repos/test/test/contributors",
+            "https://api.github.com/graphql",
             block.timestamp,
             TEST_QUERIES_HASH,
+            "owner/repo",
             "testuser",
             uint256(100)
         );
@@ -119,9 +109,10 @@ contract GitHubContributionVerifierTest is Test {
 
         bytes memory journalData = abi.encode(
             TEST_NOTARY_FINGERPRINT,
-            "https://api.github.com/repos/test/test/contributors",
+            "https://api.github.com/graphql",
             block.timestamp,
             wrongHash,
+            "owner/repo",
             "testuser",
             uint256(100)
         );
@@ -136,6 +127,7 @@ contract GitHubContributionVerifierTest is Test {
             "https://invalid-url.com/test",
             block.timestamp,
             TEST_QUERIES_HASH,
+            "owner/repo",
             "testuser",
             uint256(100)
         );
@@ -147,9 +139,10 @@ contract GitHubContributionVerifierTest is Test {
     function testRevertInvalidContributions() public {
         bytes memory journalData = abi.encode(
             TEST_NOTARY_FINGERPRINT,
-            "https://api.github.com/repos/test/test/contributors",
+            "https://api.github.com/graphql",
             block.timestamp,
             TEST_QUERIES_HASH,
+            "owner/repo",
             "testuser",
             uint256(0)
         );
@@ -163,9 +156,10 @@ contract GitHubContributionVerifierTest is Test {
 
         bytes memory journalData = abi.encode(
             TEST_NOTARY_FINGERPRINT,
-            "https://api.github.com/repos/test/test/contributors",
+            "https://api.github.com/graphql",
             block.timestamp,
             TEST_QUERIES_HASH,
+            "owner/repo",
             "testuser",
             uint256(100)
         );
@@ -177,13 +171,15 @@ contract GitHubContributionVerifierTest is Test {
     function testEmitContributionVerified() public {
         string memory username = "testuser";
         uint256 contributions = 100;
-        string memory url = "https://api.github.com/repos/vlayer-xyz/vlayer/contributors";
+        string memory url = "https://api.github.com/graphql";
+        string memory repoNameWithOwner = "vlayer-xyz/vlayer";
 
         bytes memory journalData = abi.encode(
             TEST_NOTARY_FINGERPRINT,
             url,
             block.timestamp,
             TEST_QUERIES_HASH,
+            repoNameWithOwner,
             username,
             contributions
         );

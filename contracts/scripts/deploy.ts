@@ -260,10 +260,15 @@ Examples:
     console.log(`Contract Address: ${result.address}`);
     console.log(`Transaction: ${result.transactionHash}`);
     console.log(`\nNext steps:`);
-    console.log(`1. Update your .env with: ${network.toUpperCase()}_CONTRACT_ADDRESS=${result.address}`);
-    console.log(`2. Test the contract: npm run submit-proof ${network} ./proof.json`);
+    if (network.toLowerCase() === 'anvil' || network.toLowerCase() === 'local' || network.toLowerCase() === 'localhost') {
+      console.log(`1. Update your .env with: NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS=${result.address}`);
+    } else {
+      const prefix = network.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+      console.log(`1. Update your .env with: NEXT_PUBLIC_${prefix}_CONTRACT_ADDRESS=${result.address}`);
+    }
+    console.log(`2. Test the contract: npm run submit-proof ${network} ./proof.json ${result.address}`);
     if (!shouldVerify) {
-      console.log(`3. Verify contract: npm run verify ${network} ${result.address}`);
+      console.log(`3. Verify contract code in blockchain explorer: npm run verify ${network} ${result.address}`);
     }
 
   } catch (error: unknown) {
