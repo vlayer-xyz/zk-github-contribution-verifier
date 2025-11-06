@@ -14,6 +14,7 @@ export function OnChainVerificationPanel(props: {
   const {
     address, isConnected, isConnecting, isSwitching, isWriting,
     connect, disconnect,
+    chainId, needsSwitch, requestSwitch,
     selectedChainId, setSelectedChainId,
     contractAddress, setContractAddress,
     verifyOnChain,
@@ -28,7 +29,13 @@ export function OnChainVerificationPanel(props: {
           <select
             className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded"
             value={selectedChainId}
-            onChange={(e) => setSelectedChainId(parseInt(e.target.value, 10))}
+            onChange={(e) => {
+              const nextId = parseInt(e.target.value, 10);
+              setSelectedChainId(nextId);
+              if (isConnected && chainId !== nextId) {
+                requestSwitch(nextId).catch(() => {});
+              }
+            }}
           >
             {chains.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
@@ -45,7 +52,16 @@ export function OnChainVerificationPanel(props: {
           />
         </div>
       </div>
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3">
+        {needsSwitch && (
+          <div className="text-xs text-amber-400 flex items-center gap-2">
+            Wallet on wrong network.
+            <button onClick={() => requestSwitch()} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded">
+              Switch network
+            </button>
+          </div>
+        )}
+        <div className="flex gap-3">
         {!isConnected ? (
           <button onClick={connect} className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded" disabled={isConnecting}>
             {isConnecting ? 'Connecting...' : 'Connect Wallet'}
@@ -57,11 +73,12 @@ export function OnChainVerificationPanel(props: {
         )}
         <button
           onClick={() => verifyOnChain({ zkProofResult: props.zkProofResult, username: props.username, inputUrl: props.inputUrl, setError: props.setError })}
-          disabled={!isConnected || !contractAddress || isWriting || isSwitching}
+          disabled={!isConnected || !contractAddress || isWriting || isSwitching || needsSwitch}
           className="px-4 py-2 bg-[#7235e5] hover:bg-[#5d2bc7] disabled:bg-gray-700 rounded"
         >
           {isWriting || isSwitching ? 'Submitting…' : 'Verify on-chain'}
         </button>
+        </div>
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ export function RepositoryInput(props: {
           </label>
           <input
             id="url"
-            type="url"
+            type="text"
             value={url}
             onChange={(e) => {
               const v = e.target.value;
