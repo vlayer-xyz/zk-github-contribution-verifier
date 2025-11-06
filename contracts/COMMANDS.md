@@ -62,6 +62,5 @@ npm run submit-proof opSepolia ./proof.json
 ## Tips
 
 - All commands require proper `.env` configuration
-- Mainnet deployments require typing "yes" to confirm
 - Deployment info is automatically saved to `deployments/<network>.json`
 - Contract addresses from deployments are used automatically for proof submission

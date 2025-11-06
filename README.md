@@ -1,5 +1,7 @@
 # GitHub Contribution Verifier
 
+> IMPORTANT: This project is not production-ready. Mainnets are not supported. Testnets only (Sepolia, Base Sepolia, OP Sepolia, and local Anvil).
+
 A Next.js application that uses web proofs / zkTLS to verify GitHub contributions through vlayer's Web Prover API.
 
 ## Overview
@@ -60,7 +62,7 @@ The project includes Solidity smart contracts for storing verified GitHub contri
 
 - On-chain verification of ZK proofs using RISC Zero
 - Store contribution records permanently on blockchain
-- Support for multiple EVM networks (Ethereum, Base, Optimism, Arbitrum, and their testnets)
+- Supports testnets only: Sepolia, Base Sepolia, OP Sepolia, and local Anvil
 - Comprehensive test suite with Foundry
 
 ### Quick Start
@@ -115,10 +117,9 @@ Migration from vendored/submodule libs:
 
 ### Supported Networks
 
-- Ethereum Mainnet & Sepolia
-- Base & Base Sepolia
-- Optimism & OP Sepolia
-- Arbitrum & Arbitrum Sepolia
+- Sepolia (testnet)
+- Base Sepolia (testnet)
+- OP Sepolia (testnet)
 - Anvil (local testing)
 
 ## Testing

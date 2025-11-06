@@ -1,5 +1,7 @@
 # GitHub Contribution Verifier - Smart Contracts
 
+> IMPORTANT: Testnets only. Mainnet deployments are not supported in this project.
+
 Solidity smart contracts for verifying GitHub contributions using zero-knowledge proofs from vlayer.
 
 ## Overview
