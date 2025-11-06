@@ -76,7 +76,7 @@ async function main() {
 Usage: npm run verify <network> <contractAddress> [constructorArgs...]
 
 Arguments:
-  network         - Target network (sepolia, base, baseSepolia, etc.)
+  network         - Target network (sepolia, base, base-sepolia, etc.)
   contractAddress - Deployed contract address
   constructorArgs - (Optional) Constructor arguments if needed
 
