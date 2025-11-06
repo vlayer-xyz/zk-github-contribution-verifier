@@ -210,7 +210,7 @@ async function main() {
 Usage: npm run deploy <network> [verifierAddress] [--verify]
 
 Networks:
-  mainnet, sepolia, base, baseSepolia, optimism, opSepolia,
+  mainnet, sepolia, base, base-sepolia, optimism, opSepolia,
   arbitrum, arbitrumSepolia
 
 Options:

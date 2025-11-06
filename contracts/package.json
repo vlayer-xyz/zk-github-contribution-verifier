@@ -11,7 +11,7 @@
     "deploy": "ts-node scripts/deploy.ts",
     "deploy:anvil": "ts-node scripts/deploy.ts anvil",
     "deploy:sepolia": "ts-node scripts/deploy.ts sepolia",
-    "deploy:base-sepolia": "ts-node scripts/deploy.ts baseSepolia",
+    "deploy:base-sepolia": "ts-node scripts/deploy.ts base-sepolia",
     "deploy:op-sepolia": "ts-node scripts/deploy.ts opSepolia",
     "verify": "ts-node scripts/verify.ts",
     "submit-proof": "ts-node scripts/submitProof.ts",

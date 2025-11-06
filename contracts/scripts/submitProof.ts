@@ -134,7 +134,7 @@ async function submitProof(options: SubmitProofOptions) {
 
   // Normalize values [repo?, username, contributions]
   let username = '';
-  let contributions: bigint = 0n;
+  let contributions: bigint = BigInt(0);
   if (Array.isArray(valuesRaw)) {
     if (valuesRaw.length >= 3) {
       username = String(valuesRaw[1] ?? '');
@@ -279,7 +279,7 @@ async function main() {
 Usage: npm run submit-proof <network> <zkProofFile> [contractAddress]
 
 Arguments:
-  network         - Target network (sepolia, base, baseSepolia, optimism, opSepolia, arbitrum, arbitrumSepolia, mainnet)
+  network         - Target network (sepolia, base, base-sepolia, optimism, opSepolia, arbitrum, arbitrumSepolia, mainnet)
   zkProofFile     - Path to JSON file containing ZK proof data
   contractAddress - (Optional) Override contract address
 
