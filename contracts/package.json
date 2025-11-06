@@ -11,13 +11,8 @@
     "deploy": "ts-node scripts/deploy.ts",
     "deploy:anvil": "ts-node scripts/deploy.ts anvil",
     "deploy:sepolia": "ts-node scripts/deploy.ts sepolia",
-    "deploy:base": "ts-node scripts/deploy.ts base",
     "deploy:base-sepolia": "ts-node scripts/deploy.ts baseSepolia",
-    "deploy:optimism": "ts-node scripts/deploy.ts optimism",
     "deploy:op-sepolia": "ts-node scripts/deploy.ts opSepolia",
-    "deploy:arbitrum": "ts-node scripts/deploy.ts arbitrum",
-    "deploy:arbitrum-sepolia": "ts-node scripts/deploy.ts arbitrumSepolia",
-    "deploy:mainnet": "ts-node scripts/deploy.ts mainnet",
     "verify": "ts-node scripts/verify.ts",
     "submit-proof": "ts-node scripts/submitProof.ts",
     "prepare:anvil": "ts-node scripts/prepareLocal.ts"
