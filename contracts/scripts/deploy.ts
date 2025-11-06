@@ -260,7 +260,7 @@ Examples:
     console.log(`Contract Address: ${result.address}`);
     console.log(`Transaction: ${result.transactionHash}`);
     console.log(`\nNext steps:`);
-    if (network.toLowerCase() === 'anvil' || network.toLowerCase() === 'local' || network.toLowerCase() === 'localhost') {
+    if (network.toLowerCase() === 'anvil') {
       console.log(`1. Update your .env with: NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS=${result.address}`);
     } else {
       const prefix = network.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();

@@ -89,8 +89,8 @@ contract GitHubContributionVerifier {
             revert InvalidQueriesHash();
         }
 
-        // Validate URL equals the expected GraphQL endpoint
-        if (keccak256(bytes(url)) != keccak256(bytes("https://api.github.com/graphql"))) {
+        // Validate URL equals the expected endpoint pattern provided at deployment
+        if (keccak256(bytes(url)) != keccak256(bytes(expectedUrlPattern))) {
             revert InvalidUrl();
         }
 
