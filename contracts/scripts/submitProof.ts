@@ -272,7 +272,7 @@ Example:
     throw new Error(`ZK proof file not found: ${zkProofPath}`);
   }
 
-  // Load and normalize zk proof data. Support both flat and wrapped formats like:
+  // Load zk proof data. Support both flat and wrapped formats like:
   // { zkProof, publicOutputs } OR { success, data: { zkProof, publicOutputs } }
   type ZKProofDataLike = {
     zkProof?: string;
@@ -301,33 +301,12 @@ Example:
     ? (raw as Wrapped).data as ZKProofDataLike
     : (raw as ZKProofDataLike);
 
-  // Normalize hex values to 0x-prefixed and correct sizes when possible
-  const ensure0x = (v: string): Hex => (v?.startsWith('0x') ? v as Hex : (`0x${v}` as Hex));
-
   if (!extracted || !extracted.zkProof || !extracted.publicOutputs) {
     throw new Error('Invalid zk proof file: expected { zkProof, publicOutputs } or { success, data: { ... } }');
   }
 
-  // Defensive cloning and normalization
-  const po = extracted.publicOutputs;
-  if (!extracted.zkProof || !po.notaryKeyFingerprint || !po.queriesHash || !po.method || !po.url || po.timestamp === undefined || !po.values) {
-    throw new Error('Invalid zk proof file: missing required publicOutputs fields');
-  }
-
-  const zkProofData: ZKProofData = {
-    zkProof: ensure0x(extracted.zkProof),
-    publicOutputs: {
-      notaryKeyFingerprint: ensure0x(po.notaryKeyFingerprint),
-      method: String(po.method),
-      url: String(po.url),
-      timestamp: Number(po.timestamp),
-      queriesHash: ensure0x(po.queriesHash),
-      values: [
-        String(po.values[0] ?? ''),
-        Number(po.values[1] ?? 0),
-      ],
-    },
-  };
+  // Use data as-is without normalization
+  const zkProofData = extracted as unknown as ZKProofData;
 
   // Submit proof
   try {
