@@ -22,19 +22,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build JMESPath queries to extract specific user's data from contributors array
+    // Build JMESPath queries to extract login and merged PRs count from GraphQL response
     const extractConfig = {
       "response.body": {
         "jmespath": [
-          `[?login=='${username}'].login | [0]`,
-          `[?login=='${username}'].contributions | [0]`,
+          `data.user.login`,
+          `data.mergedPRs.issueCount`,
         ]
       }
     };
 
     const requestBody = {
       presentation,
-      extract: extractConfig
+      extraction: extractConfig
     };
 
     console.log('Compressing web proof for user:', username);
