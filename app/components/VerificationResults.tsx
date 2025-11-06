@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
+import type { PageResult } from "../lib/types";
 
-export function VerificationResults(props: { result: any }) {
+export function VerificationResults(props: { result: PageResult }) {
   const r = props.result;
   if (!r) return null;
   if (r.type === 'verify' && r.data?.contributionData) {

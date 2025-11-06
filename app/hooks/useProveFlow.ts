@@ -28,6 +28,7 @@ export function useProveFlow() {
     setIsProving(true);
     setError(null);
     setResult(null);
+    setZkProofResult(null);
 
     try {
       const { owner, name } = parseOwnerRepo(url);
