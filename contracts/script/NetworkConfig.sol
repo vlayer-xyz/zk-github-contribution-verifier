@@ -2,6 +2,9 @@
 pragma solidity ^0.8.24;
 
 import {Script} from "forge-std/Script.sol";
+import {
+    RiscZeroMockVerifier
+} from "risc0-ethereum/contracts/src/test/RiscZeroMockVerifier.sol";
 
 /// @title NetworkConfig
 /// @notice Provides network-specific configuration for deployments
@@ -20,9 +23,12 @@ contract NetworkConfig is Script {
 
     // RISC Zero Verifier Addresses (placeholders - replace with actual addresses)
     // Check https://dev.risczero.com/api/blockchain-integration/contracts/verifier
-    address constant SEPOLIA_VERIFIER = 0x0000000000000000000000000000000000000000;
-    address constant BASE_SEPOLIA_VERIFIER = 0x0000000000000000000000000000000000000000;
-    address constant OP_SEPOLIA_VERIFIER = 0x0000000000000000000000000000000000000000;
+    address constant SEPOLIA_VERIFIER =
+        0x0000000000000000000000000000000000000000;
+    address constant BASE_SEPOLIA_VERIFIER =
+        0x0000000000000000000000000000000000000000;
+    address constant OP_SEPOLIA_VERIFIER =
+        0x0000000000000000000000000000000000000000;
 
     /// @notice Get configuration for the current network
     /// @return config Network configuration including verifier address
@@ -33,22 +39,16 @@ contract NetworkConfig is Script {
     /// @notice Get configuration for a specific chain
     /// @param chainId The chain ID to get config for
     /// @return config Network configuration
-    function getConfigByChainId(uint256 chainId) public returns (Config memory) {
+    function getConfigByChainId(
+        uint256 chainId
+    ) public returns (Config memory) {
         if (chainId == SEPOLIA_CHAIN_ID) {
-            return Config({
-                verifier: SEPOLIA_VERIFIER,
-                name: "sepolia"
-            });
+            return Config({verifier: SEPOLIA_VERIFIER, name: "sepolia"});
         } else if (chainId == BASE_SEPOLIA_CHAIN_ID) {
-            return Config({
-                verifier: BASE_SEPOLIA_VERIFIER,
-                name: "baseSepolia"
-            });
+            return
+                Config({verifier: BASE_SEPOLIA_VERIFIER, name: "baseSepolia"});
         } else if (chainId == OP_SEPOLIA_CHAIN_ID) {
-            return Config({
-                verifier: OP_SEPOLIA_VERIFIER,
-                name: "opSepolia"
-            });
+            return Config({verifier: OP_SEPOLIA_VERIFIER, name: "opSepolia"});
         } else if (chainId == ANVIL_CHAIN_ID) {
             return getAnvilConfig();
         } else {
@@ -62,10 +62,7 @@ contract NetworkConfig is Script {
     function getAnvilConfig() public returns (Config memory) {
         // Deploy a mock verifier for local testing
         address mockVerifier = deployMockVerifier();
-        return Config({
-            verifier: mockVerifier,
-            name: "anvil"
-        });
+        return Config({verifier: mockVerifier, name: "anvil"});
     }
 
     /// @notice Deploy a mock verifier for testing
@@ -73,20 +70,10 @@ contract NetworkConfig is Script {
     /// @return address Address of the mock verifier
     function deployMockVerifier() internal returns (address) {
         vm.startBroadcast();
-        MockRiscZeroVerifier mock = new MockRiscZeroVerifier();
+        RiscZeroMockVerifier mock = new RiscZeroMockVerifier(
+            bytes4(0x00000000)
+        );
         vm.stopBroadcast();
         return address(mock);
-    }
-}
-
-/// @title MockRiscZeroVerifier
-/// @notice Mock verifier for local testing
-/// @dev Always returns success for testing purposes
-contract MockRiscZeroVerifier {
-    /// @notice Mock verify function
-    /// @dev Always succeeds for testing
-    function verify(bytes calldata, bytes32, bytes32) external pure {
-        // Mock verification - always succeeds
-        return;
     }
 }
