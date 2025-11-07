@@ -5,17 +5,14 @@ libs = ["lib", "dependencies"]
 solc_version = "0.8.24"
 optimizer = true
 optimizer_runs = 200
-via_ir = false
+via_ir = true
 
 [soldeer]
 # Generate remappings automatically into remappings.txt based on installed packages
 remappings_generate = true
 # Define packages to be installed into lib/ via Soldeer.
 # Pin to tags/commits as appropriate for your project.
-packages = [
-  "foundry-rs/forge-std@^1.9",
-  "risc0/risc0-ethereum@^0.2",
-]
+packages = ["foundry-rs/forge-std@^1.9", "risc0/risc0-ethereum@^0.2"]
 
 [rpc_endpoints]
 sepolia = "${SEPOLIA_RPC_URL}"
