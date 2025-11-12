@@ -2,7 +2,9 @@
 pragma solidity ^0.8.24;
 
 import {Script, console} from "forge-std/Script.sol";
-import {GitHubContributionVerifier} from "../src/GitHubContributionVerifier.sol";
+import {
+    GitHubContributionVerifier
+} from "../src/GitHubContributionVerifier.sol";
 import {NetworkConfig} from "./NetworkConfig.sol";
 
 /// @title Deploy
@@ -68,7 +70,8 @@ contract Deploy is Script {
         console.log("Deployment complete!");
 
         // Save deployment address to file
-        _saveDeployment(config.name, address(verifier));
+        // Commented out due to forge file permission issues
+        // _saveDeployment(config.name, address(verifier));
 
         return verifier;
     }
@@ -76,30 +79,24 @@ contract Deploy is Script {
     /// @notice Save deployment address to a JSON file
     /// @param network Network name
     /// @param contractAddress Deployed contract address
-    function _saveDeployment(string memory network, address contractAddress)
-        internal
-    {
-        string memory path = string.concat(
-            "deployments/",
-            network,
-            ".json"
-        );
+    function _saveDeployment(
+        string memory network,
+        address contractAddress
+    ) internal {
+        string memory path = string.concat("deployments/", network, ".json");
 
         string memory json = string.concat(
-            '{\n',
+            "{\n",
             '  "GitHubContributionVerifier": "',
             vm.toString(contractAddress),
             '",\n',
             '  "chainId": ',
             vm.toString(block.chainid),
-            ',\n',
+            ",\n",
             '  "timestamp": ',
             vm.toString(block.timestamp),
-            '\n',
-            '}'
+            "\n",
+            "}"
         );
-
-        vm.writeFile(path, json);
-        console.log("Deployment info saved to:", path);
     }
 }

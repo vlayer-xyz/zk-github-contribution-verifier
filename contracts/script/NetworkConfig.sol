@@ -72,7 +72,7 @@ contract NetworkConfig is Script {
         vm.startBroadcast();
         // Use selector 0xdeafbeef for fake proofs (matches zk-prover-server)
         RiscZeroMockVerifier mock = new RiscZeroMockVerifier(
-            bytes4(0xfaceb00c)
+            bytes4(0xFFFFFFFF)
         );
         vm.stopBroadcast();
         return address(mock);

@@ -14,8 +14,9 @@ contract GitHubContributionVerifier {
 
     /// @notice ZK proof program identifier
     /// @dev This should match the IMAGE_ID from your ZK proof program
+    /// @dev Current value matches the guest program with generic string[] format
     bytes32 public constant IMAGE_ID =
-        0x9cfcc279e52812e716665fa592dbbcb26ed591252ccf046ff5eacb0e529a550f;
+        0x01be2503b0560b210ec953401b3a091ff0295a98aafdc1e3019539a0cb5365f2;
 
     /// @notice Expected notary key fingerprint from vlayer
     bytes32 public immutable EXPECTED_NOTARY_KEY_FINGERPRINT;
@@ -67,24 +68,29 @@ contract GitHubContributionVerifier {
     /// @notice Submit and verify a GitHub contribution proof
     /// @param journalData Encoded proof data containing public outputs
     /// @param seal ZK proof seal for verification
-    /// @dev Journal data should be abi.encoded as: (notaryKeyFingerprint, url, timestamp, queriesHash, repoNameWithOwner, username, contributions)
+    /// @dev Journal data should be abi.encoded as: (notaryKeyFingerprint, url, timestamp, queriesHash, extractedValues[])
     function submitContribution(
         bytes calldata journalData,
         bytes calldata seal
     ) external {
-        // Decode the journal data
+        // Decode the journal data - generic format with string array
         (
             bytes32 notaryKeyFingerprint,
             string memory url,
             uint256 timestamp,
             bytes32 queriesHash,
-            string memory repoNameWithOwner,
-            string memory username,
-            uint256 contributions
+            string[] memory extractedValues
         ) = abi.decode(
                 journalData,
-                (bytes32, string, uint256, bytes32, string, string, uint256)
+                (bytes32, string, uint256, bytes32, string[])
             );
+
+        // Extract GitHub-specific fields from the array
+        // Expected format: [repoNameWithOwner, username, contributions]
+        require(extractedValues.length >= 3, "Invalid extracted values length");
+        string memory repoNameWithOwner = extractedValues[0];
+        string memory username = extractedValues[1];
+        uint256 contributions = parseUint(extractedValues[2]);
 
         // Validate notary key fingerprint
         if (notaryKeyFingerprint != EXPECTED_NOTARY_KEY_FINGERPRINT) {
@@ -108,29 +114,79 @@ contract GitHubContributionVerifier {
 
         // Verify the ZK proof
         bytes32 journalDigest = sha256(journalData);
+
+        // Extract seal details for debugging
+        bytes4 receivedSelector = seal.length >= 4
+            ? bytes4(seal[:4])
+            : bytes4(0);
+        // Note: SELECTOR is not part of IRiscZeroVerifier interface, access via low-level call
+        (bool success, bytes memory data) = address(VERIFIER).staticcall(
+            abi.encodeWithSignature("SELECTOR()")
+        );
+        bytes4 expectedSelector = success && data.length >= 32
+            ? bytes4(data)
+            : bytes4(0);
+
+        // Extract received claim digest from seal (seal = selector + claimDigest)
+        bytes32 receivedClaimDigest = seal.length >= 36
+            ? bytes32(seal[4:36])
+            : bytes32(0);
+
+        // Calculate expected claim digest from our IMAGE_ID + journalDigest
+        bytes32 expectedClaimDigest = sha256(
+            abi.encodePacked(
+                hex"01", // TAG_DIGEST
+                bytes32(0), // input (unused in ok())
+                IMAGE_ID,
+                sha256(abi.encodePacked(journalDigest, bytes32(0))) // output digest
+            )
+        );
+
         try VERIFIER.verify(seal, IMAGE_ID, journalDigest) {
             // Proof verified successfully
         } catch Error(string memory reason) {
             string memory errorMsg = string.concat(
                 "Verification failed: ",
                 reason,
-                " | IMAGE_ID: ",
+                " | Expected IMAGE_ID: ",
                 toHexString(IMAGE_ID),
+                " | Expected selector: ",
+                toHexString(bytes32(expectedSelector)),
+                " | Received selector: ",
+                toHexString(bytes32(receivedSelector)),
+                " | Expected claim digest: ",
+                toHexString(expectedClaimDigest),
+                " | Received claim digest: ",
+                toHexString(receivedClaimDigest),
                 " | Journal digest: ",
                 toHexString(journalDigest),
                 " | Seal length: ",
-                uintToString(seal.length)
+                uintToString(seal.length),
+                " | Seal (first 32b): ",
+                bytesToHexString(seal)
             );
             revert ZKProofVerificationFailed(errorMsg);
-        } catch (bytes memory) {
+        } catch (bytes memory lowLevelData) {
             string memory errorMsg = string.concat(
-                "Verification failed with unknown error",
-                " | IMAGE_ID: ",
+                "Verification failed (low-level)",
+                " | Expected IMAGE_ID: ",
                 toHexString(IMAGE_ID),
+                " | Expected selector: ",
+                toHexString(bytes32(expectedSelector)),
+                " | Received selector: ",
+                toHexString(bytes32(receivedSelector)),
+                " | Expected claim digest: ",
+                toHexString(expectedClaimDigest),
+                " | Received claim digest: ",
+                toHexString(receivedClaimDigest),
                 " | Journal digest: ",
                 toHexString(journalDigest),
                 " | Seal length: ",
-                uintToString(seal.length)
+                uintToString(seal.length),
+                " | Seal (first 32b): ",
+                bytesToHexString(seal),
+                " | Error data: ",
+                bytesToHexString(lowLevelData)
             );
             revert ZKProofVerificationFailed(errorMsg);
         }
@@ -177,5 +233,37 @@ contract GitHubContributionVerifier {
             value /= 10;
         }
         return string(buffer);
+    }
+
+    /// @notice Parse string to uint256
+    function parseUint(string memory s) internal pure returns (uint256 result) {
+        bytes memory b = bytes(s);
+        result = 0;
+        for (uint256 i = 0; i < b.length; i++) {
+            uint8 digit = uint8(b[i]);
+            require(digit >= 48 && digit <= 57, "Invalid number string");
+            result = result * 10 + (digit - 48);
+        }
+        return result;
+    }
+
+    /// @notice Convert bytes to hex string (truncated to first 32 bytes for readability)
+    function bytesToHexString(
+        bytes memory data
+    ) internal pure returns (string memory) {
+        if (data.length == 0) return "0x";
+
+        bytes memory alphabet = "0123456789abcdef";
+        uint256 len = data.length > 32 ? 32 : data.length; // Limit to 32 bytes
+        bytes memory str = new bytes(2 + len * 2);
+        str[0] = "0";
+        str[1] = "x";
+
+        for (uint256 i = 0; i < len; i++) {
+            str[2 + i * 2] = alphabet[uint8(data[i] >> 4)];
+            str[3 + i * 2] = alphabet[uint8(data[i] & 0x0f)];
+        }
+
+        return string(str);
     }
 }
