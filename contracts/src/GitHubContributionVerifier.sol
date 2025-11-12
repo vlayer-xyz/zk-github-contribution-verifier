@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {IRiscZeroVerifier} from "risc0-ethereum/contracts/src/IRiscZeroVerifier.sol";
+import {
+    IRiscZeroVerifier
+} from "risc0-ethereum/contracts/src/IRiscZeroVerifier.sol";
 
 /// @title GitHubContributionVerifier
 /// @notice Verifies and stores GitHub contribution proofs using ZK proofs from vlayer
@@ -12,7 +14,8 @@ contract GitHubContributionVerifier {
 
     /// @notice ZK proof program identifier
     /// @dev This should match the IMAGE_ID from your ZK proof program
-    bytes32 public constant IMAGE_ID = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 public constant IMAGE_ID =
+        0x9cfcc279e52812e716665fa592dbbcb26ed591252ccf046ff5eacb0e529a550f;
 
     /// @notice Expected notary key fingerprint from vlayer
     bytes32 public immutable EXPECTED_NOTARY_KEY_FINGERPRINT;
@@ -25,7 +28,8 @@ contract GitHubContributionVerifier {
     string public expectedUrlPattern;
 
     /// @notice Mapping of repo (owner/repo) => username => contributions
-    mapping(string => mapping(string => uint256)) public contributionsByRepoAndUser;
+    mapping(string => mapping(string => uint256))
+        public contributionsByRepoAndUser;
 
     /// @notice Emitted when a contribution is successfully verified
     event ContributionVerified(
@@ -40,7 +44,7 @@ contract GitHubContributionVerifier {
     error InvalidNotaryKeyFingerprint();
     error InvalidQueriesHash();
     error InvalidUrl();
-    error ZKProofVerificationFailed();
+    error ZKProofVerificationFailed(string reason);
     error InvalidContributions();
 
     /// @notice Contract constructor
@@ -77,7 +81,10 @@ contract GitHubContributionVerifier {
             string memory repoNameWithOwner,
             string memory username,
             uint256 contributions
-        ) = abi.decode(journalData, (bytes32, string, uint256, bytes32, string, string, uint256));
+        ) = abi.decode(
+                journalData,
+                (bytes32, string, uint256, bytes32, string, string, uint256)
+            );
 
         // Validate notary key fingerprint
         if (notaryKeyFingerprint != EXPECTED_NOTARY_KEY_FINGERPRINT) {
@@ -100,12 +107,33 @@ contract GitHubContributionVerifier {
         }
 
         // Verify the ZK proof
-        try VERIFIER.verify(seal, IMAGE_ID, sha256(journalData)) {
+        bytes32 journalDigest = sha256(journalData);
+        try VERIFIER.verify(seal, IMAGE_ID, journalDigest) {
             // Proof verified successfully
-        } catch {
-            revert ZKProofVerificationFailed();
+        } catch Error(string memory reason) {
+            string memory errorMsg = string.concat(
+                "Verification failed: ",
+                reason,
+                " | IMAGE_ID: ",
+                toHexString(IMAGE_ID),
+                " | Journal digest: ",
+                toHexString(journalDigest),
+                " | Seal length: ",
+                uintToString(seal.length)
+            );
+            revert ZKProofVerificationFailed(errorMsg);
+        } catch (bytes memory) {
+            string memory errorMsg = string.concat(
+                "Verification failed with unknown error",
+                " | IMAGE_ID: ",
+                toHexString(IMAGE_ID),
+                " | Journal digest: ",
+                toHexString(journalDigest),
+                " | Seal length: ",
+                uintToString(seal.length)
+            );
+            revert ZKProofVerificationFailed(errorMsg);
         }
-
         // Store the contribution value for the specific repo and user
         contributionsByRepoAndUser[repoNameWithOwner][username] = contributions;
 
@@ -116,5 +144,38 @@ contract GitHubContributionVerifier {
             timestamp,
             block.number
         );
+    }
+
+    /// @notice Convert bytes32 to hex string
+    function toHexString(bytes32 value) internal pure returns (string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str = new bytes(66);
+        str[0] = "0";
+        str[1] = "x";
+        for (uint256 i = 0; i < 32; i++) {
+            str[2 + i * 2] = alphabet[uint8(value[i] >> 4)];
+            str[3 + i * 2] = alphabet[uint8(value[i] & 0x0f)];
+        }
+        return string(str);
+    }
+
+    /// @notice Convert uint to string
+    function uintToString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
     }
 }

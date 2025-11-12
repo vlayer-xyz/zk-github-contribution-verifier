@@ -70,8 +70,9 @@ contract NetworkConfig is Script {
     /// @return address Address of the mock verifier
     function deployMockVerifier() internal returns (address) {
         vm.startBroadcast();
+        // Use selector 0xdeafbeef for fake proofs (matches zk-prover-server)
         RiscZeroMockVerifier mock = new RiscZeroMockVerifier(
-            bytes4(0x00000000)
+            bytes4(0xfaceb00c)
         );
         vm.stopBroadcast();
         return address(mock);
