@@ -1,10 +1,17 @@
-import { createWalletClient, createPublicClient, http, type Hex, encodeAbiParameters, decodeErrorResult } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import * as dotenv from 'dotenv';
-import { getNetworkConfig } from './config';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as util from 'util';
+import {
+  createWalletClient,
+  createPublicClient,
+  http,
+  type Hex,
+  encodeAbiParameters,
+  decodeErrorResult,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import * as dotenv from "dotenv";
+import { getNetworkConfig } from "./config";
+import * as fs from "fs";
+import * as path from "path";
+import * as util from "util";
 
 dotenv.config();
 
@@ -12,46 +19,53 @@ dotenv.config();
 const contractABI = [
   {
     inputs: [
-      { name: 'journalData', type: 'bytes' },
-      { name: 'seal', type: 'bytes' }
+      { name: "journalData", type: "bytes" },
+      { name: "seal", type: "bytes" },
     ],
-    name: 'submitContribution',
+    name: "submitContribution",
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
-    inputs: [{ name: 'username', type: 'string' }],
-    name: 'getLatestContribution',
-    outputs: [{
-      components: [
-        { name: 'username', type: 'string' },
-        { name: 'contributions', type: 'uint256' },
-        { name: 'timestamp', type: 'uint256' },
-        { name: 'blockNumber', type: 'uint256' },
-        { name: 'repoUrl', type: 'string' }
-      ],
-      name: '',
-      type: 'tuple'
-    }],
-    stateMutability: 'view',
-    type: 'function'
+    inputs: [{ name: "username", type: "string" }],
+    name: "getLatestContribution",
+    outputs: [
+      {
+        components: [
+          { name: "username", type: "string" },
+          { name: "contributions", type: "uint256" },
+          { name: "timestamp", type: "uint256" },
+          { name: "blockNumber", type: "uint256" },
+          { name: "repoUrl", type: "string" },
+        ],
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
   },
   // Custom errors for better revert decoding
-  { name: 'InvalidNotaryKeyFingerprint', type: 'error', inputs: [] },
-  { name: 'InvalidQueriesHash', type: 'error', inputs: [] },
-  { name: 'InvalidUrl', type: 'error', inputs: [] },
-  { name: 'InvalidContributions', type: 'error', inputs: [] },
-  { name: 'ZKProofVerificationFailed', type: 'error', inputs: [] },
+  { name: "InvalidNotaryKeyFingerprint", type: "error", inputs: [] },
+  { name: "InvalidQueriesHash", type: "error", inputs: [] },
+  { name: "InvalidUrl", type: "error", inputs: [] },
+  { name: "InvalidContributions", type: "error", inputs: [] },
+  { name: "ZKProofVerificationFailed", type: "error", inputs: [] },
   // Standard errors
-  { name: 'Error', type: 'error', inputs: [{ name: 'message', type: 'string' }] },
-  { name: 'Panic', type: 'error', inputs: [{ name: 'code', type: 'uint256' }] },
+  {
+    name: "Error",
+    type: "error",
+    inputs: [{ name: "message", type: "string" }],
+  },
+  { name: "Panic", type: "error", inputs: [{ name: "code", type: "uint256" }] },
 ] as const;
 
 // Accept a flexible input; we'll normalize later
 interface ZKProofData {
   zkProof: string;
   publicOutputs: Record<string, unknown>;
+  journalDataAbi?: string;
 }
 
 interface SubmitProofOptions {
@@ -61,12 +75,12 @@ interface SubmitProofOptions {
 }
 
 function getRevertData(err: unknown): Hex | undefined {
-  if (typeof err === 'object' && err !== null) {
+  if (typeof err === "object" && err !== null) {
     const top = err as { data?: unknown; cause?: unknown };
-    if (typeof top.data === 'string') return top.data as Hex;
-    if (typeof top.cause === 'object' && top.cause !== null) {
+    if (typeof top.data === "string") return top.data as Hex;
+    if (typeof top.cause === "object" && top.cause !== null) {
       const cause = top.cause as { data?: unknown };
-      if (typeof cause.data === 'string') return cause.data as Hex;
+      if (typeof cause.data === "string") return cause.data as Hex;
     }
   }
   return undefined;
@@ -79,7 +93,8 @@ async function submitProof(options: SubmitProofOptions) {
 
   // Get network configuration
   const networkConfig = getNetworkConfig(network);
-  const contractAddress = (overrideAddress || networkConfig.contractAddress) as Hex;
+  const contractAddress = (overrideAddress ||
+    networkConfig.contractAddress) as Hex;
 
   if (!contractAddress) {
     throw new Error(`Contract address not configured for network: ${network}`);
@@ -92,7 +107,7 @@ async function submitProof(options: SubmitProofOptions) {
   // Setup wallet
   const privateKey = process.env.PRIVATE_KEY;
   if (!privateKey) {
-    throw new Error('PRIVATE_KEY not set in environment variables');
+    throw new Error("PRIVATE_KEY not set in environment variables");
   }
 
   const account = privateKeyToAccount(privateKey as Hex);
@@ -110,68 +125,41 @@ async function submitProof(options: SubmitProofOptions) {
     transport: http(networkConfig.rpcUrl),
   });
 
-  // Extract values from ZK proof (seal intentionally empty to match tests)
-  const seal: Hex = '0x';
-  const po = (zkProofData.publicOutputs || {}) as Record<string, unknown>;
-  const url: string = String(po.url ?? '');
-  const tsRaw = (po as { tlsTimestamp?: unknown; timestamp?: unknown }).tlsTimestamp ?? (po as { timestamp?: unknown }).timestamp;
-  const queriesHashRaw = (po as { extractionHash?: unknown; queriesHash?: unknown }).extractionHash ?? (po as { queriesHash?: unknown }).queriesHash;
-  const valuesRaw = (po as { extractedValues?: unknown; values?: unknown }).extractedValues ?? (po as { values?: unknown }).values;
-  const notaryRaw = (po as { notaryKeyFingerprint?: unknown }).notaryKeyFingerprint;
-
-  // Normalize notary fingerprint (ensure 0x prefix)
-  const notaryKeyFingerprint: Hex = String(notaryRaw || '').startsWith('0x')
-    ? String(notaryRaw) as Hex
-    : (`0x${String(notaryRaw || '')}` as Hex);
-
-  // Normalize timestamp
-  const timestampBigInt = BigInt(typeof tsRaw === 'string' || typeof tsRaw === 'number' ? tsRaw : 0);
-
-  // Normalize queries/extraction hash (ensure 0x prefix)
-  const queriesHash: Hex = String(queriesHashRaw || '').startsWith('0x')
-    ? String(queriesHashRaw) as Hex
-    : (`0x${String(queriesHashRaw || '')}` as Hex);
-
-  // Normalize values [repo?, username, contributions]
-  let username = '';
-  let contributions: bigint = BigInt(0);
-  if (Array.isArray(valuesRaw)) {
-    if (valuesRaw.length >= 3) {
-      username = String(valuesRaw[1] ?? '');
-      const c = valuesRaw[2];
-      contributions = BigInt(typeof c === 'string' || typeof c === 'number' ? c : 0);
-    } else if (valuesRaw.length >= 2) {
-      username = String(valuesRaw[0] ?? '');
-      const c = valuesRaw[1];
-      contributions = BigInt(typeof c === 'string' || typeof c === 'number' ? c : 0);
-    }
+  // Require journalDataAbi - it must be provided by the prover
+  if (!zkProofData.journalDataAbi) {
+    throw new Error("journalDataAbi is required but not found in zkProofData");
   }
+
+  const journalData: Hex = zkProofData.journalDataAbi as Hex;
+
+  // Extract display values from publicOutputs for logging
+  const po = zkProofData.publicOutputs || {};
+  const url = String((po as any).url ?? "");
+  const tsRaw = (po as any).tlsTimestamp ?? (po as any).timestamp;
+  const timestampBigInt = BigInt(
+    typeof tsRaw === "string" || typeof tsRaw === "number" ? tsRaw : 0
+  );
+
+  let username = "";
+  let contributions: bigint = BigInt(0);
+  const valuesRaw = (po as any).extractedValues ?? (po as any).values;
+  if (Array.isArray(valuesRaw) && valuesRaw.length >= 2) {
+    username = String(valuesRaw[1] ?? "");
+    const c = valuesRaw[2];
+    contributions = BigInt(
+      typeof c === "string" || typeof c === "number" ? c : 0
+    );
+  }
+
+  // Extract seal from zkProof
+  const seal: Hex = zkProofData.zkProof as Hex;
 
   console.log(`\nProof Details:`);
   console.log(`  Username: ${username}`);
   console.log(`  Contributions: ${contributions}`);
   console.log(`  Repo URL: ${url}`);
-  console.log(`  Timestamp: ${new Date(Number(timestampBigInt) * 1000).toISOString()}`);
-
-  // Encode journal data to match Solidity abi.decode types exactly
-  // (bytes32, string, uint256, bytes32, string, uint256)
-  const journalData = encodeAbiParameters(
-    [
-      { type: 'bytes32' },
-      { type: 'string' },
-      { type: 'uint256' },
-      { type: 'bytes32' },
-      { type: 'string' },
-      { type: 'uint256' },
-    ],
-    [
-      notaryKeyFingerprint,
-      url,
-      timestampBigInt,
-      queriesHash,
-      username,
-      contributions,
-    ]
+  console.log(
+    `  Timestamp: ${new Date(Number(timestampBigInt) * 1000).toISOString()}`
   );
 
   console.log(`\nTransaction Details:`);
@@ -184,7 +172,7 @@ async function submitProof(options: SubmitProofOptions) {
     await publicClient.simulateContract({
       address: contractAddress,
       abi: contractABI,
-      functionName: 'submitContribution',
+      functionName: "submitContribution",
       args: [journalData, seal],
       account: account.address,
     });
@@ -195,8 +183,14 @@ async function submitProof(options: SubmitProofOptions) {
     const revertData = getRevertData(error);
     if (revertData) {
       try {
-        const decoded = decodeErrorResult({ abi: contractABI, data: revertData });
-        console.error(`✗ Simulation failed: ${decoded.errorName}`, decoded.args ?? []);
+        const decoded = decodeErrorResult({
+          abi: contractABI,
+          data: revertData,
+        });
+        console.error(
+          `✗ Simulation failed: ${decoded.errorName}`,
+          decoded.args ?? []
+        );
       } catch {
         console.error(`✗ Simulation failed:`, message);
         console.error(`Revert data:`, revertData);
@@ -215,7 +209,7 @@ async function submitProof(options: SubmitProofOptions) {
     hash = await walletClient.writeContract({
       address: contractAddress,
       abi: contractABI,
-      functionName: 'submitContribution',
+      functionName: "submitContribution",
       args: [journalData, seal],
     });
   } catch (error: unknown) {
@@ -223,8 +217,14 @@ async function submitProof(options: SubmitProofOptions) {
     const revertData = getRevertData(error);
     if (revertData) {
       try {
-        const decoded = decodeErrorResult({ abi: contractABI, data: revertData });
-        console.error(`✗ Submission failed: ${decoded.errorName}`, decoded.args ?? []);
+        const decoded = decodeErrorResult({
+          abi: contractABI,
+          data: revertData,
+        });
+        console.error(
+          `✗ Submission failed: ${decoded.errorName}`,
+          decoded.args ?? []
+        );
       } catch {
         console.error(`✗ Submission failed:`, message);
         console.error(`Revert data:`, revertData);
@@ -252,7 +252,7 @@ async function submitProof(options: SubmitProofOptions) {
   const storedData = await publicClient.readContract({
     address: contractAddress,
     abi: contractABI,
-    functionName: 'getLatestContribution',
+    functionName: "getLatestContribution",
     args: [username],
   });
 
@@ -302,6 +302,7 @@ Example:
   // { zkProof, publicOutputs } OR { success, data: { zkProof, publicOutputs } }
   type ZKProofDataLike = {
     zkProof?: string;
+    journalDataAbi?: string;
     publicOutputs?: {
       notaryKeyFingerprint?: string;
       method?: string;
@@ -313,22 +314,30 @@ Example:
   };
   type Wrapped = { success?: boolean; data?: ZKProofDataLike };
 
-  const raw: unknown = JSON.parse(fs.readFileSync(zkProofPath, 'utf-8')) as unknown;
+  const raw: unknown = JSON.parse(
+    fs.readFileSync(zkProofPath, "utf-8")
+  ) as unknown;
 
   const hasZkProof = (obj: unknown): obj is ZKProofDataLike =>
-    typeof obj === 'object' && obj !== null &&
-    'zkProof' in obj && 'publicOutputs' in obj;
+    typeof obj === "object" &&
+    obj !== null &&
+    "zkProof" in obj &&
+    "publicOutputs" in obj;
 
   const hasDataWithZk = (obj: unknown): obj is Wrapped =>
-    typeof obj === 'object' && obj !== null &&
-    'data' in obj && hasZkProof((obj as { data?: unknown }).data);
+    typeof obj === "object" &&
+    obj !== null &&
+    "data" in obj &&
+    hasZkProof((obj as { data?: unknown }).data);
 
   const extracted: ZKProofDataLike = hasDataWithZk(raw)
-    ? (raw as Wrapped).data as ZKProofDataLike
+    ? ((raw as Wrapped).data as ZKProofDataLike)
     : (raw as ZKProofDataLike);
 
   if (!extracted || !extracted.zkProof || !extracted.publicOutputs) {
-    throw new Error('Invalid zk proof file: expected { zkProof, publicOutputs } or { success, data: { ... } }');
+    throw new Error(
+      "Invalid zk proof file: expected { zkProof, publicOutputs } or { success, data: { ... } }"
+    );
   }
 
   // Use data as-is without normalization
@@ -345,7 +354,6 @@ Example:
     console.log(`\n=== Submission Complete ===\n`);
     console.log(`Transaction: ${result.transactionHash}`);
     console.log(`View on explorer: [Add explorer URL here]`);
-
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`\n✗ Error:`, message);

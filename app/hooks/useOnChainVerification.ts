@@ -1,11 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useConnect,
+  useDisconnect,
+  useSwitchChain,
+  useWriteContract,
+} from "wagmi";
 import { injected } from "wagmi/connectors";
 import { useEffect, useMemo, useState } from "react";
 import { GitHubContributionVerifierAbi } from "../lib/abi";
-import { buildJournalData, normalizeSealHex, parseOwnerRepo } from "../lib/utils";
+import { parseOwnerRepo } from "../lib/utils";
 import { anvil } from "../lib/chains";
 import { baseSepolia, optimismSepolia, sepolia } from "viem/chains";
 
@@ -18,10 +25,17 @@ export function useOnChainVerification() {
   const chainId = useChainId();
   const { writeContractAsync, isPending: isWriting } = useWriteContract();
 
-  const [selectedChainId, setSelectedChainId] = useState<number>(Number(process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || 31337));
-  const [contractAddress, setContractAddress] = useState<string>(process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || '');
+  const [selectedChainId, setSelectedChainId] = useState<number>(
+    Number(process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || 31337)
+  );
+  const [contractAddress, setContractAddress] = useState<string>(
+    process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || ""
+  );
 
-  const needsSwitch = useMemo(() => isConnected && chainId !== selectedChainId, [isConnected, chainId, selectedChainId]);
+  const needsSwitch = useMemo(
+    () => isConnected && chainId !== selectedChainId,
+    [isConnected, chainId, selectedChainId]
+  );
 
   const requestSwitch = async (targetChainId?: number) => {
     const goalId = targetChainId ?? selectedChainId;
@@ -42,84 +56,116 @@ export function useOnChainVerification() {
   // Prefill contract address based on selected chain if empty
   useEffect(() => {
     if (contractAddress && contractAddress.length > 0) return;
-    let envAddress = '';
-    if (selectedChainId === anvil.id) envAddress = process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || '';
-    else if (selectedChainId === sepolia.id) envAddress = process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS || '';
-    else if (selectedChainId === baseSepolia.id) envAddress = process.env.NEXT_PUBLIC_BASE_SEPOLIA_CONTRACT_ADDRESS || '';
-    else if (selectedChainId === optimismSepolia.id) envAddress = process.env.NEXT_PUBLIC_OP_SEPOLIA_CONTRACT_ADDRESS || '';
+    let envAddress = "";
+    if (selectedChainId === anvil.id)
+      envAddress = process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || "";
+    else if (selectedChainId === sepolia.id)
+      envAddress = process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS || "";
+    else if (selectedChainId === baseSepolia.id)
+      envAddress = process.env.NEXT_PUBLIC_BASE_SEPOLIA_CONTRACT_ADDRESS || "";
+    else if (selectedChainId === optimismSepolia.id)
+      envAddress = process.env.NEXT_PUBLIC_OP_SEPOLIA_CONTRACT_ADDRESS || "";
     if (envAddress) setContractAddress(envAddress);
   }, [selectedChainId, contractAddress]);
 
   async function verifyOnChain(params: {
-    zkProofResult: { zkProof: any; publicOutputs: any } | null;
+    zkProofResult: {
+      zkProof: any;
+      publicOutputs: any;
+      journalDataAbi: any;
+    } | null;
     username: string;
     inputUrl: string;
     setError: (m: string | null) => void;
   }) {
     try {
       params.setError(null);
-      if (!params.zkProofResult?.zkProof || !params.zkProofResult?.publicOutputs) {
-        params.setError('Generate ZK proof first');
+
+      console.log("verifyOnChain called with:", params.zkProofResult);
+
+      if (!params.zkProofResult) {
+        params.setError("Generate ZK proof first (result is null)");
+        return;
+      }
+      if (!params.zkProofResult.zkProof) {
+        params.setError("zkProof missing from result");
+        return;
+      }
+      if (!params.zkProofResult.publicOutputs) {
+        params.setError("publicOutputs missing from result");
         return;
       }
       if (!contractAddress || contractAddress.length < 10) {
-        params.setError('Enter contract address');
+        params.setError("Enter contract address");
         return;
       }
       if (!isConnected) {
-        params.setError('Connect your wallet');
+        params.setError("Connect your wallet");
         return;
       }
       if (chainId !== selectedChainId && switchChain) {
         await switchChain({ chainId: selectedChainId });
       }
 
-      const { journalData, username, contributions } = buildJournalData(params.zkProofResult.publicOutputs, params.username);
-      const sealHex = normalizeSealHex(params.zkProofResult.zkProof);
+      if (!params.zkProofResult.journalDataAbi) {
+        params.setError("journalDataAbi not found in proof result");
+        return;
+      }
 
-      const hash = await writeContractAsync({
-        address: contractAddress as `0x${string}`,
-        abi: GitHubContributionVerifierAbi,
-        functionName: 'submitContribution',
-        args: [journalData, sealHex],
-        chainId: selectedChainId,
-      });
+      const journalData = params.zkProofResult.journalDataAbi;
+      const sealHex = params.zkProofResult.zkProof;
 
-      // build repo name for redirect
+      // Extract display values from publicOutputs
       const values = params.zkProofResult.publicOutputs?.extractedValues ?? [];
-      let repoForRedirect = String(values?.[0] ?? '');
+      const username = String(values?.[1] ?? params.username);
+      const contributions = String(values?.[2] ?? "0");
+      let repoForRedirect = String(values?.[0] ?? "");
       if (!repoForRedirect) {
         const { owner, name } = parseOwnerRepo(params.inputUrl);
         if (owner && name) repoForRedirect = `${owner}/${name}`;
       }
 
+      const hash = await writeContractAsync({
+        address: contractAddress as `0x${string}`,
+        abi: GitHubContributionVerifierAbi,
+        functionName: "submitContribution",
+        args: [journalData, sealHex],
+        chainId: selectedChainId,
+      });
+
       const q = new URLSearchParams({
         handle: username,
         chainId: String(selectedChainId),
         reponame: repoForRedirect,
-        contributions: String(contributions),
+        contributions: contributions,
         txHash: hash,
       });
       router.push(`/success?${q.toString()}`);
     } catch (e: any) {
-      params.setError(e?.shortMessage || e?.message || 'On-chain verification failed');
+      params.setError(
+        e?.shortMessage || e?.message || "On-chain verification failed"
+      );
     }
   }
 
   return {
     // wallet state
-    address, isConnected, isConnecting, isSwitching, isWriting,
+    address,
+    isConnected,
+    isConnecting,
+    isSwitching,
+    isWriting,
     connect: () => connect({ connector: injected() }),
     disconnect,
     chainId,
     needsSwitch,
     requestSwitch,
     // form state
-    selectedChainId, setSelectedChainId,
-    contractAddress, setContractAddress,
+    selectedChainId,
+    setSelectedChainId,
+    contractAddress,
+    setContractAddress,
     // action
     verifyOnChain,
   } as const;
 }
-
-

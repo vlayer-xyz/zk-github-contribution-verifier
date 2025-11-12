@@ -6,26 +6,25 @@ export function parseOwnerRepo(input: string): { owner: string; name: string } {
   const ownerRepoFromGit = urlStr.match(/github\.com\/([^/]+)\/([^/]+)\b/i);
   const ownerRepoFromPlain = urlStr.match(/^([^/]+)\/([^/]+)$/);
 
-  const owner = (ownerRepoFromApi?.[1] || ownerRepoFromGit?.[1] || ownerRepoFromPlain?.[1] || "").trim();
-  const name = (ownerRepoFromApi?.[2] || ownerRepoFromGit?.[2] || ownerRepoFromPlain?.[2] || "").trim();
+  const owner = (
+    ownerRepoFromApi?.[1] ||
+    ownerRepoFromGit?.[1] ||
+    ownerRepoFromPlain?.[1] ||
+    ""
+  ).trim();
+  const name = (
+    ownerRepoFromApi?.[2] ||
+    ownerRepoFromGit?.[2] ||
+    ownerRepoFromPlain?.[2] ||
+    ""
+  ).trim();
   return { owner, name };
 }
 
-export function normalizeZkProofData(data: any): {
-  zkProof: any;
-  publicOutputs: any;
-} | null {
-  if (!data) return null;
-  if (data.success && data.data) {
-    return { zkProof: data.data.zkProof, publicOutputs: data.data.publicOutputs };
-  }
-  if (data.zkProof && data.publicOutputs) {
-    return { zkProof: data.zkProof, publicOutputs: data.publicOutputs };
-  }
-  return null;
-}
 
-export function extractContributionData(graphLike: unknown): { username: string; total: number } | null {
+export function extractContributionData(
+  graphLike: unknown
+): { username: string; total: number } | null {
   const body = (graphLike as any)?.response?.body ?? graphLike;
   let graph: any = null;
   if (typeof body === "string") {
@@ -45,24 +44,69 @@ export function extractContributionData(graphLike: unknown): { username: string;
   return null;
 }
 
-export function normalizeSealHex(zkProof: any): `0x${string}` {
-  if (typeof zkProof === "string") {
-    return (zkProof.startsWith("0x") ? zkProof : (`0x${zkProof}` as `0x${string}`)) as `0x${string}`;
-  }
-  if (zkProof?.seal) {
-    const s: string = zkProof.seal;
-    return (s.startsWith("0x") ? s : (`0x${s}` as `0x${string}`)) as `0x${string}`;
-  }
-  return toHex(toBytes(JSON.stringify(zkProof))) as `0x${string}`;
-}
+// export function normalizeSealHex(zkProof: any): `0x${string}` {
+//   if (typeof zkProof === "string") {
+//     return (
+//       zkProof.startsWith("0x") ? zkProof : (`0x${zkProof}` as `0x${string}`)
+//     ) as `0x${string}`;
+//   }
+//   if (zkProof?.seal) {
+//     const s: string = zkProof.seal;
+//     return (
+//       s.startsWith("0x") ? s : (`0x${s}` as `0x${string}`)
+//     ) as `0x${string}`;
+//   }
+//   return toHex(toBytes(JSON.stringify(zkProof))) as `0x${string}`;
+// }
 
-export function buildJournalData(publicOutputs: any, fallbackUsername: string): { journalData: Hex; username: string; contributions: bigint; repoOrUrl: string } {
+export function buildJournalData(
+  proofData: any,
+  fallbackUsername: string
+): {
+  journalData: Hex;
+  username: string;
+  contributions: bigint;
+  repoOrUrl: string;
+} {
+  console.log(
+    "buildJournalData called with:",
+    JSON.stringify(proofData, null, 2)
+  );
+  console.log("Has journalDataAbi:", !!proofData.journalDataAbi);
+
+  // If journalDataAbi is provided (new format), use it directly
+  if (proofData.journalDataAbi) {
+    console.log("Using journalDataAbi directly:", proofData.journalDataAbi);
+    const journalData = proofData.journalDataAbi as Hex;
+
+    // Extract display values from publicOutputs
+    const publicOutputs = proofData.publicOutputs || {};
+    const values = publicOutputs.extractedValues ?? publicOutputs.values ?? [];
+    const repoFromValues = values?.[0];
+    const userFromValues = String(values?.[1] ?? fallbackUsername);
+    const contribFromValuesRaw = values?.[2] ?? values?.[1];
+    const contributions = BigInt(
+      typeof contribFromValuesRaw === "number"
+        ? contribFromValuesRaw
+        : parseInt(String(contribFromValuesRaw ?? 0), 10)
+    );
+    const repoOrUrl =
+      (publicOutputs.url as string) ?? String(repoFromValues ?? "");
+
+    return { journalData, username: userFromValues, contributions, repoOrUrl };
+  }
+
+  // Legacy format: build from publicOutputs
+  const publicOutputs = proofData.publicOutputs || proofData;
   if (!publicOutputs) throw new Error("Missing public outputs");
 
   const notaryFp = String(publicOutputs.notaryKeyFingerprint || "");
-  const notaryFpHex = (notaryFp.startsWith("0x") ? notaryFp : (`0x${notaryFp}`)) as Hex;
+  const notaryFpHex = (
+    notaryFp.startsWith("0x") ? notaryFp : `0x${notaryFp}`
+  ) as Hex;
 
-  const queriesHashHex = (publicOutputs.extractionHash ?? publicOutputs.queriesHash) as Hex;
+  const queriesHashHex = (publicOutputs.extractionHash ??
+    publicOutputs.queriesHash) as Hex;
 
   const tsSource = publicOutputs.tlsTimestamp ?? publicOutputs.timestamp;
   if (tsSource == null) throw new Error("Missing timestamp in proof");
@@ -73,10 +117,20 @@ export function buildJournalData(publicOutputs: any, fallbackUsername: string): 
   const userFromValues = String(values?.[1] ?? fallbackUsername);
   const contribFromValuesRaw = values?.[2] ?? values?.[1];
   const contributions = BigInt(
-    typeof contribFromValuesRaw === "number" ? contribFromValuesRaw : parseInt(String(contribFromValuesRaw ?? 0), 10)
+    typeof contribFromValuesRaw === "number"
+      ? contribFromValuesRaw
+      : parseInt(String(contribFromValuesRaw ?? 0), 10)
   );
 
-  const repoOrUrl = (publicOutputs.url as string) ?? String(repoFromValues ?? "");
+  const repoOrUrl =
+    (publicOutputs.url as string) ?? String(repoFromValues ?? "");
+
+  // Build extracted values as string array (generic format)
+  const extractedValuesArray = [
+    String(repoFromValues ?? ""),
+    userFromValues,
+    contributions.toString(),
+  ];
 
   const journalData = encodeAbiParameters(
     [
@@ -84,13 +138,10 @@ export function buildJournalData(publicOutputs: any, fallbackUsername: string): 
       { type: "string" },
       { type: "uint256" },
       { type: "bytes32" },
-      { type: "string" },
-      { type: "uint256" },
+      { type: "string[]" },
     ],
-    [notaryFpHex, repoOrUrl, ts, queriesHashHex, userFromValues, contributions]
+    [notaryFpHex, repoOrUrl, ts, queriesHashHex, extractedValuesArray]
   );
 
   return { journalData, username: userFromValues, contributions, repoOrUrl };
 }
-
-
