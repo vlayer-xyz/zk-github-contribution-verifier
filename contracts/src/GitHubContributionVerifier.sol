@@ -14,7 +14,7 @@ contract GitHubContributionVerifier {
 
     /// @notice ZK proof program identifier
     /// @dev This should match the IMAGE_ID from your ZK proof program
-    /// @dev Returns (bytes32 notaryKeyFingerprint, string method, string url, uint256 tlsTimestamp, bytes32 extractionHash, string value1, string value2)
+    /// @dev Returns (bytes32 notaryKeyFingerprint, string method, string url, uint256 tlsTimestamp, bytes32 extractionHash, string repo, string username, uint256 contributions)
     /// @dev Note: extracted values are encoded as individual tuple parameters, not as an array
     bytes32 public constant IMAGE_ID =
         0xb61918bc011883cff19252d781b88cf0920e28b19248231d890dd339351f0dea;
@@ -69,7 +69,7 @@ contract GitHubContributionVerifier {
     /// @notice Submit and verify a GitHub contribution proof
     /// @param journalData Encoded proof data containing all public outputs as individual tuple parameters
     /// @param seal ZK proof seal for verification
-    /// @dev Journal data format: (bytes32 notaryKeyFingerprint, string method, string url, uint256 tlsTimestamp, bytes32 extractionHash, string value1, string value2)
+    /// @dev Journal data format: (bytes32 notaryKeyFingerprint, string method, string url, uint256 tlsTimestamp, bytes32 extractionHash, string repo, string username, uint256 contributions)
     function submitContribution(
         bytes calldata journalData,
         bytes calldata seal
@@ -81,11 +81,12 @@ contract GitHubContributionVerifier {
             string memory url,
             uint256 tlsTimestamp,
             bytes32 extractionHash,
-            string memory extractedValue0,
-            string memory extractedValue1
+            string memory repo,
+            string memory username,
+            uint256 contributions
         ) = abi.decode(
                 journalData,
-                (bytes32, string, string, uint256, bytes32, string, string)
+                (bytes32, string, string, uint256, bytes32, string, string, uint256)
             );
 
         // Verify the ZK proof first
@@ -107,17 +108,20 @@ contract GitHubContributionVerifier {
             revert InvalidUrl();
         }
 
-        // For GitHub contributions, expect extractedValue0 to contain repo
-        // and extractedValue1 to contain username
-        // Note: This test data doesn't have contributions as a separate field
+        // For GitHub contributions, decoded values are:
+        // - repo (string)
+        // - username (string)
+        // - contributions (uint256)
 
-        string memory repo = extractedValue0;
-        string memory username = extractedValue1;
+        contributionsByRepoAndUser[repo][username] = contributions;
 
-        // Store with default contribution value (for testing)
-        contributionsByRepoAndUser[repo][username] = 0;
-
-        emit ContributionVerified(username, 0, url, tlsTimestamp, block.number);
+        emit ContributionVerified(
+            username,
+            contributions,
+            url,
+            tlsTimestamp,
+            block.number
+        );
     }
 
     /// @notice Convert bytes32 to hex string

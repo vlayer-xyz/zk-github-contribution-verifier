@@ -312,7 +312,7 @@ contract GitHubContributionVerifierTest is Test {
     }
 
     /// @notice Test with REAL values from zk-prover-server using RiscZeroMockVerifier
-    /// @dev Journal contains all public outputs: (bytes32, string, string, uint256, bytes32, string, string)
+    /// @dev Journal contains all public outputs: (bytes32, string, string, uint256, bytes32, string, string, uint256)
     function testRealZKProofData() public {
         bytes4 mockSelector = bytes4(0xFFFFFFFF); // Mock selector for fake receipt
         RiscZeroMockVerifier riscZeroMock = new RiscZeroMockVerifier(
@@ -346,11 +346,21 @@ contract GitHubContributionVerifierTest is Test {
             string memory url,
             uint256 tlsTimestamp,
             bytes32 extractionHash,
-            string memory extractedValue0,
-            string memory extractedValue1
+            string memory repo,
+            string memory username,
+            uint256 contributions
         ) = abi.decode(
                 journalDataAbi,
-                (bytes32, string, string, uint256, bytes32, string, string)
+                (
+                    bytes32,
+                    string,
+                    string,
+                    uint256,
+                    bytes32,
+                    string,
+                    string,
+                    uint256
+                )
             );
 
         console.log("Notary Key Fingerprint:");
@@ -361,17 +371,19 @@ contract GitHubContributionVerifierTest is Test {
         console.log("Extraction Hash:");
         console.logBytes32(extractionHash);
         console.log("Extracted Values:");
-        console.log("  [0]:", extractedValue0);
-        console.log("  [1]:", extractedValue1);
+        console.log("  repo:", repo);
+        console.log("  username:", username);
+        console.log("  contributions:", contributions);
+
+        // Assert the expected values
+        assertEq(repo, "vlayer-xyz/vlayer");
+        assertEq(username, "wgromniak2");
+        assertEq(contributions, 149);
         console.log("Submitting to contract...");
 
         // Submit to contract - should verify ZK proof
         realVerifier.submitContribution(journalDataAbi, seal);
 
         console.log("Submission successful!");
-
-        // This test uses real GitHub API data with:
-        // - extractedValue0: "vlayer-xyz/vlayer" (repo)
-        // - extractedValue1: "wgromniak2" (username)
     }
 }
