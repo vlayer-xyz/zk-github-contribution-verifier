@@ -16,7 +16,7 @@ contract GitHubContributionVerifier {
     /// @dev This should match the IMAGE_ID from your ZK proof program
     /// @dev SIMPLIFIED VERSION: Returns only uint256 contributions
     bytes32 public constant IMAGE_ID =
-        0x7f379a7bf5099eea650c0dd8c6180ba1d8ad404e6d717332f6ca61231d3a4e57;
+        0xab2a1d1e6e607454ea66d02e44527b38f17fed8751435049b884ea03c94278d0;
 
     /// @notice Expected notary key fingerprint from vlayer
     bytes32 public immutable EXPECTED_NOTARY_KEY_FINGERPRINT;
