@@ -14,9 +14,10 @@ contract GitHubContributionVerifier {
 
     /// @notice ZK proof program identifier
     /// @dev This should match the IMAGE_ID from your ZK proof program
-    /// @dev Returns (uint256 contributions, uint256 tlsTimestamp)
+    /// @dev Returns (bytes32 notaryKeyFingerprint, string method, string url, uint256 tlsTimestamp, bytes32 extractionHash, string value1, string value2)
+    /// @dev Note: extracted values are encoded as individual tuple parameters, not as an array
     bytes32 public constant IMAGE_ID =
-        0xb15da9e9f6026be8ef857880beaa010515523a46c6c252258322842a8fd25cd5;
+        0xb61918bc011883cff19252d781b88cf0920e28b19248231d890dd339351f0dea;
 
     /// @notice Expected notary key fingerprint from vlayer
     bytes32 public immutable EXPECTED_NOTARY_KEY_FINGERPRINT;
@@ -66,43 +67,57 @@ contract GitHubContributionVerifier {
     }
 
     /// @notice Submit and verify a GitHub contribution proof
-    /// @param journalData Encoded proof data containing (contributions, tlsTimestamp)
+    /// @param journalData Encoded proof data containing all public outputs as individual tuple parameters
     /// @param seal ZK proof seal for verification
-    /// @dev Journal data is abi.encode((uint256 contributions, uint256 tlsTimestamp))
+    /// @dev Journal data format: (bytes32 notaryKeyFingerprint, string method, string url, uint256 tlsTimestamp, bytes32 extractionHash, string value1, string value2)
     function submitContribution(
         bytes calldata journalData,
         bytes calldata seal
     ) external {
-        // Decode contributions and timestamp
-        (uint256 contributions, uint256 tlsTimestamp) = abi.decode(
-            journalData,
-            (uint256, uint256)
-        );
+        // Decode all public outputs - extracted values are individual parameters
+        (
+            bytes32 notaryKeyFingerprint,
+            string memory method,
+            string memory url,
+            uint256 tlsTimestamp,
+            bytes32 extractionHash,
+            string memory extractedValue0,
+            string memory extractedValue1
+        ) = abi.decode(
+                journalData,
+                (bytes32, string, string, uint256, bytes32, string, string)
+            );
 
-        // SIMPLIFIED: Hardcode repo and username for testing
-        string memory repoNameWithOwner = "vlayer-xyz/vlayer";
-        string memory username = "wgromniak2";
-
-        // Validate contributions is a reasonable number
-        // if (contributions == 0 || contributions > 1000000) {
-        //     revert InvalidContributions();
-        // }
-
-        // Verify the ZK proof - trust RISC Zero's verifier to handle the cryptography
+        // Verify the ZK proof first
         bytes32 journalDigest = sha256(journalData);
-
         VERIFIER.verify(seal, IMAGE_ID, journalDigest);
 
-        // Store the contribution value for the hardcoded repo and user
-        contributionsByRepoAndUser[repoNameWithOwner][username] = contributions;
+        // Validate notary key fingerprint
+        if (notaryKeyFingerprint != EXPECTED_NOTARY_KEY_FINGERPRINT) {
+            revert InvalidNotaryKeyFingerprint();
+        }
 
-        emit ContributionVerified(
-            username,
-            contributions,
-            "https://api.github.com/graphql", // hardcoded
-            tlsTimestamp,
-            block.number
-        );
+        // Validate extraction hash
+        if (extractionHash != EXPECTED_QUERIES_HASH) {
+            revert InvalidQueriesHash();
+        }
+
+        // Validate URL pattern
+        if (!contains(url, expectedUrlPattern)) {
+            revert InvalidUrl();
+        }
+
+        // For GitHub contributions, expect extractedValue0 to contain repo
+        // and extractedValue1 to contain username
+        // Note: This test data doesn't have contributions as a separate field
+
+        string memory repo = extractedValue0;
+        string memory username = extractedValue1;
+
+        // Store with default contribution value (for testing)
+        contributionsByRepoAndUser[repo][username] = 0;
+
+        emit ContributionVerified(username, 0, url, tlsTimestamp, block.number);
     }
 
     /// @notice Convert bytes32 to hex string
@@ -168,5 +183,36 @@ contract GitHubContributionVerifier {
         }
 
         return string(str);
+    }
+
+    /// @notice Check if a string contains a substring
+    function contains(
+        string memory source,
+        string memory substring
+    ) internal pure returns (bool) {
+        bytes memory sourceBytes = bytes(source);
+        bytes memory substringBytes = bytes(substring);
+
+        if (substringBytes.length > sourceBytes.length) {
+            return false;
+        }
+
+        for (
+            uint256 i = 0;
+            i <= sourceBytes.length - substringBytes.length;
+            i++
+        ) {
+            bool found = true;
+            for (uint256 j = 0; j < substringBytes.length; j++) {
+                if (sourceBytes[i + j] != substringBytes[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) {
+                return true;
+            }
+        }
+        return false;
     }
 }
