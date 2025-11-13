@@ -6,24 +6,28 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:e2e": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.56.2",
+    "next": "latest",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "next": "latest",
-    "@tanstack/react-query": "^5.56.2",
     "viem": "^2.21.15",
     "wagmi": "^2.12.15"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
-    "eslint-config-next": "latest"
+    "eslint-config-next": "latest",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vite": "^7.2.2",
+    "vitest": "^4.0.8"
   }
 }
