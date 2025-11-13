@@ -5,7 +5,7 @@ export type ContributionData = {
 
 export type ZKProofNormalized = {
   zkProof: any;
-  publicOutputs: any;
+  journalDataAbi: string;
   userData?: ContributionData | null;
 };
 

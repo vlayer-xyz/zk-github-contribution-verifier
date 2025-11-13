@@ -23,7 +23,7 @@ anvil = "http://localhost:8545"
 [etherscan]
 sepolia = { key = "${ETHERSCAN_API_KEY}" }
 baseSepolia = { key = "${BASESCAN_API_KEY}" }
-opSepolia = { key = "${OPTIMISTIC_ETHERSCAN_API_KEY}" }
+opSepolia = { key = "${OPTIMISTIC_ETHERSCAN_API_KEY}", chain = 11155420 }
 
 [dependencies]
 forge-std = "1.11.0"

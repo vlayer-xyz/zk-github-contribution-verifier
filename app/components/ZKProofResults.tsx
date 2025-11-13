@@ -22,7 +22,7 @@ export function ZKProofResults(props: { zkProofResult: any }) {
             </div>
             <div className="bg-green-600/10 border border-green-600/20 rounded-lg p-4">
               <p className="text-green-400 font-semibold text-xl">
-                {z.userData.total} contributions proven with ZK
+                {z.userData.total > 0 ? `${z.userData.total} contributions` : 'Contributions'} proven with ZK
               </p>
               <p className="text-gray-400 text-sm mt-1">
                 Your contributions have been cryptographically proven using zero-knowledge proofs
@@ -30,43 +30,37 @@ export function ZKProofResults(props: { zkProofResult: any }) {
             </div>
           </div>
 
-          {z.publicOutputs && (
-            <details className="bg-gray-900 border border-gray-700 rounded-lg">
-              <summary className="p-4 text-sm font-medium text-gray-300 cursor-pointer hover:text-white">
-                Public Outputs
-              </summary>
-              <div className="p-4 pt-0 space-y-3 text-sm">
-                <div className="grid grid-cols-[140px_1fr] gap-2">
-                  <span className="text-gray-500">Verified URL:</span>
-                  <span className="text-gray-300 break-all">{z.publicOutputs.url}</span>
-                </div>
-                <div className="grid grid-cols-[140px_1fr] gap-2">
-                  <span className="text-gray-500">Method:</span>
-                  <span className="text-gray-300">{z.publicOutputs.method}</span>
-                </div>
-                <div className="grid grid-cols-[140px_1fr] gap-2">
-                  <span className="text-gray-500">Timestamp:</span>
-                  <span className="text-gray-300">{new Date((z.publicOutputs.tlsTimestamp ?? z.publicOutputs.timestamp) * 1000).toLocaleString()}</span>
-                </div>
-                <div className="grid grid-cols-[140px_1fr] gap-2">
-                  <span className="text-gray-500">Extracted Values:</span>
-                  <div className="text-gray-300">
-                    {z.publicOutputs.extractedValues?.map((value: any, idx: number) => (
-                      <div key={idx} className="font-mono text-xs bg-gray-800 px-2 py-1 rounded mb-1">[{idx}]: {JSON.stringify(value)}</div>
-                    ))}
-                  </div>
-                </div>
-                <div className="grid grid-cols-[140px_1fr] gap-2">
-                  <span className="text-gray-500">Queries Hash:</span>
-                  <span className="text-gray-300 font-mono text-xs break-all">{z.publicOutputs.extractionHash ?? z.publicOutputs.queriesHash}</span>
-                </div>
-                <div className="grid grid-cols-[140px_1fr] gap-2">
-                  <span className="text-gray-500">Notary Fingerprint:</span>
-                  <span className="text-gray-300 font-mono text-xs break-all">{z.publicOutputs.notaryKeyFingerprint}</span>
-                </div>
+          <details className="bg-gray-900 border border-gray-700 rounded-lg">
+            <summary className="p-4 text-sm font-medium text-gray-300 cursor-pointer hover:text-white">
+              Public Outputs
+            </summary>
+            <div className="p-4 pt-0 space-y-3 text-sm">
+              <div className="grid grid-cols-[140px_1fr] gap-2">
+                <span className="text-gray-500">Verified URL:</span>
+                <span className="text-gray-300 break-all">N/A</span>
               </div>
-            </details>
-          )}
+              <div className="grid grid-cols-[140px_1fr] gap-2">
+                <span className="text-gray-500">Method:</span>
+                <span className="text-gray-300">N/A</span>
+              </div>
+              <div className="grid grid-cols-[140px_1fr] gap-2">
+                <span className="text-gray-500">Timestamp:</span>
+                <span className="text-gray-300">N/A</span>
+              </div>
+              <div className="grid grid-cols-[140px_1fr] gap-2">
+                <span className="text-gray-500">Extracted Values:</span>
+                <div className="text-gray-300">N/A</div>
+              </div>
+              <div className="grid grid-cols-[140px_1fr] gap-2">
+                <span className="text-gray-500">Queries Hash:</span>
+                <span className="text-gray-300 font-mono text-xs break-all">N/A</span>
+              </div>
+              <div className="grid grid-cols-[140px_1fr] gap-2">
+                <span className="text-gray-500">Notary Fingerprint:</span>
+                <span className="text-gray-300 font-mono text-xs break-all">N/A</span>
+              </div>
+            </div>
+          </details>
 
           <details className="bg-gray-900 border border-gray-700 rounded-lg">
             <summary className="p-4 text-sm font-medium text-gray-300 cursor-pointer hover:text-white">
