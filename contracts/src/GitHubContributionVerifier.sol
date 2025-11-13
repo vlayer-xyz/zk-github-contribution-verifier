@@ -14,9 +14,9 @@ contract GitHubContributionVerifier {
 
     /// @notice ZK proof program identifier
     /// @dev This should match the IMAGE_ID from your ZK proof program
-    /// @dev SIMPLIFIED VERSION: Returns only uint256 contributions
+    /// @dev Returns (uint256 contributions, uint256 tlsTimestamp)
     bytes32 public constant IMAGE_ID =
-        0xab2a1d1e6e607454ea66d02e44527b38f17fed8751435049b884ea03c94278d0;
+        0xb15da9e9f6026be8ef857880beaa010515523a46c6c252258322842a8fd25cd5;
 
     /// @notice Expected notary key fingerprint from vlayer
     bytes32 public immutable EXPECTED_NOTARY_KEY_FINGERPRINT;
@@ -65,16 +65,19 @@ contract GitHubContributionVerifier {
         expectedUrlPattern = _expectedUrlPattern;
     }
 
-    /// @notice Submit and verify a GitHub contribution proof (SIMPLIFIED VERSION)
-    /// @param journalData Encoded proof data containing only uint256 contributions
+    /// @notice Submit and verify a GitHub contribution proof
+    /// @param journalData Encoded proof data containing (contributions, tlsTimestamp)
     /// @param seal ZK proof seal for verification
-    /// @dev SIMPLIFIED: Journal data is just abi.encode(uint256 contributions)
+    /// @dev Journal data is abi.encode((uint256 contributions, uint256 tlsTimestamp))
     function submitContribution(
         bytes calldata journalData,
         bytes calldata seal
     ) external {
-        // SIMPLIFIED: Decode only the contributions count
-        uint256 contributions = abi.decode(journalData, (uint256));
+        // Decode contributions and timestamp
+        (uint256 contributions, uint256 tlsTimestamp) = abi.decode(
+            journalData,
+            (uint256, uint256)
+        );
 
         // SIMPLIFIED: Hardcode repo and username for testing
         string memory repoNameWithOwner = "vlayer-xyz/vlayer";
@@ -87,17 +90,17 @@ contract GitHubContributionVerifier {
 
         // Verify the ZK proof - trust RISC Zero's verifier to handle the cryptography
         bytes32 journalDigest = sha256(journalData);
-        
+
         VERIFIER.verify(seal, IMAGE_ID, journalDigest);
-        
+
         // Store the contribution value for the hardcoded repo and user
         contributionsByRepoAndUser[repoNameWithOwner][username] = contributions;
 
         emit ContributionVerified(
             username,
             contributions,
-            "https://api.github.com/graphql",  // hardcoded
-            block.timestamp,
+            "https://api.github.com/graphql", // hardcoded
+            tlsTimestamp,
             block.number
         );
     }
