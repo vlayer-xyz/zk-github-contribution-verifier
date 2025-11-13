@@ -27,6 +27,8 @@ Create a `.env.local` file with your vlayer API credentials:
 ```
 WEB_PROVER_API_CLIENT_ID=your_client_id
 WEB_PROVER_API_SECRET=your_api_secret
+# Optional: override the prover base URL (useful for local tests/mocking)
+WEB_PROVER_API_URL=https://web-prover.vlayer.xyz/api/v1
 ```
 
 ## Usage
@@ -49,6 +51,34 @@ npm run dev
 7. Click "Verify Proof" to verify your contributions with our backend
 
 8. Click "Generate ZK Proof" to verify your contributions on-chain
+
+## Testing
+
+The end-to-end suite exercises the full stack (Anvil chain, contract deployment, Next.js API routes, and the prover API proxy).
+
+```bash
+npm run test:e2e
+```
+
+Requirements:
+- Foundry's `anvil` and `forge` must be available on your `PATH`
+- `contracts` dependencies installed (`npm install` inside `contracts/`)
+- No other services bound to the random ports the test selects
+- Real network access plus the following environment variables (the test fails fast if any are missing):
+  - `WEB_PROVER_API_CLIENT_ID` and `WEB_PROVER_API_SECRET` (vlayer credentials)
+  - `GITHUB_TOKEN` (or `GITHUB_GRAPHQL_TOKEN`) with GitHub GraphQL access
+  - Optional overrides: `WEB_PROVER_API_URL`, `GITHUB_LOGIN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME` for the query target
+- The test calls `/api/prove`, `/api/compress`, and finally submits the compressed proof to the locally deployed contract via viem/wagmi-compatible logic.
+- These env vars can be exported in your shell or placed in a `.env.test` file in the repo root, which the Vitest suite loads automatically before running.
+- Example `.env.test`:
+  ```
+  GITHUB_TOKEN=ghp_xxx
+  GITHUB_LOGIN=your-handle
+  GITHUB_REPO_OWNER=vlayer-xyz
+  GITHUB_REPO_NAME=vlayer
+  WEB_PROVER_API_CLIENT_ID=client-id
+  WEB_PROVER_API_SECRET=client-secret
+  ```
 
 ## Smart Contracts
 

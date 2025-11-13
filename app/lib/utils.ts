@@ -56,27 +56,51 @@ export function normalizeSealHex(zkProof: any): `0x${string}` {
   return toHex(toBytes(JSON.stringify(zkProof))) as `0x${string}`;
 }
 
-export function buildJournalData(publicOutputs: any, fallbackUsername: string): { journalData: Hex; username: string; contributions: bigint; repoOrUrl: string } {
+export function buildJournalData(publicOutputs: any, fallbackUsername: string): {
+  journalData: Hex;
+  username: string;
+  contributions: bigint;
+  repoUrlOrEndpoint: string;
+  repoNameWithOwner: string;
+} {
   if (!publicOutputs) throw new Error("Missing public outputs");
 
   const notaryFp = String(publicOutputs.notaryKeyFingerprint || "");
+  if (!notaryFp) throw new Error("Missing notary key fingerprint");
   const notaryFpHex = (notaryFp.startsWith("0x") ? notaryFp : (`0x${notaryFp}`)) as Hex;
 
-  const queriesHashHex = (publicOutputs.extractionHash ?? publicOutputs.queriesHash) as Hex;
+  const queriesHash = (publicOutputs.extractionHash ?? publicOutputs.queriesHash) as string | undefined;
+  if (!queriesHash) throw new Error("Missing queries hash in proof");
+  const queriesHashHex = (queriesHash.startsWith("0x") ? queriesHash : (`0x${queriesHash}`)) as Hex;
 
   const tsSource = publicOutputs.tlsTimestamp ?? publicOutputs.timestamp;
   if (tsSource == null) throw new Error("Missing timestamp in proof");
   const ts = BigInt(tsSource);
 
   const values = publicOutputs.extractedValues ?? publicOutputs.values ?? [];
+  console.log('values', values);
   const repoFromValues = values?.[0];
+  const repoNameWithOwner = String(repoFromValues ?? "");
+  if (!repoNameWithOwner) {
+    throw new Error("Missing repository name in extracted values");
+  }
+
   const userFromValues = String(values?.[1] ?? fallbackUsername);
+  if (!userFromValues) {
+    throw new Error("Missing username in extracted values");
+  }
+
   const contribFromValuesRaw = values?.[2] ?? values?.[1];
   const contributions = BigInt(
     typeof contribFromValuesRaw === "number" ? contribFromValuesRaw : parseInt(String(contribFromValuesRaw ?? 0), 10)
   );
+  if (contributions <= 0n) {
+    throw new Error("Invalid contribution count extracted from proof");
+  }
 
-  const repoOrUrl = (publicOutputs.url as string) ?? String(repoFromValues ?? "");
+  const repoUrlOrEndpoint = typeof publicOutputs.url === "string" && publicOutputs.url.length > 0
+    ? publicOutputs.url
+    : repoNameWithOwner;
 
   const journalData = encodeAbiParameters(
     [
@@ -85,12 +109,12 @@ export function buildJournalData(publicOutputs: any, fallbackUsername: string): 
       { type: "uint256" },
       { type: "bytes32" },
       { type: "string" },
+      { type: "string" },
       { type: "uint256" },
     ],
-    [notaryFpHex, repoOrUrl, ts, queriesHashHex, userFromValues, contributions]
+    [notaryFpHex, repoUrlOrEndpoint, ts, queriesHashHex, repoNameWithOwner, userFromValues, contributions]
   );
 
-  return { journalData, username: userFromValues, contributions, repoOrUrl };
+  return { journalData, username: userFromValues, contributions, repoUrlOrEndpoint, repoNameWithOwner };
 }
-
 
