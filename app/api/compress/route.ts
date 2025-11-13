@@ -66,6 +66,17 @@ export async function POST(request: NextRequest) {
     console.log("=== ZK PROOF COMPRESSION RESPONSE ===");
     console.log("Response status:", response.status);
     console.log("Response data:", JSON.stringify(data, null, 2));
+    
+    // Extract key fields for Solidity test
+    if (data.success && data.data) {
+      console.log("\n=== VALUES FOR SOLIDITY TEST ===");
+      console.log("journalDataAbi:", data.data.journalDataAbi);
+      console.log("zkProof (seal):", data.data.zkProof);
+      console.log("journalDataAbi length:", data.data.journalDataAbi?.length);
+      console.log("zkProof length:", data.data.zkProof?.length);
+      console.log("=== END TEST VALUES ===\n");
+    }
+    
     console.log("=== END ZK PROOF RESPONSE ===");
 
     return NextResponse.json(data);

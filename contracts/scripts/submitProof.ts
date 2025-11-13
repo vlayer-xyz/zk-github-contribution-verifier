@@ -64,7 +64,7 @@ const contractABI = [
 // Accept a flexible input; we'll normalize later
 interface ZKProofData {
   zkProof: string;
-  publicOutputs: Record<string, unknown>;
+  publicOutputs?: Record<string, unknown>; // Optional now - simplified response doesn't include it
   journalDataAbi?: string;
 }
 
@@ -132,19 +132,19 @@ async function submitProof(options: SubmitProofOptions) {
 
   const journalData: Hex = zkProofData.journalDataAbi as Hex;
 
-  // Extract display values from publicOutputs for logging
+  // Extract display values from publicOutputs for logging (if available)
   const po = zkProofData.publicOutputs || {};
-  const url = String((po as any).url ?? "");
+  const url = String((po as any).url ?? "N/A");
   const tsRaw = (po as any).tlsTimestamp ?? (po as any).timestamp;
   const timestampBigInt = BigInt(
     typeof tsRaw === "string" || typeof tsRaw === "number" ? tsRaw : 0
   );
 
-  let username = "";
+  let username = "N/A";
   let contributions: bigint = BigInt(0);
   const valuesRaw = (po as any).extractedValues ?? (po as any).values;
   if (Array.isArray(valuesRaw) && valuesRaw.length >= 2) {
-    username = String(valuesRaw[1] ?? "");
+    username = String(valuesRaw[1] ?? "N/A");
     const c = valuesRaw[2];
     contributions = BigInt(
       typeof c === "string" || typeof c === "number" ? c : 0
@@ -321,8 +321,7 @@ Example:
   const hasZkProof = (obj: unknown): obj is ZKProofDataLike =>
     typeof obj === "object" &&
     obj !== null &&
-    "zkProof" in obj &&
-    "publicOutputs" in obj;
+    "zkProof" in obj;
 
   const hasDataWithZk = (obj: unknown): obj is Wrapped =>
     typeof obj === "object" &&
@@ -334,9 +333,9 @@ Example:
     ? ((raw as Wrapped).data as ZKProofDataLike)
     : (raw as ZKProofDataLike);
 
-  if (!extracted || !extracted.zkProof || !extracted.publicOutputs) {
+  if (!extracted || !extracted.zkProof) {
     throw new Error(
-      "Invalid zk proof file: expected { zkProof, publicOutputs } or { success, data: { ... } }"
+      "Invalid zk proof file: expected { zkProof, journalDataAbi } or { success, data: { ... } }"
     );
   }
 

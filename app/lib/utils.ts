@@ -79,21 +79,12 @@ export function buildJournalData(
     console.log("Using journalDataAbi directly:", proofData.journalDataAbi);
     const journalData = proofData.journalDataAbi as Hex;
 
-    // Extract display values from publicOutputs
-    const publicOutputs = proofData.publicOutputs || {};
-    const values = publicOutputs.extractedValues ?? publicOutputs.values ?? [];
-    const repoFromValues = values?.[0];
-    const userFromValues = String(values?.[1] ?? fallbackUsername);
-    const contribFromValuesRaw = values?.[2] ?? values?.[1];
-    const contributions = BigInt(
-      typeof contribFromValuesRaw === "number"
-        ? contribFromValuesRaw
-        : parseInt(String(contribFromValuesRaw ?? 0), 10)
-    );
-    const repoOrUrl =
-      (publicOutputs.url as string) ?? String(repoFromValues ?? "");
+    // Use fallback values since publicOutputs is no longer available in new format
+    const username = fallbackUsername;
+    const contributions = BigInt(0); // N/A - not available in simplified response
+    const repoOrUrl = ""; // N/A - not available in simplified response
 
-    return { journalData, username: userFromValues, contributions, repoOrUrl };
+    return { journalData, username, contributions, repoOrUrl };
   }
 
   // Legacy format: build from publicOutputs

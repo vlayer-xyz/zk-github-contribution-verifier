@@ -115,24 +115,15 @@ export function useProveFlow() {
 
       // Unwrap the { success, data } response from the server
       const data = response.data || response;
-      if (!data.zkProof || !data.publicOutputs) {
+      if (!data.zkProof || !data.journalDataAbi) {
         throw new Error("Invalid ZK proof response structure");
       }
 
-      // best-effort user data extraction from publicOutputs
-      let userData: { username: string; total: number } | null = null;
-      const values = data.publicOutputs?.extractedValues ?? [];
-      if (
-        Array.isArray(values) &&
-        values.length >= 2 &&
-        values[0] &&
-        values[1]
-      ) {
-        userData = {
-          username: String(values[1]),
-          total: parseInt(String(values[2] ?? values[1])) || 0,
-        };
-      }
+      // Set user data from known context (no longer extracted from publicOutputs)
+      const userData: { username: string; total: number } = {
+        username: username.trim(),
+        total: 0, // N/A - not available in simplified response
+      };
       setZkProofResult({ ...data, userData });
     } catch (err: any) {
       setError(err?.message || "Failed to generate ZK proof");

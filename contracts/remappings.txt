@@ -1,4 +1,4 @@
 forge-std-1.11.0/=dependencies/forge-std-1.11.0/
-risc0-risc0-ethereum-3.0.0/=dependencies/risc0-risc0-ethereum-3.0.0/
 forge-std/=dependencies/forge-std-1.11.0/src/
 risc0-ethereum/=dependencies/risc0-risc0-ethereum-3.0.0/
+risc0-risc0-ethereum-3.0.0/=dependencies/risc0-risc0-ethereum-3.0.0/
