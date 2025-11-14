@@ -23,11 +23,11 @@ function loadContractArtifact() {
   };
 }
 
-// Load MockRiscZeroVerifier artifact (from NetworkConfig.sol output)
+// Load RiscZeroMockVerifier artifact (from risc0-ethereum library)
 function loadMockVerifierArtifact() {
   const artifactPath = path.join(
     __dirname,
-    '../out/NetworkConfig.sol/MockRiscZeroVerifier.json'
+    '../out/RiscZeroMockVerifier.sol/RiscZeroMockVerifier.json'
   );
 
   if (!fs.existsSync(artifactPath)) {
@@ -52,7 +52,7 @@ async function deployMockVerifier(
     bytecode,
     account,
     chain: walletClient.chain,
-    args: [],
+    args: ['0xFFFFFFFF'],
   });
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
   if (!receipt.contractAddress) {
@@ -111,13 +111,18 @@ async function deploy(options: DeployOptions) {
   // Get or deploy verifier
   let verifierAddress: Hex | undefined = providedVerifier;
   if (!verifierAddress) {
-    console.log(`\nNo verifier address provided. Deploying MockRiscZeroVerifier...`);
+    console.log(`\nNo verifier address provided. Deploying RiscZeroMockVerifier...`);
     verifierAddress = await deployMockVerifier(walletClient, publicClient, account);
-    console.log(`MockRiscZeroVerifier deployed at: ${verifierAddress}`);
+    console.log(`RiscZeroMockVerifier deployed at: ${verifierAddress}`);
   }
+  const imageId = process.env.IMAGE_ID as Hex;
   const notaryKeyFingerprint = process.env.NOTARY_KEY_FINGERPRINT as Hex;
   const queriesHash = process.env.QUERIES_HASH as Hex;
   const expectedUrl = process.env.EXPECTED_URL || 'https://api.github.com';
+
+  if (!imageId || imageId === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+    throw new Error('IMAGE_ID not set');
+  }
 
   if (!notaryKeyFingerprint || notaryKeyFingerprint === '0x0000000000000000000000000000000000000000000000000000000000000000') {
     throw new Error('NOTARY_KEY_FINGERPRINT not set');
@@ -129,6 +134,7 @@ async function deploy(options: DeployOptions) {
 
   console.log(`\nDeployment Parameters:`);
   console.log(`  Verifier: ${verifierAddress}`);
+  console.log(`  Image ID: ${imageId}`);
   console.log(`  Notary Key Fingerprint: ${notaryKeyFingerprint}`);
   console.log(`  Queries Hash: ${queriesHash}`);
   console.log(`  Expected URL: ${expectedUrl}`);
@@ -145,7 +151,7 @@ async function deploy(options: DeployOptions) {
     bytecode,
     account,
     chain: walletClient.chain,
-    args: [verifierAddress, notaryKeyFingerprint, queriesHash, expectedUrl],
+    args: [verifierAddress, imageId, notaryKeyFingerprint, queriesHash, expectedUrl],
   });
 
   console.log(`\nTransaction hash: ${hash}`);
@@ -175,6 +181,7 @@ async function deploy(options: DeployOptions) {
     timestamp: Date.now(),
     parameters: {
       verifierAddress,
+      imageId,
       notaryKeyFingerprint,
       queriesHash,
       expectedUrl,
