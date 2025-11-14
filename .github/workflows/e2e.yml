@@ -31,11 +31,7 @@ jobs:
       - name: Run E2E tests
         run: npm run test:e2e
         env:
-          # What we prove
           GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_LOGIN: rzadp
-          GITHUB_REPO_OWNER: vlayer-xyz
-          GITHUB_REPO_NAME: vlayer
           
           # Web Prover
           WEB_PROVER_API_CLIENT_ID: ${{ secrets.WEB_PROVER_API_CLIENT_ID }}
@@ -43,4 +39,4 @@ jobs:
           WEB_PROVER_API_URL: https://web-prover.vlayer.xyz/api/v1
 
           # ZK Prover
-          ZK_PROVER_URL: "https://zk-prover.vlayer.xyz"
+          ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v0"
