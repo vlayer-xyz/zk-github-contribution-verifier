@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useWriteContract } from "wagmi";
+import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useWriteContract, usePublicClient } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { useEffect, useMemo, useState } from "react";
+import { decodeErrorResult } from "viem";
 import { GitHubContributionVerifierAbi } from "../lib/abi";
 import { decodeJournalData, parseOwnerRepo } from "../lib/utils";
 import { anvil } from "../lib/chains";
@@ -17,6 +18,7 @@ export function useOnChainVerification() {
   const { switchChain, isPending: isSwitching } = useSwitchChain();
   const chainId = useChainId();
   const { writeContractAsync, isPending: isWriting } = useWriteContract();
+  const publicClient = usePublicClient();
 
   const [selectedChainId, setSelectedChainId] = useState<number>(Number(process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || 31337));
   const [contractAddress, setContractAddress] = useState<string>(process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || '');
@@ -79,6 +81,11 @@ export function useOnChainVerification() {
 
       const decoded = decodeJournalData(journalData);
 
+      if (!publicClient) {
+        params.setError('Public client not available');
+        return;
+      }
+
       const hash = await writeContractAsync({
         address: contractAddress as `0x${string}`,
         abi: GitHubContributionVerifierAbi,
@@ -87,6 +94,82 @@ export function useOnChainVerification() {
         chainId: selectedChainId,
       });
 
+      // Wait for transaction receipt
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      // Check if transaction reverted
+      if (receipt.status === "reverted") {
+        // Try to decode the revert reason by simulating the call
+        let errorMessage = "Transaction reverted on-chain";
+        let errorName = "UnknownError";
+        
+        try {
+          // Get the transaction to extract call data
+          const tx = await publicClient.getTransaction({ hash });
+          if (tx.from && tx.to && address) {
+            // Try to simulate the call to get the revert reason
+            try {
+              await publicClient.simulateContract({
+                address: contractAddress as `0x${string}`,
+                abi: GitHubContributionVerifierAbi,
+                functionName: 'submitContribution',
+                args: [journalData, sealHex],
+                account: address,
+              });
+            } catch (simError: any) {
+              // Extract revert data from simulation error
+              const revertData = (simError as { data?: string })?.data || 
+                                 (simError as { cause?: { data?: string } })?.cause?.data;
+              
+              if (revertData && typeof revertData === 'string' && revertData.startsWith('0x')) {
+                try {
+                  const decoded = decodeErrorResult({ 
+                    abi: GitHubContributionVerifierAbi, 
+                    data: revertData as `0x${string}` 
+                  });
+                  errorName = decoded.errorName;
+                  errorMessage = `Transaction reverted: ${decoded.errorName}`;
+                } catch {
+                  // If decode fails, use the raw data
+                  errorMessage = `Transaction reverted (unable to decode error)`;
+                }
+              } else {
+                // Try to extract error message from the error object
+                const msg = (simError as Error)?.message || String(simError);
+                if (msg.includes('revert') || msg.includes('Revert')) {
+                  errorMessage = msg;
+                }
+              }
+            }
+          }
+        } catch (decodeError) {
+          // If we can't decode, use generic message
+          console.error("Failed to decode revert reason:", decodeError);
+        }
+
+        // build repo name for redirect
+        const values = params.zkProofResult.publicOutputs?.extractedValues ?? [];
+        let repoForRedirect = String(values?.[0] ?? '');
+        if (!repoForRedirect) {
+          const { owner, name } = parseOwnerRepo(params.inputUrl);
+          if (owner && name) repoForRedirect = `${owner}/${name}`;
+        }
+
+        const q = new URLSearchParams({
+          txHash: hash,
+          chainId: String(selectedChainId),
+          error: errorMessage,
+          errorName: errorName,
+          handle: username,
+          reponame: repoForRedirect,
+          contributions: String(contributions),
+          contractAddress: contractAddress,
+        });
+        router.push(`/error?${q.toString()}`);
+        return;
+      }
+
+      // Transaction succeeded - redirect to success page
       // build repo name for redirect
       let repoForRedirect = decoded.repo;
       if (!repoForRedirect) {
