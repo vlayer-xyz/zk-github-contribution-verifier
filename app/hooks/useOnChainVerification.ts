@@ -5,7 +5,7 @@ import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useW
 import { injected } from "wagmi/connectors";
 import { useEffect, useMemo, useState } from "react";
 import { GitHubContributionVerifierAbi } from "../lib/abi";
-import { buildJournalData, normalizeSealHex, parseOwnerRepo } from "../lib/utils";
+import { decodeJournalData, normalizeSealHex, parseOwnerRepo } from "../lib/utils";
 import { anvil } from "../lib/chains";
 import { baseSepolia, optimismSepolia, sepolia } from "viem/chains";
 
@@ -51,14 +51,14 @@ export function useOnChainVerification() {
   }, [selectedChainId, contractAddress]);
 
   async function verifyOnChain(params: {
-    zkProofResult: { zkProof: any; publicOutputs: any } | null;
+    zkProofResult: { zkProof: any; journalDataAbi: `0x${string}` } | null;
     username: string;
     inputUrl: string;
     setError: (m: string | null) => void;
   }) {
     try {
       params.setError(null);
-      if (!params.zkProofResult?.zkProof || !params.zkProofResult?.publicOutputs) {
+      if (!params.zkProofResult?.zkProof || !params.zkProofResult?.journalDataAbi) {
         params.setError('Generate ZK proof first');
         return;
       }
@@ -74,8 +74,12 @@ export function useOnChainVerification() {
         await switchChain({ chainId: selectedChainId });
       }
 
-      const { journalData, username, contributions } = buildJournalData(params.zkProofResult.publicOutputs, params.username);
+      // Use journalDataAbi directly - no building needed!
+      const journalData = params.zkProofResult.journalDataAbi;
       const sealHex = normalizeSealHex(params.zkProofResult.zkProof);
+
+      // Decode to get values for redirect page
+      const decoded = decodeJournalData(journalData);
 
       const hash = await writeContractAsync({
         address: contractAddress as `0x${string}`,
@@ -86,18 +90,17 @@ export function useOnChainVerification() {
       });
 
       // build repo name for redirect
-      const values = params.zkProofResult.publicOutputs?.extractedValues ?? [];
-      let repoForRedirect = String(values?.[0] ?? '');
+      let repoForRedirect = decoded.repo;
       if (!repoForRedirect) {
         const { owner, name } = parseOwnerRepo(params.inputUrl);
         if (owner && name) repoForRedirect = `${owner}/${name}`;
       }
 
       const q = new URLSearchParams({
-        handle: username,
+        handle: decoded.username,
         chainId: String(selectedChainId),
         reponame: repoForRedirect,
-        contributions: String(contributions),
+        contributions: String(decoded.contributions),
         txHash: hash,
       });
       router.push(`/success?${q.toString()}`);

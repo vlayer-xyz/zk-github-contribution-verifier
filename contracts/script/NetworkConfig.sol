@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {Script} from "forge-std/Script.sol";
+import {RiscZeroMockVerifier} from "risc0-ethereum/contracts/src/test/RiscZeroMockVerifier.sol";
 
 /// @title NetworkConfig
 /// @notice Provides network-specific configuration for deployments
@@ -73,20 +74,8 @@ contract NetworkConfig is Script {
     /// @return address Address of the mock verifier
     function deployMockVerifier() internal returns (address) {
         vm.startBroadcast();
-        MockRiscZeroVerifier mock = new MockRiscZeroVerifier();
+        RiscZeroMockVerifier mock = new RiscZeroMockVerifier(bytes4(0xFFFFFFFF));
         vm.stopBroadcast();
         return address(mock);
-    }
-}
-
-/// @title MockRiscZeroVerifier
-/// @notice Mock verifier for local testing
-/// @dev Always returns success for testing purposes
-contract MockRiscZeroVerifier {
-    /// @notice Mock verify function
-    /// @dev Always succeeds for testing
-    function verify(bytes calldata, bytes32, bytes32) external pure {
-        // Mock verification - always succeeds
-        return;
     }
 }

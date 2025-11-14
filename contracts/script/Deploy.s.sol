@@ -26,6 +26,7 @@ contract Deploy is Script {
         console.log("Using verifier at:", config.verifier);
 
         // Get deployment parameters from environment variables
+        bytes32 imageId = vm.envOr("IMAGE_ID", bytes32(0));
         bytes32 notaryKeyFingerprint = vm.envOr(
             "NOTARY_KEY_FINGERPRINT",
             bytes32(0)
@@ -37,12 +38,15 @@ contract Deploy is Script {
         );
 
         // Validate parameters
+        require(imageId != bytes32(0), "IMAGE_ID not set");
         require(
             notaryKeyFingerprint != bytes32(0),
             "NOTARY_KEY_FINGERPRINT not set"
         );
         require(queriesHash != bytes32(0), "QUERIES_HASH not set");
 
+        console.log("Image ID:");
+        console.logBytes32(imageId);
         console.log("Notary Key Fingerprint:");
         console.logBytes32(notaryKeyFingerprint);
         console.log("Queries Hash:");
@@ -54,6 +58,7 @@ contract Deploy is Script {
 
         GitHubContributionVerifier verifier = new GitHubContributionVerifier(
             config.verifier,
+            imageId,
             notaryKeyFingerprint,
             queriesHash,
             expectedUrl

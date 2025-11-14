@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
     console.log('Compressing web proof for user:', username);
     console.log('Extract config:', JSON.stringify(extractConfig, null, 2));
 
-    const response = await fetch('https://zk-prover.vlayer.xyz/api/v0/compress-web-proof', {
+    const zkProverUrl = process.env.ZK_PROVER_URL || 'https://zk-prover.vlayer.xyz';
+    const response = await fetch(`${zkProverUrl}/api/v0/compress-web-proof`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

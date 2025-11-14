@@ -1,10 +1,21 @@
 "use client";
 
 import React from "react";
+import { decodeJournalData } from "../lib/utils";
 
 export function ZKProofResults(props: { zkProofResult: any }) {
   const z = props.zkProofResult;
   if (!z) return null;
+
+  let decoded = null;
+  if (z.journalDataAbi) {
+    try {
+      decoded = decodeJournalData(z.journalDataAbi);
+    } catch (error) {
+      console.error("Failed to decode journalDataAbi for display:", error);
+    }
+  }
+
   return (
     <div className="space-y-4">
       {z.userData ? (
@@ -30,7 +41,7 @@ export function ZKProofResults(props: { zkProofResult: any }) {
             </div>
           </div>
 
-          {z.publicOutputs && (
+          {decoded && (
             <details className="bg-gray-900 border border-gray-700 rounded-lg">
               <summary className="p-4 text-sm font-medium text-gray-300 cursor-pointer hover:text-white">
                 Public Outputs
@@ -38,31 +49,31 @@ export function ZKProofResults(props: { zkProofResult: any }) {
               <div className="p-4 pt-0 space-y-3 text-sm">
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Verified URL:</span>
-                  <span className="text-gray-300 break-all">{z.publicOutputs.url}</span>
+                  <span className="text-gray-300 break-all">{decoded.url}</span>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Method:</span>
-                  <span className="text-gray-300">{z.publicOutputs.method}</span>
+                  <span className="text-gray-300">{decoded.method}</span>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Timestamp:</span>
-                  <span className="text-gray-300">{new Date((z.publicOutputs.tlsTimestamp ?? z.publicOutputs.timestamp) * 1000).toLocaleString()}</span>
+                  <span className="text-gray-300">{new Date(decoded.tlsTimestamp * 1000).toLocaleString()}</span>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Extracted Values:</span>
                   <div className="text-gray-300">
-                    {z.publicOutputs.extractedValues?.map((value: any, idx: number) => (
-                      <div key={idx} className="font-mono text-xs bg-gray-800 px-2 py-1 rounded mb-1">[{idx}]: {JSON.stringify(value)}</div>
-                    ))}
+                    <div className="font-mono text-xs bg-gray-800 px-2 py-1 rounded mb-1">[0] Repository: {decoded.repo}</div>
+                    <div className="font-mono text-xs bg-gray-800 px-2 py-1 rounded mb-1">[1] Username: {decoded.username}</div>
+                    <div className="font-mono text-xs bg-gray-800 px-2 py-1 rounded">[2] Contributions: {decoded.contributions.toString()}</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
-                  <span className="text-gray-500">Queries Hash:</span>
-                  <span className="text-gray-300 font-mono text-xs break-all">{z.publicOutputs.extractionHash ?? z.publicOutputs.queriesHash}</span>
+                  <span className="text-gray-500">Extraction Hash:</span>
+                  <span className="text-gray-300 font-mono text-xs break-all">{decoded.extractionHash}</span>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Notary Fingerprint:</span>
-                  <span className="text-gray-300 font-mono text-xs break-all">{z.publicOutputs.notaryKeyFingerprint}</span>
+                  <span className="text-gray-300 font-mono text-xs break-all">{decoded.notaryKeyFingerprint}</span>
                 </div>
               </div>
             </details>

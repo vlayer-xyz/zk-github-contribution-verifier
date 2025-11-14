@@ -5,7 +5,7 @@ import { useOnChainVerification } from "../hooks/useOnChainVerification";
 import { useSupportedChains } from "../hooks/useSupportedChains";
 
 export function OnChainVerificationPanel(props: {
-  zkProofResult: { zkProof: any; publicOutputs: any } | null;
+  zkProofResult: { zkProof: any; journalDataAbi: `0x${string}` } | null;
   username: string;
   inputUrl: string;
   setError: (m: string | null) => void;

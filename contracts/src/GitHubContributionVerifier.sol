@@ -12,7 +12,7 @@ contract GitHubContributionVerifier {
 
     /// @notice ZK proof program identifier
     /// @dev This should match the IMAGE_ID from your ZK proof program
-    bytes32 public constant IMAGE_ID = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 public immutable IMAGE_ID;
 
     /// @notice Expected notary key fingerprint from vlayer
     bytes32 public immutable EXPECTED_NOTARY_KEY_FINGERPRINT;
@@ -45,16 +45,19 @@ contract GitHubContributionVerifier {
 
     /// @notice Contract constructor
     /// @param _verifier Address of the RISC Zero verifier contract
+    /// @param _imageId ZK proof program identifier (IMAGE_ID)
     /// @param _expectedNotaryKeyFingerprint Expected notary key fingerprint from vlayer
     /// @param _expectedQueriesHash Expected hash of extraction queries
     /// @param _expectedUrlPattern Expected GitHub API URL pattern
     constructor(
         address _verifier,
+        bytes32 _imageId,
         bytes32 _expectedNotaryKeyFingerprint,
         bytes32 _expectedQueriesHash,
         string memory _expectedUrlPattern
     ) {
         VERIFIER = IRiscZeroVerifier(_verifier);
+        IMAGE_ID = _imageId;
         EXPECTED_NOTARY_KEY_FINGERPRINT = _expectedNotaryKeyFingerprint;
         EXPECTED_QUERIES_HASH = _expectedQueriesHash;
         expectedUrlPattern = _expectedUrlPattern;
@@ -63,7 +66,7 @@ contract GitHubContributionVerifier {
     /// @notice Submit and verify a GitHub contribution proof
     /// @param journalData Encoded proof data containing public outputs
     /// @param seal ZK proof seal for verification
-    /// @dev Journal data should be abi.encoded as: (notaryKeyFingerprint, url, timestamp, queriesHash, repoNameWithOwner, username, contributions)
+    /// @dev Journal data should be abi.encoded as: (notaryKeyFingerprint, method, url, timestamp, queriesHash, repoNameWithOwner, username, contributions)
     function submitContribution(
         bytes calldata journalData,
         bytes calldata seal
@@ -71,13 +74,14 @@ contract GitHubContributionVerifier {
         // Decode the journal data
         (
             bytes32 notaryKeyFingerprint,
+            string memory _method,
             string memory url,
             uint256 timestamp,
             bytes32 queriesHash,
             string memory repoNameWithOwner,
             string memory username,
             uint256 contributions
-        ) = abi.decode(journalData, (bytes32, string, uint256, bytes32, string, string, uint256));
+        ) = abi.decode(journalData, (bytes32, string, string, uint256, bytes32, string, string, uint256));
 
         // Validate notary key fingerprint
         if (notaryKeyFingerprint != EXPECTED_NOTARY_KEY_FINGERPRINT) {

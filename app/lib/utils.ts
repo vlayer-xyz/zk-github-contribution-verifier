@@ -1,4 +1,4 @@
-import { encodeAbiParameters, toBytes, toHex, type Hex } from "viem";
+import { decodeAbiParameters, toBytes, toHex, type Hex } from "viem";
 
 export function parseOwnerRepo(input: string): { owner: string; name: string } {
   const urlStr = (input || "").trim();
@@ -11,19 +11,6 @@ export function parseOwnerRepo(input: string): { owner: string; name: string } {
   return { owner, name };
 }
 
-export function normalizeZkProofData(data: any): {
-  zkProof: any;
-  publicOutputs: any;
-} | null {
-  if (!data) return null;
-  if (data.success && data.data) {
-    return { zkProof: data.data.zkProof, publicOutputs: data.data.publicOutputs };
-  }
-  if (data.zkProof && data.publicOutputs) {
-    return { zkProof: data.zkProof, publicOutputs: data.publicOutputs };
-  }
-  return null;
-}
 
 export function extractContributionData(graphLike: unknown): { username: string; total: number } | null {
   const body = (graphLike as any)?.response?.body ?? graphLike;
@@ -56,65 +43,40 @@ export function normalizeSealHex(zkProof: any): `0x${string}` {
   return toHex(toBytes(JSON.stringify(zkProof))) as `0x${string}`;
 }
 
-export function buildJournalData(publicOutputs: any, fallbackUsername: string): {
-  journalData: Hex;
-  username: string;
-  contributions: bigint;
-  repoUrlOrEndpoint: string;
-  repoNameWithOwner: string;
-} {
-  if (!publicOutputs) throw new Error("Missing public outputs");
+/**
+ * Decode journalDataAbi from the zk-prover-server to extract public outputs
+ * Format: (bytes32 notaryKeyFingerprint, string method, string url, uint256 tlsTimestamp, bytes32 extractionHash, string repo, string username, uint256 contributions)
+ */
+export function decodeJournalData(journalDataAbi: Hex) {
+  try {
+    const decoded = decodeAbiParameters(
+      [
+        { type: "bytes32", name: "notaryKeyFingerprint" },
+        { type: "string", name: "method" },
+        { type: "string", name: "url" },
+        { type: "uint256", name: "tlsTimestamp" },
+        { type: "bytes32", name: "extractionHash" },
+        { type: "string", name: "repo" },
+        { type: "string", name: "username" },
+        { type: "uint256", name: "contributions" },
+      ],
+      journalDataAbi
+    );
 
-  const notaryFp = String(publicOutputs.notaryKeyFingerprint || "");
-  if (!notaryFp) throw new Error("Missing notary key fingerprint");
-  const notaryFpHex = (notaryFp.startsWith("0x") ? notaryFp : (`0x${notaryFp}`)) as Hex;
-
-  const queriesHash = (publicOutputs.extractionHash ?? publicOutputs.queriesHash) as string | undefined;
-  if (!queriesHash) throw new Error("Missing queries hash in proof");
-  const queriesHashHex = (queriesHash.startsWith("0x") ? queriesHash : (`0x${queriesHash}`)) as Hex;
-
-  const tsSource = publicOutputs.tlsTimestamp ?? publicOutputs.timestamp;
-  if (tsSource == null) throw new Error("Missing timestamp in proof");
-  const ts = BigInt(tsSource);
-
-  const values = publicOutputs.extractedValues ?? publicOutputs.values ?? [];
-  console.log('values', values);
-  const repoFromValues = values?.[0];
-  const repoNameWithOwner = String(repoFromValues ?? "");
-  if (!repoNameWithOwner) {
-    throw new Error("Missing repository name in extracted values");
+    return {
+      notaryKeyFingerprint: decoded[0] as Hex,
+      method: decoded[1] as string,
+      url: decoded[2] as string,
+      tlsTimestamp: Number(decoded[3]),
+      extractionHash: decoded[4] as Hex,
+      repo: decoded[5] as string,
+      username: decoded[6] as string,
+      contributions: decoded[7] as bigint,
+    };
+  } catch (error) {
+    console.error("Failed to decode journalDataAbi:", error);
+    throw new Error("Invalid journalDataAbi format");
   }
-
-  const userFromValues = String(values?.[1] ?? fallbackUsername);
-  if (!userFromValues) {
-    throw new Error("Missing username in extracted values");
-  }
-
-  const contribFromValuesRaw = values?.[2] ?? values?.[1];
-  const contributions = BigInt(
-    typeof contribFromValuesRaw === "number" ? contribFromValuesRaw : parseInt(String(contribFromValuesRaw ?? 0), 10)
-  );
-  if (contributions <= 0n) {
-    throw new Error("Invalid contribution count extracted from proof");
-  }
-
-  const repoUrlOrEndpoint = typeof publicOutputs.url === "string" && publicOutputs.url.length > 0
-    ? publicOutputs.url
-    : repoNameWithOwner;
-
-  const journalData = encodeAbiParameters(
-    [
-      { type: "bytes32" },
-      { type: "string" },
-      { type: "uint256" },
-      { type: "bytes32" },
-      { type: "string" },
-      { type: "string" },
-      { type: "uint256" },
-    ],
-    [notaryFpHex, repoUrlOrEndpoint, ts, queriesHashHex, repoNameWithOwner, userFromValues, contributions]
-  );
-
-  return { journalData, username: userFromValues, contributions, repoUrlOrEndpoint, repoNameWithOwner };
 }
+
 

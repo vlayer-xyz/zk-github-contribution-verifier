@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { proveContributions, verifyPresentation, compressPresentation } from "../lib/api";
-import { extractContributionData, normalizeZkProofData, parseOwnerRepo } from "../lib/utils";
+import { extractContributionData, parseOwnerRepo, decodeJournalData } from "../lib/utils";
 import type { PageResult, ZKProofNormalized } from "../lib/types";
 
 export function useProveFlow() {
@@ -94,16 +94,18 @@ export function useProveFlow() {
     setError(null);
     try {
       const data = await compressPresentation(presentation, username.trim());
-      const normalized = normalizeZkProofData(data);
-      if (!normalized) throw new Error('Invalid ZK proof response');
-
-      // best-effort user data extraction from publicOutputs
-      let userData: { username: string; total: number } | null = null;
-      const values = normalized.publicOutputs?.extractedValues ?? [];
-      if (Array.isArray(values) && values.length >= 2 && values[0] && values[1]) {
-        userData = { username: String(values[1]), total: parseInt(String(values[2] ?? values[1])) || 0 };
+      
+      const zkProof = data.success ? data.data.zkProof : data.zkProof;
+      const journalDataAbi = data.success ? data.data.journalDataAbi : data.journalDataAbi;
+      
+      if (!zkProof || !journalDataAbi) {
+        throw new Error('Invalid ZK proof response: missing zkProof or journalDataAbi');
       }
-      setZkProofResult({ ...normalized, userData });
+
+      const decoded = decodeJournalData(journalDataAbi);
+      const userData = { username: decoded.username, total: Number(decoded.contributions) };
+
+      setZkProofResult({ zkProof, journalDataAbi, userData });
     } catch (err: any) {
       setError(err?.message || 'Failed to generate ZK proof');
     } finally {
