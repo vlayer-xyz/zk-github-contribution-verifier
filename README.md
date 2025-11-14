@@ -150,7 +150,7 @@ export PRIVATE_KEY=0x<one_of_anvil_accounts_private_keys>
 
 # Fetch the ZK Prover guest ID from the server
 export ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0  
-export ZK_PROVER_GUEST_ID=$(curl -s ${ZK_PROVER_API_URL}/guest-id | jq -r '.data.guestId' | sed 's/^/0x/')
+export ZK_PROVER_GUEST_ID=$(curl -s ${ZK_PROVER_API_URL}/guest-id | jq -r '.data.guestId')
 
 # Match these to your compressed proof (example from zk_proof_compress_*.json)
 export NOTARY_KEY_FINGERPRINT=0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af
