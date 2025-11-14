@@ -1,3 +1,4 @@
 .env.local
+.env.test
 .next
 node_modules
