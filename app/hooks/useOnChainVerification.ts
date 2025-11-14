@@ -53,7 +53,7 @@ export function useOnChainVerification() {
   }, [selectedChainId, contractAddress]);
 
   async function verifyOnChain(params: {
-    zkProofResult: { zkProof: any; journalDataAbi: `0x${string}` } | null;
+    zkProofResult: { zkProof: string; journalDataAbi: `0x${string}` } | null;
     username: string;
     inputUrl: string;
     setError: (m: string | null) => void;
@@ -113,7 +113,7 @@ export function useOnChainVerification() {
                 address: contractAddress as `0x${string}`,
                 abi: GitHubContributionVerifierAbi,
                 functionName: 'submitContribution',
-                args: [journalData, sealHex],
+                args: [journalData, seal],
                 account: address,
               });
             } catch (simError: any) {
@@ -148,8 +148,7 @@ export function useOnChainVerification() {
         }
 
         // build repo name for redirect
-        const values = params.zkProofResult.publicOutputs?.extractedValues ?? [];
-        let repoForRedirect = String(values?.[0] ?? '');
+        let repoForRedirect = decoded.repo;
         if (!repoForRedirect) {
           const { owner, name } = parseOwnerRepo(params.inputUrl);
           if (owner && name) repoForRedirect = `${owner}/${name}`;
@@ -160,9 +159,9 @@ export function useOnChainVerification() {
           chainId: String(selectedChainId),
           error: errorMessage,
           errorName: errorName,
-          handle: username,
+          handle: decoded.username,
           reponame: repoForRedirect,
-          contributions: String(contributions),
+          contributions: String(decoded.contributions),
           contractAddress: contractAddress,
         });
         router.push(`/error?${q.toString()}`);

@@ -73,7 +73,7 @@ function ErrorContent() {
               <h2 className="text-xl font-semibold text-red-400 mb-2">Error Information</h2>
               <div className="bg-black/50 p-3 rounded border border-red-500/20">
                 <div className="font-mono text-sm">
-                  <div className="text-red-300">{error}</div>
+                  <div className="text-red-300 break-words whitespace-pre-wrap">{error}</div>
                   {errorName !== "UnknownError" && (
                     <div className="text-gray-400 mt-1">Error Type: {errorName}</div>
                   )}
