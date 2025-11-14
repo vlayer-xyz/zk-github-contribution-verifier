@@ -5,7 +5,7 @@ import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { foundry } from 'viem/chains';
 import { GitHubContributionVerifierAbi } from '../../app/lib/abi';
-import { buildJournalData, normalizeSealHex, normalizeZkProofData } from '../../app/lib/utils';
+import { decodeJournalData } from '../../app/lib/utils';
 import { contractsDir, projectRoot } from '../helpers/env';
 import { getAvailablePort, waitForServer } from '../helpers/network';
 import { ManagedProcess, runCommand, startProcess, stopProcess, waitForOutput } from '../helpers/process';
@@ -32,11 +32,13 @@ describe('vlayer web proof e2e', () => {
     nextPort?: number;
     contractAddress?: string;
     githubToken?: string;
+    imageId?: string;
     proverEnv?: {
       baseUrl?: string;
       clientId: string;
       secret: string;
     };
+    zkProverUrl?: string;
   } = {};
 
   beforeAll(async () => {
@@ -56,6 +58,16 @@ describe('vlayer web proof e2e', () => {
       clientId: proverClientId,
       secret: proverSecret,
     };
+    ctx.zkProverUrl = process.env.ZK_PROVER_URL || 'http://localhost:3000';
+
+    console.log('Fetching IMAGE_ID from zk-prover-server...');
+    const guestIdResponse = await fetch(`${ctx.zkProverUrl}/api/v0/guest-id`);
+    if (!guestIdResponse.ok) {
+      throw new Error(`Failed to fetch guest-id: ${guestIdResponse.status}`);
+    }
+    const guestIdData = await guestIdResponse.json();
+    ctx.imageId = `0x${guestIdData.data.guestId}`;
+    console.log('IMAGE_ID:', ctx.imageId);
 
     const anvilPort = await getAvailablePort();
     ctx.anvilRpcUrl = `http://127.0.0.1:${anvilPort}`;
@@ -77,6 +89,7 @@ describe('vlayer web proof e2e', () => {
         env: {
           ...process.env,
           PRIVATE_KEY: DEFAULT_ANVIL_PRIVATE_KEY,
+          IMAGE_ID: ctx.imageId,
           NOTARY_KEY_FINGERPRINT: '0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af',
           QUERIES_HASH: '0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1faceb5c6c6',
           EXPECTED_URL: 'https://api.github.com/graphql',
@@ -102,6 +115,7 @@ describe('vlayer web proof e2e', () => {
           WEB_PROVER_API_URL: ctx.proverEnv.baseUrl,
           WEB_PROVER_API_CLIENT_ID: ctx.proverEnv.clientId,
           WEB_PROVER_API_SECRET: ctx.proverEnv.secret,
+          ZK_PROVER_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
       }
@@ -158,18 +172,23 @@ describe('vlayer web proof e2e', () => {
     });
     expect(compressResponse.status).toBe(200);
     const compressionPayload = await compressResponse.json();
-    const normalized = normalizeZkProofData(compressionPayload);
-    if (!normalized) {
-      throw new Error('Compression response missing zk proof');
+    
+    const zkProof = compressionPayload.success ? compressionPayload.data.zkProof : compressionPayload.zkProof;
+    const journalDataAbi = compressionPayload.success ? compressionPayload.data.journalDataAbi : compressionPayload.journalDataAbi;
+    
+    if (!zkProof || !journalDataAbi) {
+      throw new Error('Compression response missing zkProof or journalDataAbi');
     }
 
-    const {
-      journalData,
-      username: proofUsername,
-      contributions,
-      repoNameWithOwner,
-    } = buildJournalData(normalized.publicOutputs, login);
-    const sealHex = normalizeSealHex(normalized.zkProof);
+    const decoded = decodeJournalData(journalDataAbi as `0x${string}`);
+    const journalData = journalDataAbi as `0x${string}`;
+    const seal = zkProof as `0x${string}`;
+    
+    console.log('Decoded journal data:', {
+      repo: decoded.repo,
+      username: decoded.username,
+      contributions: decoded.contributions.toString(),
+    });
 
     const configuredFoundry = {
       ...foundry,
@@ -194,7 +213,7 @@ describe('vlayer web proof e2e', () => {
       address: ctx.contractAddress as `0x${string}`,
       abi: GitHubContributionVerifierAbi,
       functionName: 'submitContribution',
-      args: [journalData, sealHex],
+      args: [journalData, seal],
     });
 
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
@@ -204,8 +223,8 @@ describe('vlayer web proof e2e', () => {
       address: ctx.contractAddress as `0x${string}`,
       abi: CONTRIBUTIONS_GETTER_ABI,
       functionName: 'contributionsByRepoAndUser',
-      args: [repoNameWithOwner, proofUsername],
+      args: [decoded.repo, decoded.username],
     });
-    expect(stored).toBe(contributions);
+    expect(stored).toBe(decoded.contributions);
   });
 });

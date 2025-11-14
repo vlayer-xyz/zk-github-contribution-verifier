@@ -1,4 +1,4 @@
-import { decodeAbiParameters, toBytes, toHex, type Hex } from "viem";
+import { decodeAbiParameters, type Hex } from "viem";
 
 export function parseOwnerRepo(input: string): { owner: string; name: string } {
   const urlStr = (input || "").trim();
@@ -32,16 +32,6 @@ export function extractContributionData(graphLike: unknown): { username: string;
   return null;
 }
 
-export function normalizeSealHex(zkProof: any): `0x${string}` {
-  if (typeof zkProof === "string") {
-    return (zkProof.startsWith("0x") ? zkProof : (`0x${zkProof}` as `0x${string}`)) as `0x${string}`;
-  }
-  if (zkProof?.seal) {
-    const s: string = zkProof.seal;
-    return (s.startsWith("0x") ? s : (`0x${s}` as `0x${string}`)) as `0x${string}`;
-  }
-  return toHex(toBytes(JSON.stringify(zkProof))) as `0x${string}`;
-}
 
 /**
  * Decode journalDataAbi from the zk-prover-server to extract public outputs

@@ -5,7 +5,7 @@ import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useW
 import { injected } from "wagmi/connectors";
 import { useEffect, useMemo, useState } from "react";
 import { GitHubContributionVerifierAbi } from "../lib/abi";
-import { decodeJournalData, normalizeSealHex, parseOwnerRepo } from "../lib/utils";
+import { decodeJournalData, parseOwnerRepo } from "../lib/utils";
 import { anvil } from "../lib/chains";
 import { baseSepolia, optimismSepolia, sepolia } from "viem/chains";
 
@@ -76,7 +76,7 @@ export function useOnChainVerification() {
 
       // Use journalDataAbi directly - no building needed!
       const journalData = params.zkProofResult.journalDataAbi;
-      const sealHex = normalizeSealHex(params.zkProofResult.zkProof);
+      const seal = params.zkProofResult.zkProof as `0x${string}`;
 
       // Decode to get values for redirect page
       const decoded = decodeJournalData(journalData);
@@ -85,7 +85,7 @@ export function useOnChainVerification() {
         address: contractAddress as `0x${string}`,
         abi: GitHubContributionVerifierAbi,
         functionName: 'submitContribution',
-        args: [journalData, sealHex],
+        args: [journalData, seal],
         chainId: selectedChainId,
       });
 
