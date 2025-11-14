@@ -58,16 +58,16 @@ describe('vlayer web proof e2e', () => {
       clientId: proverClientId,
       secret: proverSecret,
     };
-    ctx.zkProverUrl = process.env.ZK_PROVER_URL || 'http://localhost:3000';
+    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
 
-    console.log('Fetching IMAGE_ID from zk-prover-server...');
-    const guestIdResponse = await fetch(`${ctx.zkProverUrl}/api/v0/guest-id`);
+    console.log('Fetching ZK_PROVER_GUEST_ID from zk-prover-server...');
+    const guestIdResponse = await fetch(`${ctx.zkProverUrl}/guest-id`);
     if (!guestIdResponse.ok) {
       throw new Error(`Failed to fetch guest-id: ${guestIdResponse.status}`);
     }
     const guestIdData = await guestIdResponse.json();
     ctx.imageId = `0x${guestIdData.data.guestId}`;
-    console.log('IMAGE_ID:', ctx.imageId);
+    console.log('ZK_PROVER_GUEST_ID:', ctx.imageId);
 
     const anvilPort = await getAvailablePort();
     ctx.anvilRpcUrl = `http://127.0.0.1:${anvilPort}`;
@@ -89,7 +89,7 @@ describe('vlayer web proof e2e', () => {
         env: {
           ...process.env,
           PRIVATE_KEY: DEFAULT_ANVIL_PRIVATE_KEY,
-          IMAGE_ID: ctx.imageId,
+          ZK_PROVER_GUEST_ID: ctx.imageId,
           NOTARY_KEY_FINGERPRINT: '0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af',
           QUERIES_HASH: '0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1faceb5c6c6',
           EXPECTED_URL: 'https://api.github.com/graphql',
@@ -115,7 +115,7 @@ describe('vlayer web proof e2e', () => {
           WEB_PROVER_API_URL: ctx.proverEnv.baseUrl,
           WEB_PROVER_API_CLIENT_ID: ctx.proverEnv.clientId,
           WEB_PROVER_API_SECRET: ctx.proverEnv.secret,
-          ZK_PROVER_URL: ctx.zkProverUrl,
+          ZK_PROVER_API_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
       }

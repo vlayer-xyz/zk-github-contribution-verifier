@@ -27,8 +27,10 @@ Create a `.env.local` file with your vlayer API credentials:
 ```
 WEB_PROVER_API_CLIENT_ID=your_client_id
 WEB_PROVER_API_SECRET=your_api_secret
-# Optional: override the prover base URL (useful for local tests/mocking)
+# Optional: override the Web Prover base URL (useful for local tests/mocking)
 WEB_PROVER_API_URL=https://web-prover.vlayer.xyz/api/v1
+# Optional: override the ZK Prover base URL (useful for local tests/mocking)
+ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0
 ```
 
 ## Usage
@@ -67,7 +69,7 @@ Requirements:
 - Real network access plus the following environment variables (the test fails fast if any are missing):
   - `WEB_PROVER_API_CLIENT_ID` and `WEB_PROVER_API_SECRET` (vlayer credentials)
   - `GITHUB_TOKEN` (or `GITHUB_GRAPHQL_TOKEN`) with GitHub GraphQL access
-  - Optional overrides: `WEB_PROVER_API_URL`, `GITHUB_LOGIN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME` for the query target
+  - Optional overrides: `WEB_PROVER_API_URL`, `ZK_PROVER_API_URL`, `GITHUB_LOGIN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME` for the query target
 - The test calls `/api/prove`, `/api/compress`, and finally submits the compressed proof to the locally deployed contract via viem/wagmi-compatible logic.
 - These env vars can be exported in your shell or placed in a `.env.test` file in the repo root, which the Vitest suite loads automatically before running.
 - Example `.env.test`:
@@ -146,6 +148,10 @@ anvil
 export ANVIL_RPC_URL=http://127.0.0.1:8545
 export PRIVATE_KEY=0x<one_of_anvil_accounts_private_keys>
 
+# Fetch the ZK Prover guest ID from the server
+export ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0  
+export ZK_PROVER_GUEST_ID=$(curl -s ${ZK_PROVER_API_URL}/guest-id | jq -r '.data.guestId' | sed 's/^/0x/')
+
 # Match these to your compressed proof (example from zk_proof_compress_*.json)
 export NOTARY_KEY_FINGERPRINT=0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af
 export QUERIES_HASH=0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1faceb5c6c6
@@ -182,7 +188,8 @@ Expected output:
 - Simulation success, transaction hash, receipt details
 
 Troubleshooting:
-- If you see “Contract not compiled”, run `forge build` in `contracts`.
+- If you see "Contract not compiled", run `forge build` in `contracts`.
+- If deployment fails with "`ZK_PROVER_GUEST_ID not set`", ensure you've fetched it from the ZK prover server (see step 2 above). Note: In e2e tests, this is fetched automatically.
 - If simulation reverts, ensure env vars match the proof:
   - `NOTARY_KEY_FINGERPRINT` equals `publicOutputs.notaryKeyFingerprint`
   - `QUERIES_HASH` equals `publicOutputs.queriesHash`

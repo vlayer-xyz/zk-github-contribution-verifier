@@ -74,11 +74,9 @@ export function useOnChainVerification() {
         await switchChain({ chainId: selectedChainId });
       }
 
-      // Use journalDataAbi directly - no building needed!
       const journalData = params.zkProofResult.journalDataAbi;
       const seal = params.zkProofResult.zkProof as `0x${string}`;
 
-      // Decode to get values for redirect page
       const decoded = decodeJournalData(journalData);
 
       const hash = await writeContractAsync({
