@@ -52,7 +52,7 @@ cp .env.example .env
 Note: To fetch `ZK_PROVER_GUEST_ID` automatically:
 ```bash
 export ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0
-export ZK_PROVER_GUEST_ID=$(curl -s ${ZK_PROVER_API_URL}/guest-id | jq -r '.data.guestId' | sed 's/^/0x/')
+export ZK_PROVER_GUEST_ID=$(curl -s ${ZK_PROVER_API_URL}/guest-id | jq -r '.data.guestId')
 ```
 
 ## Available Commands
@@ -253,7 +253,7 @@ contracts/
 **Solution**: Set the required environment variables in `.env`
 
 **Problem**: `ZK_PROVER_GUEST_ID not set`
-**Solution**: Fetch the guest ID from your ZK prover server endpoint: `curl {ZK_PROVER_API_URL}/guest-id`, then set `export ZK_PROVER_GUEST_ID=0x{guestId}`. In e2e tests, this is fetched automatically.
+**Solution**: Fetch the guest ID from your ZK prover server endpoint: `curl {ZK_PROVER_API_URL}/guest-id`, then set `export ZK_PROVER_GUEST_ID={guestId}`. In e2e tests, this is fetched automatically.
 
 **Problem**: `Contract not compiled`
 **Solution**: Run `npm run build` before deploying
