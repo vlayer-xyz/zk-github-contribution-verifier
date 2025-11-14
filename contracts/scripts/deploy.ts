@@ -23,11 +23,11 @@ function loadContractArtifact() {
   };
 }
 
-// Load MockRiscZeroVerifier artifact (from NetworkConfig.sol output)
+// Load RiscZeroMockVerifier artifact (from risc0-ethereum library)
 function loadMockVerifierArtifact() {
   const artifactPath = path.join(
     __dirname,
-    '../out/NetworkConfig.sol/MockRiscZeroVerifier.json'
+    '../out/RiscZeroMockVerifier.sol/RiscZeroMockVerifier.json'
   );
 
   if (!fs.existsSync(artifactPath)) {
@@ -52,7 +52,7 @@ async function deployMockVerifier(
     bytecode,
     account,
     chain: walletClient.chain,
-    args: [],
+    args: ['0xFFFFFFFF'],
   });
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
   if (!receipt.contractAddress) {
@@ -111,9 +111,9 @@ async function deploy(options: DeployOptions) {
   // Get or deploy verifier
   let verifierAddress: Hex | undefined = providedVerifier;
   if (!verifierAddress) {
-    console.log(`\nNo verifier address provided. Deploying MockRiscZeroVerifier...`);
+    console.log(`\nNo verifier address provided. Deploying RiscZeroMockVerifier...`);
     verifierAddress = await deployMockVerifier(walletClient, publicClient, account);
-    console.log(`MockRiscZeroVerifier deployed at: ${verifierAddress}`);
+    console.log(`RiscZeroMockVerifier deployed at: ${verifierAddress}`);
   }
   const imageId = process.env.IMAGE_ID as Hex;
   const notaryKeyFingerprint = process.env.NOTARY_KEY_FINGERPRINT as Hex;
