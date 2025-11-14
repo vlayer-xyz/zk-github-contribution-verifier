@@ -4,7 +4,7 @@ export type ContributionData = {
 };
 
 export type ZKProofNormalized = {
-  zkProof: any;
+  zkProof: `0x${string}`;
   journalDataAbi: `0x${string}`;
   userData: ContributionData;
 };

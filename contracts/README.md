@@ -42,11 +42,18 @@ cp .env.example .env
 
 2. Fill in the required values:
    - `PRIVATE_KEY` - Your wallet's private key (without 0x prefix)
+   - `ZK_PROVER_GUEST_ID` - Guest ID from the ZK Prover server (fetch via: `curl {ZK_PROVER_API_URL}/guest-id`)
    - `NOTARY_KEY_FINGERPRINT` - From vlayer's Web Prover
    - `QUERIES_HASH` - Hash of your extraction queries
    - `EXPECTED_URL` - GitHub API URL pattern
    - RPC URLs for your target networks
    - API keys for contract verification
+
+Note: To fetch `ZK_PROVER_GUEST_ID` automatically:
+```bash
+export ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0
+export ZK_PROVER_GUEST_ID=$(curl -s ${ZK_PROVER_API_URL}/guest-id | jq -r '.data.guestId' | sed 's/^/0x/')
+```
 
 ## Available Commands
 
@@ -139,17 +146,20 @@ Create a JSON file with your ZK proof data (from `/api/compress` endpoint):
 
 ```json
 {
-  "zkProof": "0x...",
-  "publicOutputs": {
-    "notaryKeyFingerprint": "0x...",
-    "method": "GET",
-    "url": "https://api.github.com/repos/vlayer-xyz/vlayer/contributors",
-    "timestamp": 1762169987,
-    "queriesHash": "0x...",
-    "values": ["username", 286]
-  }
+  "zkProof": "0xffffffff...",
+  "journalDataAbi": "0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af..."
 }
 ```
+
+The `journalDataAbi` is ABI-encoded data containing:
+- `notaryKeyFingerprint` (bytes32)
+- `method` (string) - e.g., "POST"
+- `url` (string) - e.g., "https://api.github.com/graphql"
+- `tlsTimestamp` (uint256)
+- `extractionHash` (bytes32) - corresponds to QUERIES_HASH
+- `repo` (string) - repository name with owner
+- `username` (string) - GitHub username
+- `contributions` (uint256) - number of contributions
 
 ### 2. Submit to Contract
 
@@ -242,6 +252,9 @@ contracts/
 **Problem**: `NOTARY_KEY_FINGERPRINT not set`
 **Solution**: Set the required environment variables in `.env`
 
+**Problem**: `ZK_PROVER_GUEST_ID not set`
+**Solution**: Fetch the guest ID from your ZK prover server endpoint: `curl {ZK_PROVER_API_URL}/guest-id`, then set `export ZK_PROVER_GUEST_ID=0x{guestId}`. In e2e tests, this is fetched automatically.
+
 **Problem**: `Contract not compiled`
 **Solution**: Run `npm run build` before deploying
 
@@ -251,13 +264,16 @@ contracts/
 ### Submission Issues
 
 **Problem**: `InvalidNotaryKeyFingerprint()`
-**Solution**: Verify your proof was generated with the correct notary
+**Solution**: Verify your proof was generated with the correct notary. The notary fingerprint must match the first field in the decoded `journalDataAbi`.
+
+**Problem**: `InvalidQueriesHash()`
+**Solution**: The `extractionHash` field in the decoded `journalDataAbi` must match the contract's `QUERIES_HASH`.
 
 **Problem**: `ZKProofVerificationFailed()`
-**Solution**: Ensure your ZK proof data is correctly formatted and valid
+**Solution**: Ensure your ZK proof data is correctly formatted and valid. The `zkProof` must be a valid RISC Zero proof.
 
 **Problem**: `InvalidUrl()`
-**Solution**: The proof must be for a GitHub API URL
+**Solution**: The `url` field in the decoded `journalDataAbi` must match the contract's expected URL pattern (e.g., "https://api.github.com/graphql").
 
 ## Network-Specific Information
 

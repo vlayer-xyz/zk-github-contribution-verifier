@@ -26,7 +26,7 @@ contract Deploy is Script {
         console.log("Using verifier at:", config.verifier);
 
         // Get deployment parameters from environment variables
-        bytes32 imageId = vm.envOr("IMAGE_ID", bytes32(0));
+        bytes32 imageId = vm.envOr("ZK_PROVER_GUEST_ID", bytes32(0));
         bytes32 notaryKeyFingerprint = vm.envOr(
             "NOTARY_KEY_FINGERPRINT",
             bytes32(0)
@@ -38,7 +38,7 @@ contract Deploy is Script {
         );
 
         // Validate parameters
-        require(imageId != bytes32(0), "IMAGE_ID not set");
+        require(imageId != bytes32(0), "ZK_PROVER_GUEST_ID not set");
         require(
             notaryKeyFingerprint != bytes32(0),
             "NOTARY_KEY_FINGERPRINT not set"
