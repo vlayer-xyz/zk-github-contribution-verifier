@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useWriteContract, usePublicClient } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { useEffect, useMemo, useState } from "react";
+import { decodeErrorResult } from "viem";
 import { GitHubContributionVerifierAbi } from "../lib/abi";
 import { decodeJournalData } from "../lib/utils";
 import {
