@@ -115,13 +115,13 @@ async function deploy(options: DeployOptions) {
     verifierAddress = await deployMockVerifier(walletClient, publicClient, account);
     console.log(`RiscZeroMockVerifier deployed at: ${verifierAddress}`);
   }
-  const imageId = process.env.IMAGE_ID as Hex;
+  const imageId = process.env.ZK_PROVER_GUEST_ID as Hex;
   const notaryKeyFingerprint = process.env.NOTARY_KEY_FINGERPRINT as Hex;
   const queriesHash = process.env.QUERIES_HASH as Hex;
   const expectedUrl = process.env.EXPECTED_URL || 'https://api.github.com';
 
   if (!imageId || imageId === '0x0000000000000000000000000000000000000000000000000000000000000000') {
-    throw new Error('IMAGE_ID not set');
+    throw new Error('ZK_PROVER_GUEST_ID not set');
   }
 
   if (!notaryKeyFingerprint || notaryKeyFingerprint === '0x0000000000000000000000000000000000000000000000000000000000000000') {
