@@ -66,7 +66,7 @@ describe('vlayer web proof e2e', () => {
       throw new Error(`Failed to fetch guest-id: ${guestIdResponse.status}`);
     }
     const guestIdData = await guestIdResponse.json();
-    ctx.imageId = `0x${guestIdData.data.guestId}`;
+    ctx.imageId = `${guestIdData.data.guestId}`;
     console.log('ZK_PROVER_GUEST_ID:', ctx.imageId);
 
     const anvilPort = await getAvailablePort();
