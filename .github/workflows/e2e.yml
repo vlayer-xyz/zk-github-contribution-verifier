@@ -1,0 +1,42 @@
+name: E2E
+on:
+  merge_group:
+  pull_request:
+    branches: ["main"]
+  repository_dispatch:
+    types: [zk-prover-release]
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    if: github.repository == 'vlayer-xyz/zk-github-contribution-verifier'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install
+      - run: npm install
+        working-directory: contracts
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-ac81a53d1d5823919ffbadd3c65f081927aa11f2 # 2024-12-02
+      - run: forge soldeer install
+        working-directory: contracts
+      - run: npm run test:e2e
+        env:
+          # What we prove
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_LOGIN: rzadp
+          GITHUB_REPO_OWNER: vlayer-xyz
+          GITHUB_REPO_NAME: vlayer
+          
+          # Web Prover
+          WEB_PROVER_API_CLIENT_ID: ${{ secrets.WEB_PROVER_API_CLIENT_ID }}
+          WEB_PROVER_API_SECRET: ${{ secrets.WEB_PROVER_API_SECRET }}
+          WEB_PROVER_API_URL: https://web-prover.vlayer.xyz/api/v1
+
+          # ZK Prover
+          ZK_PROVER_URL: "https://zk-prover.vlayer.xyz"
