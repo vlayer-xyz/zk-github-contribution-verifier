@@ -4,11 +4,14 @@ import { useRouter } from "next/navigation";
 import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useWriteContract, usePublicClient } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { useEffect, useMemo, useState } from "react";
-import { decodeErrorResult } from "viem";
 import { GitHubContributionVerifierAbi } from "../lib/abi";
-import { decodeJournalData, parseOwnerRepo } from "../lib/utils";
-import { anvil } from "../lib/chains";
-import { baseSepolia, optimismSepolia, sepolia } from "viem/chains";
+import { decodeJournalData } from "../lib/utils";
+import {
+  decodeTransactionError,
+  buildErrorRedirectParams,
+  buildSuccessRedirectParams,
+  getContractAddressFromEnv,
+} from "../lib/verification-helpers";
 
 export function useOnChainVerification() {
   const router = useRouter();
@@ -35,21 +38,22 @@ export function useOnChainVerification() {
   // Auto-attempt switch when wallet is connected and selected chain differs
   useEffect(() => {
     if (isConnected && chainId !== selectedChainId && switchChain) {
-      switchChain({ chainId: selectedChainId }).catch(() => {
+      try {
+        switchChain({ chainId: selectedChainId });
+      } catch {
         // User rejected or wallet cannot switch; UI will display prompt via needsSwitch
-      });
+      }
     }
   }, [isConnected, selectedChainId, chainId, switchChain]);
 
   // Prefill contract address based on selected chain if empty
   useEffect(() => {
     if (contractAddress && contractAddress.length > 0) return;
-    let envAddress = '';
-    if (selectedChainId === anvil.id) envAddress = process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || '';
-    else if (selectedChainId === sepolia.id) envAddress = process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS || '';
-    else if (selectedChainId === baseSepolia.id) envAddress = process.env.NEXT_PUBLIC_BASE_SEPOLIA_CONTRACT_ADDRESS || '';
-    else if (selectedChainId === optimismSepolia.id) envAddress = process.env.NEXT_PUBLIC_OP_SEPOLIA_CONTRACT_ADDRESS || '';
-    if (envAddress) setContractAddress(envAddress);
+    const envAddress = getContractAddressFromEnv(selectedChainId);
+    if (envAddress) {
+      // Use setTimeout to avoid synchronous setState in effect
+      setTimeout(() => setContractAddress(envAddress), 0);
+    }
   }, [selectedChainId, contractAddress]);
 
   async function verifyOnChain(params: {
@@ -94,97 +98,41 @@ export function useOnChainVerification() {
         chainId: selectedChainId,
       });
 
-      // Wait for transaction receipt
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-      // Check if transaction reverted
       if (receipt.status === "reverted") {
-        // Try to decode the revert reason by simulating the call
-        let errorMessage = "Transaction reverted on-chain";
-        let errorName = "UnknownError";
-        
-        try {
-          // Get the transaction to extract call data
-          const tx = await publicClient.getTransaction({ hash });
-          if (tx.from && tx.to && address) {
-            // Try to simulate the call to get the revert reason
-            try {
-              await publicClient.simulateContract({
-                address: contractAddress as `0x${string}`,
-                abi: GitHubContributionVerifierAbi,
-                functionName: 'submitContribution',
-                args: [journalData, seal],
-                account: address,
-              });
-            } catch (simError: any) {
-              // Extract revert data from simulation error
-              const revertData = (simError as { data?: string })?.data || 
-                                 (simError as { cause?: { data?: string } })?.cause?.data;
-              
-              if (revertData && typeof revertData === 'string' && revertData.startsWith('0x')) {
-                try {
-                  const decoded = decodeErrorResult({ 
-                    abi: GitHubContributionVerifierAbi, 
-                    data: revertData as `0x${string}` 
-                  });
-                  errorName = decoded.errorName;
-                  errorMessage = `Transaction reverted: ${decoded.errorName}`;
-                } catch {
-                  // If decode fails, use the raw data
-                  errorMessage = `Transaction reverted (unable to decode error)`;
-                }
-              } else {
-                // Try to extract error message from the error object
-                const msg = (simError as Error)?.message || String(simError);
-                if (msg.includes('revert') || msg.includes('Revert')) {
-                  errorMessage = msg;
-                }
-              }
-            }
-          }
-        } catch (decodeError) {
-          // If we can't decode, use generic message
-        }
-
-        // build repo name for redirect
-        let repoForRedirect = decoded.repo;
-        if (!repoForRedirect) {
-          const { owner, name } = parseOwnerRepo(params.inputUrl);
-          if (owner && name) repoForRedirect = `${owner}/${name}`;
-        }
-
-        const q = new URLSearchParams({
-          txHash: hash,
-          chainId: String(selectedChainId),
-          error: errorMessage,
-          errorName: errorName,
-          handle: decoded.username,
-          reponame: repoForRedirect,
-          contributions: String(decoded.contributions),
-          contractAddress: contractAddress,
+        const { errorMessage, errorName } = await decodeTransactionError({
+          publicClient,
+          hash,
+          contractAddress: contractAddress as `0x${string}`,
+          journalData,
+          seal,
+          accountAddress: address!,
         });
-        router.push(`/error?${q.toString()}`);
+
+        const queryParams = buildErrorRedirectParams({
+          txHash: hash,
+          chainId: selectedChainId,
+          errorMessage,
+          errorName,
+          decoded,
+          inputUrl: params.inputUrl,
+          contractAddress,
+        });
+        router.push(`/error?${queryParams.toString()}`);
         return;
       }
 
-      // Transaction succeeded - redirect to success page
-      // build repo name for redirect
-      let repoForRedirect = decoded.repo;
-      if (!repoForRedirect) {
-        const { owner, name } = parseOwnerRepo(params.inputUrl);
-        if (owner && name) repoForRedirect = `${owner}/${name}`;
-      }
-
-      const q = new URLSearchParams({
-        handle: decoded.username,
-        chainId: String(selectedChainId),
-        reponame: repoForRedirect,
-        contributions: String(decoded.contributions),
+      const queryParams = buildSuccessRedirectParams({
+        decoded,
+        chainId: selectedChainId,
+        inputUrl: params.inputUrl,
         txHash: hash,
       });
-      router.push(`/success?${q.toString()}`);
-    } catch (e: any) {
-      params.setError(e?.shortMessage || e?.message || 'On-chain verification failed');
+      router.push(`/success?${queryParams.toString()}`);
+    } catch (e: unknown) {
+      const error = e as { shortMessage?: string; message?: string };
+      params.setError(error?.shortMessage || error?.message || 'On-chain verification failed');
     }
   }
 
