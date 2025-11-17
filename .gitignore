@@ -2,3 +2,10 @@
 .env.test
 .next
 node_modules
+
+# Lock files
+pnpm-lock.yaml
+contracts/pnpm-lock.yaml
+
+# Generated files
+contracts/remappings.txt
