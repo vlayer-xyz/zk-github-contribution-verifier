@@ -103,32 +103,11 @@ export function useProveFlow() {
       if (!zkProof || !journalDataAbi) {
         throw new Error('Compression response missing zkProof or journalDataAbi');
       }
-
-      // Handle zkProof - test uses it directly, but it might be array or string
-      // If it's an array, convert to hex string (like testScripts might do)
-      let zkProofValue: string;
-      if (Array.isArray(zkProof)) {
-        // Convert array of bytes to hex string
-        zkProofValue = '0x' + zkProof.map((b: number) => {
-          const byte = typeof b === 'number' ? b : parseInt(String(b), 10);
-          return byte.toString(16).padStart(2, '0');
-        }).join('');
-      } else if (typeof zkProof === 'string') {
-        // Already a string - use as-is (matching test)
-        zkProofValue = zkProof;
-      } else {
-        // Unexpected type - log for debugging
-        console.error('Unexpected zkProof type:', typeof zkProof, zkProof);
-        throw new Error('Invalid zkProof format');
-      }
-
-      // Decode for display only (test does this at line 183)
       const decoded = decodeJournalData(journalDataAbi as `0x${string}`);
       const userData = { username: decoded.username, total: Number(decoded.contributions) };
 
-      // Store exactly as test would use it (line 185: seal = zkProof as `0x${string}`)
       setZkProofResult({ 
-        zkProof: zkProofValue,
+        zkProof: zkProof as `0x${string}`,
         journalDataAbi: journalDataAbi as `0x${string}`, 
         userData 
       });

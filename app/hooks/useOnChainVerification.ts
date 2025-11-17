@@ -144,7 +144,6 @@ export function useOnChainVerification() {
           }
         } catch (decodeError) {
           // If we can't decode, use generic message
-          console.error("Failed to decode revert reason:", decodeError);
         }
 
         // build repo name for redirect
