@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyRepositoryAccess } from '@/app/lib/github-helpers';
 
 // Configure max duration for Vercel (up to 90 seconds)
 export const maxDuration = 160;
@@ -38,60 +39,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify repository access before proceeding
-    try {
-      const repoCheckUrl = `https://api.github.com/repos/${owner}/${name}`;
-      console.log(`Verifying repository access: ${repoCheckUrl}`);
-      
-      const repoCheckResponse = await fetch(repoCheckUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${githubToken}`,
-          'User-Agent': 'zk-github-contribution-verifier',
-          'Accept': 'application/vnd.github.v3+json',
-        },
-      });
+    const accessResult = await verifyRepositoryAccess({
+      owner,
+      name,
+      githubToken,
+    });
 
-      if (repoCheckResponse.status === 404) {
-        return NextResponse.json(
-          { error: `Repository ${owner}/${name} not found or access denied` },
-          { status: 403 }
-        );
-      }
-
-      if (repoCheckResponse.status === 403) {
-        const errorText = await repoCheckResponse.text().catch(() => 'Forbidden');
-        console.error('GitHub API 403 response:', errorText);
-        return NextResponse.json(
-          { error: `GitHub token does not have read access to repository ${owner}/${name}` },
-          { status: 403 }
-        );
-      }
-
-      if (repoCheckResponse.status === 401) {
-        return NextResponse.json(
-          { error: 'Invalid or expired GitHub token' },
-          { status: 401 }
-        );
-      }
-
-      if (!repoCheckResponse.ok) {
-        const errorText = await repoCheckResponse.text().catch(() => 'Unknown error');
-        console.error(`GitHub API error (${repoCheckResponse.status}):`, errorText);
-        return NextResponse.json(
-          { error: `Failed to verify repository access: ${errorText}` },
-          { status: 500 }
-        );
-      }
-
-      // 200 OK - token has read access, proceed
-      console.log(`Repository access verified for ${owner}/${name}`);
-    } catch (error) {
-      console.error('Error verifying repository access:', error);
-      // If it's a network error, we might want to proceed anyway or fail
-      // For now, we'll fail to be safe
+    if (!accessResult.success) {
       return NextResponse.json(
-        { error: `Failed to verify repository access: ${error instanceof Error ? error.message : 'Unknown error'}` },
-        { status: 500 }
+        { error: accessResult.error },
+        { status: accessResult.statusCode || 500 }
       );
     }
 
