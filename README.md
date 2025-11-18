@@ -80,6 +80,8 @@ Requirements:
   GITHUB_REPO_NAME=vlayer
   WEB_PROVER_API_CLIENT_ID=client-id
   WEB_PROVER_API_SECRET=client-secret
+  NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS=""
+  NEXT_PUBLIC_DEFAULT_CHAIN_ID=31337
   ```
 
 ## Smart Contracts
@@ -186,6 +188,29 @@ npx ts-node --transpile-only contracts/scripts/submitProof.ts anvil "$PROOF" ${A
 
 Expected output:
 - Simulation success, transaction hash, receipt details
+
+### Local Sepolia testing (contracts + zk proof submission)
+
+1. Deploy contract
+
+```bash
+npm run deploy:sepolia
+```
+
+2. Verify contract
+
+```bash
+npm run verify sepolia <your-contract-address>
+```
+
+3. Add contract config to .env.local in root directory:
+
+```bash
+NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS=<your-contract-address>
+NEXT_PUBLIC_DEFAULT_CHAIN_ID=11155111
+```
+
+4. Submit your compressed zk proof to the contract
 
 Troubleshooting:
 - If you see "Contract not compiled", run `forge build` in `contracts`.
