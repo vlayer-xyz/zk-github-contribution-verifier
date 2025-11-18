@@ -24,9 +24,9 @@ opSepolia = "${OP_SEPOLIA_RPC_URL}"
 anvil = "http://localhost:8545"
 
 [etherscan]
-sepolia = { key = "${ETHERSCAN_API_KEY}" }
-baseSepolia = { key = "${BASESCAN_API_KEY}" }
-opSepolia = { key = "${OPTIMISTIC_ETHERSCAN_API_KEY}" }
+sepolia = { key = "${ETHERSCAN_API_KEY}", chain = 11155111 }
+baseSepolia = { key = "${BASESCAN_API_KEY}", chain = 84532 }
+opSepolia = { key = "${OPTIMISTIC_ETHERSCAN_API_KEY}", chain = 11155420 }
 
 [dependencies]
 forge-std = "1.11.0"
