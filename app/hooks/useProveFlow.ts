@@ -95,17 +95,22 @@ export function useProveFlow() {
     try {
       const data = await compressPresentation(presentation, username.trim());
       
+      // Extract exactly like the test does (lines 176-177 in webProof.test.ts)
       const zkProof = data.success ? data.data.zkProof : data.zkProof;
       const journalDataAbi = data.success ? data.data.journalDataAbi : data.journalDataAbi;
       
+      // Match test validation exactly (line 179)
       if (!zkProof || !journalDataAbi) {
-        throw new Error('Invalid ZK proof response: missing zkProof or journalDataAbi');
+        throw new Error('Compression response missing zkProof or journalDataAbi');
       }
-
-      const decoded = decodeJournalData(journalDataAbi);
+      const decoded = decodeJournalData(journalDataAbi as `0x${string}`);
       const userData = { username: decoded.username, total: Number(decoded.contributions) };
 
-      setZkProofResult({ zkProof, journalDataAbi, userData });
+      setZkProofResult({ 
+        zkProof: zkProof as `0x${string}`,
+        journalDataAbi: journalDataAbi as `0x${string}`, 
+        userData 
+      });
     } catch (err: any) {
       setError(err?.message || 'Failed to generate ZK proof');
     } finally {

@@ -9,6 +9,31 @@ export const GitHubContributionVerifierAbi = [
     ],
     outputs: [],
   },
+  {
+    type: "error",
+    name: "InvalidNotaryKeyFingerprint",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "InvalidQueriesHash",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "InvalidUrl",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ZKProofVerificationFailed",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "InvalidContributions",
+    inputs: [],
+  },
 ] as const;
 
 

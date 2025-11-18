@@ -1,13 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useWriteContract } from "wagmi";
+import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useWriteContract, usePublicClient } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { useEffect, useMemo, useState } from "react";
 import { GitHubContributionVerifierAbi } from "../lib/abi";
-import { decodeJournalData, parseOwnerRepo } from "../lib/utils";
-import { anvil } from "../lib/chains";
-import { baseSepolia, optimismSepolia, sepolia } from "viem/chains";
+import { decodeJournalData } from "../lib/utils";
+import {
+  decodeTransactionError,
+  buildErrorRedirectParams,
+  buildSuccessRedirectParams,
+  getContractAddressFromEnv,
+} from "../lib/verification-helpers";
 
 export function useOnChainVerification() {
   const router = useRouter();
@@ -17,6 +21,7 @@ export function useOnChainVerification() {
   const { switchChain, isPending: isSwitching } = useSwitchChain();
   const chainId = useChainId();
   const { writeContractAsync, isPending: isWriting } = useWriteContract();
+  const publicClient = usePublicClient();
 
   const [selectedChainId, setSelectedChainId] = useState<number>(Number(process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || 31337));
   const [contractAddress, setContractAddress] = useState<string>(process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || '');
@@ -33,25 +38,26 @@ export function useOnChainVerification() {
   // Auto-attempt switch when wallet is connected and selected chain differs
   useEffect(() => {
     if (isConnected && chainId !== selectedChainId && switchChain) {
-      switchChain({ chainId: selectedChainId }).catch(() => {
+      try {
+        switchChain({ chainId: selectedChainId });
+      } catch {
         // User rejected or wallet cannot switch; UI will display prompt via needsSwitch
-      });
+      }
     }
   }, [isConnected, selectedChainId, chainId, switchChain]);
 
   // Prefill contract address based on selected chain if empty
   useEffect(() => {
     if (contractAddress && contractAddress.length > 0) return;
-    let envAddress = '';
-    if (selectedChainId === anvil.id) envAddress = process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || '';
-    else if (selectedChainId === sepolia.id) envAddress = process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS || '';
-    else if (selectedChainId === baseSepolia.id) envAddress = process.env.NEXT_PUBLIC_BASE_SEPOLIA_CONTRACT_ADDRESS || '';
-    else if (selectedChainId === optimismSepolia.id) envAddress = process.env.NEXT_PUBLIC_OP_SEPOLIA_CONTRACT_ADDRESS || '';
-    if (envAddress) setContractAddress(envAddress);
+    const envAddress = getContractAddressFromEnv(selectedChainId);
+    if (envAddress) {
+      // Use setTimeout to avoid synchronous setState in effect
+      setTimeout(() => setContractAddress(envAddress), 0);
+    }
   }, [selectedChainId, contractAddress]);
 
   async function verifyOnChain(params: {
-    zkProofResult: { zkProof: any; journalDataAbi: `0x${string}` } | null;
+    zkProofResult: { zkProof: string; journalDataAbi: `0x${string}` } | null;
     username: string;
     inputUrl: string;
     setError: (m: string | null) => void;
@@ -79,6 +85,11 @@ export function useOnChainVerification() {
 
       const decoded = decodeJournalData(journalData);
 
+      if (!publicClient) {
+        params.setError('Public client not available');
+        return;
+      }
+
       const hash = await writeContractAsync({
         address: contractAddress as `0x${string}`,
         abi: GitHubContributionVerifierAbi,
@@ -87,23 +98,41 @@ export function useOnChainVerification() {
         chainId: selectedChainId,
       });
 
-      // build repo name for redirect
-      let repoForRedirect = decoded.repo;
-      if (!repoForRedirect) {
-        const { owner, name } = parseOwnerRepo(params.inputUrl);
-        if (owner && name) repoForRedirect = `${owner}/${name}`;
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      if (receipt.status === "reverted") {
+        const { errorMessage, errorName } = await decodeTransactionError({
+          publicClient,
+          hash,
+          contractAddress: contractAddress as `0x${string}`,
+          journalData,
+          seal,
+          accountAddress: address!,
+        });
+
+        const queryParams = buildErrorRedirectParams({
+          txHash: hash,
+          chainId: selectedChainId,
+          errorMessage,
+          errorName,
+          decoded,
+          inputUrl: params.inputUrl,
+          contractAddress,
+        });
+        router.push(`/error?${queryParams.toString()}`);
+        return;
       }
 
-      const q = new URLSearchParams({
-        handle: decoded.username,
-        chainId: String(selectedChainId),
-        reponame: repoForRedirect,
-        contributions: String(decoded.contributions),
+      const queryParams = buildSuccessRedirectParams({
+        decoded,
+        chainId: selectedChainId,
+        inputUrl: params.inputUrl,
         txHash: hash,
       });
-      router.push(`/success?${q.toString()}`);
-    } catch (e: any) {
-      params.setError(e?.shortMessage || e?.message || 'On-chain verification failed');
+      router.push(`/success?${queryParams.toString()}`);
+    } catch (e: unknown) {
+      const error = e as { shortMessage?: string; message?: string };
+      params.setError(error?.shortMessage || error?.message || 'On-chain verification failed');
     }
   }
 
