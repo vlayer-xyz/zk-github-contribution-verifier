@@ -35,23 +35,19 @@ export function useOnChainVerification() {
     }
   };
 
-  // Auto-attempt switch when wallet is connected and selected chain differs
   useEffect(() => {
     if (isConnected && chainId !== selectedChainId && switchChain) {
       try {
         switchChain({ chainId: selectedChainId });
       } catch {
-        // User rejected or wallet cannot switch; UI will display prompt via needsSwitch
       }
     }
   }, [isConnected, selectedChainId, chainId, switchChain]);
 
-  // Prefill contract address based on selected chain if empty
   useEffect(() => {
     if (contractAddress && contractAddress.length > 0) return;
     const envAddress = getContractAddressFromEnv(selectedChainId);
     if (envAddress) {
-      // Use setTimeout to avoid synchronous setState in effect
       setTimeout(() => setContractAddress(envAddress), 0);
     }
   }, [selectedChainId, contractAddress]);
@@ -137,17 +133,14 @@ export function useOnChainVerification() {
   }
 
   return {
-    // wallet state
     address, isConnected, isConnecting, isSwitching, isWriting,
     connect: () => connect({ connector: injected() }),
     disconnect,
     chainId,
     needsSwitch,
     requestSwitch,
-    // form state
     selectedChainId, setSelectedChainId,
     contractAddress, setContractAddress,
-    // action
     verifyOnChain,
   } as const;
 }
