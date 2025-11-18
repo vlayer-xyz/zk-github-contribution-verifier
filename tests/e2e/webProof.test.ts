@@ -238,7 +238,6 @@ describe('vlayer web proof e2e', () => {
         user(login: $login) { login }
       }`;
 
-    // Use an invalid token that doesn't have access to the repository
     const invalidToken = 'invalid_token_that_has_no_access';
 
     const proveResponse = await fetch(`http://127.0.0.1:${ctx.nextPort}/api/prove`, {
@@ -257,21 +256,16 @@ describe('vlayer web proof e2e', () => {
       signal: AbortSignal.timeout(60_000),
     });
 
-    // Expect 403 (Forbidden) or 401 (Unauthorized) status
     expect([401, 403]).toContain(proveResponse.status);
     
     const errorResponse = await proveResponse.json();
     expect(errorResponse).toHaveProperty('error');
     expect(typeof errorResponse.error).toBe('string');
     
-    // Verify the error message indicates access denial
     const errorMessage = errorResponse.error.toLowerCase();
+    console.log('Error message:', errorMessage);
     expect(
-      errorMessage.includes('access') ||
-      errorMessage.includes('token') ||
-      errorMessage.includes('forbidden') ||
-      errorMessage.includes('unauthorized') ||
-      errorMessage.includes('not found')
+      errorMessage.includes('invalid or expired github token')
     ).toBe(true);
   });
 });
