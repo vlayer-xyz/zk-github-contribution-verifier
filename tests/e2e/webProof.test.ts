@@ -184,6 +184,7 @@ describe('vlayer web proof e2e', () => {
       username: decoded.username,
       contributions: decoded.contributions.toString(),
     });
+    expect(decoded.contributions).toBeGreaterThan(BigInt(0));
 
     const configuredFoundry = {
       ...foundry,
@@ -221,5 +222,56 @@ describe('vlayer web proof e2e', () => {
       args: [decoded.repo, decoded.username],
     });
     expect(stored).toBe(decoded.contributions);
+  });
+
+  test('prove fails for private repo without access', async () => {
+    if (!ctx.nextPort) {
+      throw new Error('Test context not initialized');
+    }
+
+    const login = process.env.GITHUB_LOGIN || 'Chmarusso';
+    const owner = process.env.GITHUB_REPO_OWNER || 'vlayer-xyz';
+    const repoName = process.env.GITHUB_PRIVATE_REPO_NAME || 'vouch';
+    const query = `query($login: String!, $owner: String!, $name: String!, $q: String!) {
+        repository(owner: $owner, name: $name) { name nameWithOwner owner { login } }
+        mergedPRs: search(type: ISSUE, query: $q) { issueCount }
+        user(login: $login) { login }
+      }`;
+
+    // Use an invalid token that doesn't have access to the repository
+    const invalidToken = 'invalid_token_that_has_no_access';
+
+    const proveResponse = await fetch(`http://127.0.0.1:${ctx.nextPort}/api/prove`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        variables: {
+          login,
+          owner,
+          name: repoName,
+          q: `repo:${owner}/${repoName} is:pr is:merged author:${login}`,
+        },
+        githubToken: invalidToken,
+      }),
+      signal: AbortSignal.timeout(60_000),
+    });
+
+    // Expect 403 (Forbidden) or 401 (Unauthorized) status
+    expect([401, 403]).toContain(proveResponse.status);
+    
+    const errorResponse = await proveResponse.json();
+    expect(errorResponse).toHaveProperty('error');
+    expect(typeof errorResponse.error).toBe('string');
+    
+    // Verify the error message indicates access denial
+    const errorMessage = errorResponse.error.toLowerCase();
+    expect(
+      errorMessage.includes('access') ||
+      errorMessage.includes('token') ||
+      errorMessage.includes('forbidden') ||
+      errorMessage.includes('unauthorized') ||
+      errorMessage.includes('not found')
+    ).toBe(true);
   });
 });

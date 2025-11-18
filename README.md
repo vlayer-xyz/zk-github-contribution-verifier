@@ -80,6 +80,7 @@ Requirements:
   GITHUB_REPO_NAME=vlayer
   WEB_PROVER_API_CLIENT_ID=client-id
   WEB_PROVER_API_SECRET=client-secret
+  NEXT_PUBLIC_DEFAULT_CHAIN_ID=
   ```
 
 ### Testing Scripts
