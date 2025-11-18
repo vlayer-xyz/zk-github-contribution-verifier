@@ -84,6 +84,40 @@ Requirements:
   NEXT_PUBLIC_DEFAULT_CHAIN_ID=31337
   ```
 
+### Testing Scripts
+
+#### test-graphql-prove.js
+
+A simple script to test GitHub GraphQL API calls directly, useful for debugging and verifying GitHub token access.
+
+**Usage:**
+
+```bash
+# Using environment variables
+GITHUB_TOKEN=ghp_xxx OWNER=vlayer-xyz NAME=vouch LOGIN=Chmarusso node testScripts/test-graphql-prove.js
+
+# Or using .env.local file (recommended)
+# Add to .env.local:
+#   GITHUB_TOKEN=ghp_xxx
+#   OWNER=vlayer-xyz
+#   NAME=vouch
+#   LOGIN=Chmarusso
+node testScripts/test-graphql-prove.js
+```
+
+**Environment Variables:**
+- `GITHUB_TOKEN` (required): GitHub Personal Access Token with appropriate permissions
+- `OWNER` (optional, default: `vlayer-xyz`): Repository owner/organization
+- `NAME` (optional, default: `vouch`): Repository name
+- `LOGIN` (optional, default: `Chmarusso`): GitHub username to query
+- `GITHUB_URL` (optional, default: `https://api.github.com/graphql`): GitHub API endpoint
+
+**Features:**
+- Automatically loads `.env` and `.env.local` files (`.env.local` overrides `.env`)
+- Tests direct GraphQL queries to GitHub API
+- Useful for verifying token permissions and repository access
+- Prints formatted JSON response for easy debugging
+
 ## Smart Contracts
 
 The project includes Solidity smart contracts for storing verified GitHub contributions on-chain.
