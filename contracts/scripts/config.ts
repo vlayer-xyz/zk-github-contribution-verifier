@@ -1,5 +1,11 @@
 import { type Chain } from 'viem';
 import { sepolia, baseSepolia, optimismSepolia, foundry } from 'viem/chains';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables before reading them
+// Look for .env file in the contracts directory (parent of scripts/)
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 export interface NetworkConfig {
   chain: Chain;
