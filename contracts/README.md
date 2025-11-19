@@ -253,7 +253,7 @@ contracts/
 **Solution**: Set the required environment variables in `.env`
 
 **Problem**: `ZK_PROVER_GUEST_ID not set`
-**Solution**: Fetch the guest ID from your ZK prover server endpoint: `curl {ZK_PROVER_API_URL}/guest-id`, then set `export ZK_PROVER_GUEST_ID={guestId}`. In e2e tests, this is fetched automatically.
+**Solution**: Fetch the guest ID from your ZK prover server endpoint: `curl {ZK_PROVER_API_URL}/guest-id`, then set `export ZK_PROVER_GUEST_ID={guestId}`.
 
 **Problem**: `Contract not compiled`
 **Solution**: Run `npm run build` before deploying
