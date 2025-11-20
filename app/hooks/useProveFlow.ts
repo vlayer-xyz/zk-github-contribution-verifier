@@ -93,13 +93,15 @@ export function useProveFlow() {
     setIsCompressing(true);
     setError(null);
     try {
-      const data = await compressPresentation(presentation, username.trim());
-      const decoded = decodeJournalData(data.journalDataAbi as `0x${string}`);
+      const { data } = await compressPresentation(presentation, username.trim());
+      const { zkProof, journalDataAbi } = data;
+
+      const decoded = decodeJournalData(journalDataAbi);
       const userData = { username: decoded.username, total: Number(decoded.contributions) };
 
       setZkProofResult({ 
-        zkProof: data.zkProof as `0x${string}`,
-        journalDataAbi: data.journalDataAbi as `0x${string}`, 
+        zkProof: zkProof as `0x${string}`,
+        journalDataAbi: journalDataAbi as `0x${string}`, 
         userData 
       });
     } catch (err: any) {
@@ -126,5 +128,3 @@ export function useProveFlow() {
     handleCompress,
   } as const;
 }
-
-
