@@ -10,9 +10,11 @@ async function dotenvLoad() {
   try {
     const dotenv = await import('dotenv');
     if (dotenv && typeof dotenv.config === 'function') {
+      // Load .env first, then .env.local (which will override .env values)
       dotenv.config();
+      dotenv.config({ path: '.env.local' });
     }
-  } catch (_) {
+  } catch {
     // dotenv not installed; continue without loading .env
   }
 }
@@ -22,7 +24,7 @@ async function main() {
   const githubUrl = process.env.GITHUB_URL || 'https://api.github.com/graphql';
   const token = process.env.GITHUB_TOKEN || '';
   const owner = process.env.OWNER || 'vlayer-xyz';
-  const name = process.env.NAME || 'vlayer';
+  const name = process.env.NAME || 'vouch';
   const login = process.env.LOGIN || 'Chmarusso';
 
   if (!token) {

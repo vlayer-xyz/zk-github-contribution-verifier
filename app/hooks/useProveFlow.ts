@@ -93,17 +93,10 @@ export function useProveFlow() {
     setIsCompressing(true);
     setError(null);
     try {
-      const data = await compressPresentation(presentation, username.trim());
-      
-      // Extract exactly like the test does (lines 176-177 in webProof.test.ts)
-      const zkProof = data.success ? data.data.zkProof : data.zkProof;
-      const journalDataAbi = data.success ? data.data.journalDataAbi : data.journalDataAbi;
-      
-      // Match test validation exactly (line 179)
-      if (!zkProof || !journalDataAbi) {
-        throw new Error('Compression response missing zkProof or journalDataAbi');
-      }
-      const decoded = decodeJournalData(journalDataAbi as `0x${string}`);
+      const { data } = await compressPresentation(presentation, username.trim());
+      const { zkProof, journalDataAbi } = data;
+
+      const decoded = decodeJournalData(journalDataAbi);
       const userData = { username: decoded.username, total: Number(decoded.contributions) };
 
       setZkProofResult({ 
@@ -135,5 +128,3 @@ export function useProveFlow() {
     handleCompress,
   } as const;
 }
-
-

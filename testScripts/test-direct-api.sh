@@ -3,6 +3,41 @@
 # Test script for direct vlayer Web Prover API call
 # Tests proving vlayer GitHub contributors endpoint
 
+# Get the script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ENV_LOCAL="$PROJECT_ROOT/.env.local"
+
+# Load .env.local if it exists
+if [ -f "$ENV_LOCAL" ]; then
+    echo "Loading environment variables from .env.local..."
+    # Export variables from .env.local, ignoring comments and empty lines
+    set -a
+    while IFS= read -r line || [ -n "$line" ]; do
+        # Trim leading/trailing whitespace
+        line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        # Skip empty lines and comments
+        if [[ -z "$line" || "$line" =~ ^# ]]; then
+            continue
+        fi
+        # Export the variable (handles KEY=value format, including quoted values)
+        if [[ "$line" =~ ^([^=#]+)=(.*)$ ]]; then
+            key="${BASH_REMATCH[1]}"
+            value="${BASH_REMATCH[2]}"
+            # Trim whitespace from key (both leading and trailing)
+            key=$(echo "$key" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            # Remove quotes if present (handles both single and double quotes)
+            value="${value#\"}"
+            value="${value%\"}"
+            value="${value#\'}"
+            value="${value%\'}"
+            export "$key"="$value"
+        fi
+    done < "$ENV_LOCAL"
+    set +a
+    echo ""
+fi
+
 echo "Testing direct vlayer Web Prover API call..."
 echo "URL: https://api.github.com/repos/vlayer-xyz/vlayer/contributors"
 echo ""
@@ -68,7 +103,7 @@ RESPONSE=$(curl -X POST https://web-prover.vlayer.xyz/api/v1/prove \
   -d "$REQUEST_BODY" \
   -w "\n%{http_code}" \
   -s \
-  --max-time 300)
+  --max-time 60)
 
 # Record end time
 END_TIME=$(date +%s)
