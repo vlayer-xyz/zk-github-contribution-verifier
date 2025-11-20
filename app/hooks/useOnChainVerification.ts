@@ -25,6 +25,7 @@ export function useOnChainVerification() {
 
   const [selectedChainId, setSelectedChainId] = useState<number>(Number(process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || 31337));
   const [contractAddress, setContractAddress] = useState<string>(process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || '');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const needsSwitch = useMemo(() => isConnected && chainId !== selectedChainId, [isConnected, chainId, selectedChainId]);
 
@@ -59,17 +60,21 @@ export function useOnChainVerification() {
     setError: (m: string | null) => void;
   }) {
     try {
+      setIsVerifying(true);
       params.setError(null);
       if (!params.zkProofResult?.zkProof || !params.zkProofResult?.journalDataAbi) {
         params.setError('Generate ZK proof first');
+        setIsVerifying(false);
         return;
       }
       if (!contractAddress || contractAddress.length < 10) {
         params.setError('Enter contract address');
+        setIsVerifying(false);
         return;
       }
       if (!isConnected) {
         params.setError('Connect your wallet');
+        setIsVerifying(false);
         return;
       }
       if (chainId !== selectedChainId && switchChain) {
@@ -83,6 +88,7 @@ export function useOnChainVerification() {
 
       if (!publicClient) {
         params.setError('Public client not available');
+        setIsVerifying(false);
         return;
       }
 
@@ -129,11 +135,12 @@ export function useOnChainVerification() {
     } catch (e: unknown) {
       const error = e as { shortMessage?: string; message?: string };
       params.setError(error?.shortMessage || error?.message || 'On-chain verification failed');
+      setIsVerifying(false);
     }
   }
 
   return {
-    address, isConnected, isConnecting, isSwitching, isWriting,
+    address, isConnected, isConnecting, isSwitching, isWriting, isVerifying,
     connect: () => connect({ connector: injected() }),
     disconnect,
     chainId,
