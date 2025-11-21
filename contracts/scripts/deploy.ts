@@ -75,9 +75,21 @@ async function deploy(options: DeployOptions) {
   // Get network configuration
   const networkConfig = getNetworkConfig(network);
 
+  // Use SEPOLIA_RPC_URL from .env if deploying to sepolia
+  let rpcUrl = networkConfig.rpcUrl;
+  if (network === 'sepolia') {
+    const sepoliaRpcUrl = process.env.SEPOLIA_RPC_URL;
+    if (sepoliaRpcUrl) {
+      rpcUrl = sepoliaRpcUrl;
+      console.log(`Using SEPOLIA_RPC_URL from .env`);
+    } else {
+      console.log(`SEPOLIA_RPC_URL not set in .env, using default: ${rpcUrl}`);
+    }
+  }
+
   console.log(`Network: ${network}`);
   console.log(`Chain ID: ${networkConfig.chain.id}`);
-  console.log(`RPC URL: ${networkConfig.rpcUrl}`);
+  console.log(`RPC URL: ${rpcUrl}`);
 
   // Setup wallet
   const privateKey = process.env.PRIVATE_KEY;
@@ -91,13 +103,13 @@ async function deploy(options: DeployOptions) {
   // Create clients
   const publicClient = createPublicClient({
     chain: networkConfig.chain,
-    transport: http(networkConfig.rpcUrl),
+    transport: http(rpcUrl),
   });
 
   const walletClient = createWalletClient({
     account,
     chain: networkConfig.chain,
-    transport: http(networkConfig.rpcUrl),
+    transport: http(rpcUrl),
   });
 
   // Check balance
