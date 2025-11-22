@@ -160,9 +160,10 @@ export QUERIES_HASH=0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1face
 export EXPECTED_URL=https://api.github.com/graphql
 ```
 
-3) Build and deploy the contract to Anvil:
+3) Build, install and deploy the contract to Anvil:
 ```bash
 cd contracts
+forge soldeer install
 forge build
 
 # Via npm script if available
