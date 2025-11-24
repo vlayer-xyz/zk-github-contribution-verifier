@@ -12,7 +12,7 @@ export function OnChainVerificationPanel(props: {
 }) {
   const chains = useSupportedChains();
   const {
-    address, isConnected, isConnecting, isSwitching, isWriting,
+    address, isConnected, isConnecting, isSwitching, isWriting, isVerifying,
     connect, disconnect,
     chainId, needsSwitch, requestSwitch,
     selectedChainId, setSelectedChainId,
@@ -73,10 +73,10 @@ export function OnChainVerificationPanel(props: {
         )}
         <button
           onClick={() => verifyOnChain({ zkProofResult: props.zkProofResult, username: props.username, inputUrl: props.inputUrl, setError: props.setError })}
-          disabled={!isConnected || !contractAddress || isWriting || isSwitching || needsSwitch}
+          disabled={!isConnected || !contractAddress || isWriting || isSwitching || needsSwitch || isVerifying}
           className="px-4 py-2 bg-[#7235e5] hover:bg-[#5d2bc7] disabled:bg-gray-700 rounded"
         >
-          {isWriting || isSwitching ? 'Submitting…' : 'Verify on-chain'}
+          {isWriting || isSwitching || isVerifying ? 'Submitting…' : 'Verify on-chain'}
         </button>
         </div>
       </div>

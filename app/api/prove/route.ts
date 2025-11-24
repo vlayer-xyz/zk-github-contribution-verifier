@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyRepositoryAccess } from '@/app/lib/github-helpers';
 
 // Configure max duration for Vercel (up to 90 seconds)
 export const maxDuration = 160;
@@ -23,6 +24,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Missing GitHub token. Provide githubToken in body or set GITHUB_TOKEN' },
         { status: 400 }
+      );
+    }
+
+    // Extract and validate repository information
+    const owner = variables.owner as string | undefined;
+    const name = variables.name as string | undefined;
+
+    if (!owner || typeof owner !== 'string' || !name || typeof name !== 'string') {
+      return NextResponse.json(
+        { error: 'Missing repository information. Provide owner and name in body.variables' },
+        { status: 400 }
+      );
+    }
+
+    // Verify repository access before proceeding
+    const accessResult = await verifyRepositoryAccess({
+      owner,
+      name,
+      githubToken,
+    });
+
+    if (!accessResult.success) {
+      return NextResponse.json(
+        { error: accessResult.error },
+        { status: accessResult.statusCode || 500 }
       );
     }
 
