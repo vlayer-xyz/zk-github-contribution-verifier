@@ -126,9 +126,15 @@ async function deploy(options: DeployOptions) {
   // Get or deploy verifier
   let verifierAddress: Hex | undefined = providedVerifier;
   if (!verifierAddress) {
-    console.log(`\nNo verifier address provided. Deploying RiscZeroMockVerifier...`);
-    verifierAddress = await deployMockVerifier(walletClient, publicClient, account);
-    console.log(`RiscZeroMockVerifier deployed at: ${verifierAddress}`);
+    // For base-sepolia, use the existing RiscZeroGroth16Verifier
+    if (network === 'base-sepolia') {
+      verifierAddress = '0x2a098988600d87650Fb061FfAff08B97149Fa84D';
+      console.log(`\nUsing existing RiscZeroGroth16Verifier at: ${verifierAddress}`);
+    } else {
+      console.log(`\nNo verifier address provided. Deploying RiscZeroMockVerifier...`);
+      verifierAddress = await deployMockVerifier(walletClient, publicClient, account);
+      console.log(`RiscZeroMockVerifier deployed at: ${verifierAddress}`);
+    }
   }
   const imageId = process.env.ZK_PROVER_GUEST_ID as Hex;
   const notaryKeyFingerprint = process.env.NOTARY_KEY_FINGERPRINT as Hex;

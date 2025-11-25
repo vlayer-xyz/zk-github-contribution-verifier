@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(requestBody),
       // Add timeout to prevent hanging requests
-      signal: AbortSignal.timeout(85000), // 85 seconds (less than maxDuration)
+      signal: AbortSignal.timeout(850000) // 850 seconds (less than maxDuration)
     });
 
     if (!response.ok) {
