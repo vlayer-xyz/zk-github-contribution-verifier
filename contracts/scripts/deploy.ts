@@ -10,10 +10,7 @@ dotenv.config();
 
 // Contract bytecode and ABI (will be loaded from forge artifacts)
 function loadContractArtifact() {
-  const artifactPath = path.join(
-    __dirname,
-    '../out/GitHubContributionVerifier.sol/GitHubContributionVerifier.json'
-  );
+  const artifactPath = path.join(__dirname, '../out/GitHubContributionVerifier.sol/GitHubContributionVerifier.json');
 
   if (!fs.existsSync(artifactPath)) {
     throw new Error('Contract not compiled. Run: forge build');
@@ -28,10 +25,7 @@ function loadContractArtifact() {
 
 // Load RiscZeroMockVerifier artifact (from risc0-ethereum library)
 function loadMockVerifierArtifact() {
-  const artifactPath = path.join(
-    __dirname,
-    '../out/RiscZeroMockVerifier.sol/RiscZeroMockVerifier.json'
-  );
+  const artifactPath = path.join(__dirname, '../out/RiscZeroMockVerifier.sol/RiscZeroMockVerifier.json');
 
   if (!fs.existsSync(artifactPath)) {
     throw new Error('Mock verifier not compiled. Run: forge build');
@@ -59,9 +53,7 @@ async function deployMockVerifier(
   });
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
   if (!receipt.contractAddress) {
-    throw new Error(
-      'Mock verifier deployment failed - no contract address in receipt'
-    );
+    throw new Error('Mock verifier deployment failed - no contract address in receipt');
   }
   return receipt.contractAddress as Hex;
 }
@@ -73,11 +65,7 @@ interface DeployOptions {
 }
 
 async function deploy(options: DeployOptions) {
-  const {
-    network,
-    verify = false,
-    verifierAddress: providedVerifier,
-  } = options;
+  const { network, verify = false, verifierAddress: providedVerifier } = options;
 
   console.log(`\n=== Deploying to ${network} ===\n`);
 
@@ -135,18 +123,10 @@ async function deploy(options: DeployOptions) {
     // For base-sepolia, use the existing RiscZeroGroth16Verifier
     if (network === 'base-sepolia') {
       verifierAddress = '0x2a098988600d87650Fb061FfAff08B97149Fa84D';
-      console.log(
-        `\nUsing existing RiscZeroGroth16Verifier at: ${verifierAddress}`
-      );
+      console.log(`\nUsing existing RiscZeroGroth16Verifier at: ${verifierAddress}`);
     } else {
-      console.log(
-        `\nNo verifier address provided. Deploying RiscZeroMockVerifier...`
-      );
-      verifierAddress = await deployMockVerifier(
-        walletClient,
-        publicClient,
-        account
-      );
+      console.log(`\nNo verifier address provided. Deploying RiscZeroMockVerifier...`);
+      verifierAddress = await deployMockVerifier(walletClient, publicClient, account);
       console.log(`RiscZeroMockVerifier deployed at: ${verifierAddress}`);
     }
   }
@@ -155,27 +135,18 @@ async function deploy(options: DeployOptions) {
   const queriesHash = process.env.QUERIES_HASH as Hex;
   const expectedUrl = process.env.EXPECTED_URL || 'https://api.github.com';
 
-  if (
-    !imageId ||
-    imageId ===
-      '0x0000000000000000000000000000000000000000000000000000000000000000'
-  ) {
+  if (!imageId || imageId === '0x0000000000000000000000000000000000000000000000000000000000000000') {
     throw new Error('ZK_PROVER_GUEST_ID not set');
   }
 
   if (
     !notaryKeyFingerprint ||
-    notaryKeyFingerprint ===
-      '0x0000000000000000000000000000000000000000000000000000000000000000'
+    notaryKeyFingerprint === '0x0000000000000000000000000000000000000000000000000000000000000000'
   ) {
     throw new Error('NOTARY_KEY_FINGERPRINT not set');
   }
 
-  if (
-    !queriesHash ||
-    queriesHash ===
-      '0x0000000000000000000000000000000000000000000000000000000000000000'
-  ) {
+  if (!queriesHash || queriesHash === '0x0000000000000000000000000000000000000000000000000000000000000000') {
     throw new Error('QUERIES_HASH not set');
   }
 
@@ -198,13 +169,7 @@ async function deploy(options: DeployOptions) {
     bytecode,
     account,
     chain: walletClient.chain,
-    args: [
-      verifierAddress,
-      imageId,
-      notaryKeyFingerprint,
-      queriesHash,
-      expectedUrl,
-    ],
+    args: [verifierAddress, imageId, notaryKeyFingerprint, queriesHash, expectedUrl],
   });
 
   console.log(`\nTransaction hash: ${hash}`);
@@ -214,9 +179,7 @@ async function deploy(options: DeployOptions) {
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
   if (!receipt.contractAddress) {
-    throw new Error(
-      'Contract deployment failed - no contract address in receipt'
-    );
+    throw new Error('Contract deployment failed - no contract address in receipt');
   }
 
   console.log(`\n✓ Contract deployed successfully!`);
@@ -243,11 +206,7 @@ async function deploy(options: DeployOptions) {
     },
   };
 
-  const deploymentPath = path.join(
-    __dirname,
-    '../deployments',
-    `${network}.json`
-  );
+  const deploymentPath = path.join(__dirname, '../deployments', `${network}.json`);
   fs.writeFileSync(deploymentPath, JSON.stringify(deploymentInfo, null, 2));
   console.log(`\nDeployment info saved to: ${deploymentPath}`);
 
@@ -293,15 +252,11 @@ Examples:
 
   const network = args[0];
   const shouldVerify = args.includes('--verify');
-  const potentialAddressArg = args.find(
-    (a) => a.startsWith('0x') && a.length === 42
-  );
+  const potentialAddressArg = args.find((a) => a.startsWith('0x') && a.length === 42);
 
   // Safety check for mainnet deployments
   if (['mainnet', 'base', 'optimism', 'arbitrum'].includes(network)) {
-    console.log(
-      `\n⚠️  WARNING: You are about to deploy to ${network.toUpperCase()} MAINNET!`
-    );
+    console.log(`\n⚠️  WARNING: You are about to deploy to ${network.toUpperCase()} MAINNET!`);
     console.log(`This will cost real money and cannot be undone.\n`);
 
     const rl = readline.createInterface({
@@ -333,22 +288,14 @@ Examples:
     console.log(`Transaction: ${result.transactionHash}`);
     console.log(`\nNext steps:`);
     if (network.toLowerCase() === 'anvil') {
-      console.log(
-        `1. Update your .env with: NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS=${result.address}`
-      );
+      console.log(`1. Update your .env with: NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS=${result.address}`);
     } else {
       const prefix = network.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
-      console.log(
-        `1. Update your .env with: NEXT_PUBLIC_${prefix}_CONTRACT_ADDRESS=${result.address}`
-      );
+      console.log(`1. Update your .env with: NEXT_PUBLIC_${prefix}_CONTRACT_ADDRESS=${result.address}`);
     }
-    console.log(
-      `2. Test the contract: npm run submit-proof ${network} ./proof.json ${result.address}`
-    );
+    console.log(`2. Test the contract: npm run submit-proof ${network} ./proof.json ${result.address}`);
     if (!shouldVerify) {
-      console.log(
-        `3. Verify contract code in blockchain explorer: npm run verify ${network} ${result.address}`
-      );
+      console.log(`3. Verify contract code in blockchain explorer: npm run verify ${network} ${result.address}`);
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
