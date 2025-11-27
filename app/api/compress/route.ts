@@ -40,8 +40,7 @@ export async function POST(request: NextRequest) {
         Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
       },
       body: JSON.stringify(requestBody),
-      // Add timeout to prevent hanging requests
-      signal: AbortSignal.timeout(850000) // 850 seconds (less than maxDuration)
+      signal: AbortSignal.timeout(850000)  // hight timeout because boundless proving is low
     });
 
     if (!response.ok) {
