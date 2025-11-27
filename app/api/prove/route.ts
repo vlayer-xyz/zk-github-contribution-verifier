@@ -11,13 +11,11 @@ export async function POST(request: NextRequest) {
     const graphqlUrl = 'https://api.github.com/graphql';
     const query = body.query as string | undefined;
     const variables = (body.variables as Record<string, unknown>) || {};
-    const githubToken = (body.githubToken as string) || process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN || '';
+    const githubToken =
+      (body.githubToken as string) || process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN || '';
 
     if (!query || typeof query !== 'string') {
-      return NextResponse.json(
-        { error: 'Missing GraphQL query in body.query' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing GraphQL query in body.query' }, { status: 400 });
     }
 
     if (!githubToken) {
@@ -46,10 +44,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!accessResult.success) {
-      return NextResponse.json(
-        { error: accessResult.error },
-        { status: accessResult.statusCode || 500 }
-      );
+      return NextResponse.json({ error: accessResult.error }, { status: accessResult.statusCode || 500 });
     }
 
     const requestBody = {
@@ -77,7 +72,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         'x-client-id': process.env.WEB_PROVER_API_CLIENT_ID || '',
-        'Authorization': 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
+        Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
       },
       body: JSON.stringify(requestBody),
     });
@@ -89,11 +84,11 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    
+
     return NextResponse.json(data);
   } catch (error) {
     console.error('Prove API error:', error);
-    
+
     // Handle timeout errors specifically
     if (error instanceof Error && error.name === 'TimeoutError') {
       return NextResponse.json(
@@ -101,7 +96,7 @@ export async function POST(request: NextRequest) {
         { status: 408 }
       );
     }
-    
+
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to prove URL' },
       { status: 500 }

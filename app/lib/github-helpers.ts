@@ -14,16 +14,16 @@ export async function verifyRepositoryAccess(
   params: VerifyRepositoryAccessParams
 ): Promise<VerifyRepositoryAccessResult> {
   const { owner, name, githubToken } = params;
-  
+
   try {
     const repoCheckUrl = `https://api.github.com/repos/${owner}/${name}`;
-    
+
     const repoCheckResponse = await fetch(repoCheckUrl, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${githubToken}`,
+        Authorization: `Bearer ${githubToken}`,
         'User-Agent': 'zk-github-contribution-verifier',
-        'Accept': 'application/vnd.github.v3+json',
+        Accept: 'application/vnd.github.v3+json',
       },
     });
 
@@ -69,4 +69,3 @@ export async function verifyRepositoryAccess(
     };
   }
 }
-

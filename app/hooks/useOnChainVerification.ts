@@ -1,17 +1,25 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain, useWriteContract, usePublicClient } from "wagmi";
-import { injected } from "wagmi/connectors";
-import { useEffect, useMemo, useState } from "react";
-import { GitHubContributionVerifierAbi } from "../lib/abi";
-import { decodeJournalData } from "../lib/utils";
+import { useRouter } from 'next/navigation';
+import {
+  useAccount,
+  useChainId,
+  useConnect,
+  useDisconnect,
+  useSwitchChain,
+  useWriteContract,
+  usePublicClient,
+} from 'wagmi';
+import { injected } from 'wagmi/connectors';
+import { useEffect, useMemo, useState } from 'react';
+import { GitHubContributionVerifierAbi } from '../lib/abi';
+import { decodeJournalData } from '../lib/utils';
 import {
   decodeTransactionError,
   buildErrorRedirectParams,
   buildSuccessRedirectParams,
   getContractAddressFromEnv,
-} from "../lib/verification-helpers";
+} from '../lib/verification-helpers';
 
 export function useOnChainVerification() {
   const router = useRouter();
@@ -23,11 +31,18 @@ export function useOnChainVerification() {
   const { writeContractAsync, isPending: isWriting } = useWriteContract();
   const publicClient = usePublicClient();
 
-  const [selectedChainId, setSelectedChainId] = useState<number>(Number(process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || 31337));
-  const [contractAddress, setContractAddress] = useState<string>(process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || '');
+  const [selectedChainId, setSelectedChainId] = useState<number>(
+    Number(process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || 31337)
+  );
+  const [contractAddress, setContractAddress] = useState<string>(
+    process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || ''
+  );
   const [isVerifying, setIsVerifying] = useState(false);
 
-  const needsSwitch = useMemo(() => isConnected && chainId !== selectedChainId, [isConnected, chainId, selectedChainId]);
+  const needsSwitch = useMemo(
+    () => isConnected && chainId !== selectedChainId,
+    [isConnected, chainId, selectedChainId]
+  );
 
   const requestSwitch = async (targetChainId?: number) => {
     const goalId = targetChainId ?? selectedChainId;
@@ -40,8 +55,7 @@ export function useOnChainVerification() {
     if (isConnected && chainId !== selectedChainId && switchChain) {
       try {
         switchChain({ chainId: selectedChainId });
-      } catch {
-      }
+      } catch {}
     }
   }, [isConnected, selectedChainId, chainId, switchChain]);
 
@@ -102,7 +116,7 @@ export function useOnChainVerification() {
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-      if (receipt.status === "reverted") {
+      if (receipt.status === 'reverted') {
         const { errorMessage, errorName } = await decodeTransactionError({
           publicClient,
           hash,
@@ -140,16 +154,21 @@ export function useOnChainVerification() {
   }
 
   return {
-    address, isConnected, isConnecting, isSwitching, isWriting, isVerifying,
+    address,
+    isConnected,
+    isConnecting,
+    isSwitching,
+    isWriting,
+    isVerifying,
     connect: () => connect({ connector: injected() }),
     disconnect,
     chainId,
     needsSwitch,
     requestSwitch,
-    selectedChainId, setSelectedChainId,
-    contractAddress, setContractAddress,
+    selectedChainId,
+    setSelectedChainId,
+    contractAddress,
+    setContractAddress,
     verifyOnChain,
   } as const;
 }
-
-

@@ -25,10 +25,7 @@ function loadContractArtifact() {
 
 // Load RiscZeroMockVerifier artifact (from risc0-ethereum library)
 function loadMockVerifierArtifact() {
-  const artifactPath = path.join(
-    __dirname,
-    '../out/RiscZeroMockVerifier.sol/RiscZeroMockVerifier.json'
-  );
+  const artifactPath = path.join(__dirname, '../out/RiscZeroMockVerifier.sol/RiscZeroMockVerifier.json');
 
   if (!fs.existsSync(artifactPath)) {
     throw new Error('Mock verifier not compiled. Run: forge build');
@@ -136,7 +133,10 @@ async function deploy(options: DeployOptions) {
     throw new Error('ZK_PROVER_GUEST_ID not set');
   }
 
-  if (!notaryKeyFingerprint || notaryKeyFingerprint === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+  if (
+    !notaryKeyFingerprint ||
+    notaryKeyFingerprint === '0x0000000000000000000000000000000000000000000000000000000000000000'
+  ) {
     throw new Error('NOTARY_KEY_FINGERPRINT not set');
   }
 
@@ -208,7 +208,9 @@ async function deploy(options: DeployOptions) {
   if (verify) {
     console.log(`\n=== Contract Verification ===`);
     console.log(`To verify on block explorer, run:`);
-    console.log(`forge verify-contract ${receipt.contractAddress} GitHubContributionVerifier --chain ${network} --watch`);
+    console.log(
+      `forge verify-contract ${receipt.contractAddress} GitHubContributionVerifier --chain ${network} --watch`
+    );
     console.log(`\nOr use the verify script:`);
     console.log(`npm run verify ${network} ${receipt.contractAddress}`);
   }
@@ -289,7 +291,6 @@ Examples:
     if (!shouldVerify) {
       console.log(`3. Verify contract code in blockchain explorer: npm run verify ${network} ${result.address}`);
     }
-
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`\n✗ Deployment failed:`, message);

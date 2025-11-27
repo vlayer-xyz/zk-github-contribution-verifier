@@ -35,5 +35,3 @@ export async function compressPresentation(presentation: any, username: string) 
   if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
   return res.json();
 }
-
-

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 
 export function GitHubTokenInput(props: {
   visible: boolean;
@@ -25,12 +25,15 @@ export function GitHubTokenInput(props: {
       />
       <p className="text-xs text-gray-500">
         Required for private repositories. Generate one at{' '}
-        <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener noreferrer" className="text-[#7235e5] hover:underline">
+        <a
+          href="https://github.com/settings/personal-access-tokens"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#7235e5] hover:underline"
+        >
           GitHub Settings → Developer settings → Personal access tokens
         </a>
       </p>
     </div>
   );
 }
-
-

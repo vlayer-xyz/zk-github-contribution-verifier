@@ -34,7 +34,8 @@ function nowTs() {
   return (
     d.getFullYear().toString() +
     pad(d.getMonth() + 1) +
-    pad(d.getDate()) + '_' +
+    pad(d.getDate()) +
+    '_' +
     pad(d.getHours()) +
     pad(d.getMinutes()) +
     pad(d.getSeconds())
@@ -117,10 +118,7 @@ async function main() {
         presentation,
         extract: {
           'response.body': {
-            jmespath: [
-              `[?login=='${username}'].login | [0]`,
-              `[?login=='${username}'].contributions | [0]`,
-            ],
+            jmespath: [`[?login=='${username}'].login | [0]`, `[?login=='${username}'].contributions | [0]`],
           },
         },
       }
@@ -206,5 +204,3 @@ main().catch((err) => {
   console.error('Unexpected error:', err?.message || err);
   process.exit(1);
 });
-
-

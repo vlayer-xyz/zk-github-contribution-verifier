@@ -9,33 +9,23 @@ export async function POST(request: NextRequest) {
     const { presentation, username } = body;
 
     if (!presentation) {
-      return NextResponse.json(
-        { error: 'Presentation data is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Presentation data is required' }, { status: 400 });
     }
 
     if (!username) {
-      return NextResponse.json(
-        { error: 'Username is required for extraction' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username is required for extraction' }, { status: 400 });
     }
 
     // Build JMESPath queries to extract repo nameWithOwner, login and merged PRs count from GraphQL response
     const extractConfig = {
-      "response.body": {
-        "jmespath": [
-          `data.repository.nameWithOwner`,
-          `data.user.login`,
-          `data.mergedPRs.issueCount`,
-        ]
-      }
+      'response.body': {
+        jmespath: [`data.repository.nameWithOwner`, `data.user.login`, `data.mergedPRs.issueCount`],
+      },
     };
 
     const requestBody = {
       presentation,
-      extraction: extractConfig
+      extraction: extractConfig,
     };
 
     console.log('Compressing web proof for user:', username);
@@ -47,11 +37,11 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         'x-client-id': process.env.WEB_PROVER_API_CLIENT_ID || '',
-        'Authorization': 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
+        Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
       },
       body: JSON.stringify(requestBody),
       // Add timeout to prevent hanging requests
-      signal: AbortSignal.timeout(85000) // 85 seconds (less than maxDuration)
+      signal: AbortSignal.timeout(85000), // 85 seconds (less than maxDuration)
     });
 
     if (!response.ok) {

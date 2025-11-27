@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 
 export function ActionButtons(props: {
   onProve: () => void;
@@ -45,5 +45,3 @@ export function ActionButtons(props: {
     </div>
   );
 }
-
-

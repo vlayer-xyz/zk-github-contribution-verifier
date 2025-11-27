@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Suspense, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { baseSepolia, optimismSepolia, sepolia } from "viem/chains";
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { baseSepolia, optimismSepolia, sepolia } from 'viem/chains';
 
 function getExplorerBaseUrl(chainId: number): string | null {
   const byId: Record<number, { url: string } | undefined> = {
@@ -22,11 +22,11 @@ function SuccessContent() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const handle = params.get("handle") || "";
-  const chainId = Number(params.get("chainId") || "0");
-  const reponame = params.get("reponame") || ""; // owner/repo
-  const contributions = params.get("contributions") || "";
-  const txHash = params.get("txHash") || "";
+  const handle = params.get('handle') || '';
+  const chainId = Number(params.get('chainId') || '0');
+  const reponame = params.get('reponame') || ''; // owner/repo
+  const contributions = params.get('contributions') || '';
+  const txHash = params.get('txHash') || '';
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState<string | null>(null);
@@ -42,7 +42,7 @@ function SuccessContent() {
         const data = await res.json();
         if (!ignore) setAvatarUrl(data?.avatar_url ?? null);
       } catch (e: any) {
-        if (!ignore) setAvatarError(e?.message || "Failed to load avatar");
+        if (!ignore) setAvatarError(e?.message || 'Failed to load avatar');
       }
     }
     fetchAvatar();
@@ -54,7 +54,7 @@ function SuccessContent() {
   const explorerUrl = useMemo(() => {
     const base = getExplorerBaseUrl(chainId);
     if (!base || !txHash) return null;
-    return `${base.replace(/\/$/, "")}/tx/${txHash}`;
+    return `${base.replace(/\/$/, '')}/tx/${txHash}`;
   }, [chainId, txHash]);
 
   const valid = handle && reponame && contributions && txHash;
@@ -69,12 +69,7 @@ function SuccessContent() {
             className="absolute top-[-10%] w-1.5 h-3 rounded-sm animate-confetti"
             style={{
               left: `${(i * 101) % 100}%`,
-              background:
-                i % 3 === 0
-                  ? "#7235e5"
-                  : i % 3 === 1
-                  ? "#22c55e"
-                  : "#eab308",
+              background: i % 3 === 0 ? '#7235e5' : i % 3 === 1 ? '#22c55e' : '#eab308',
               transform: `rotate(${(i * 37) % 360}deg)`,
               animationDelay: `${(i % 6) * 0.25}s`,
               animationDuration: `${6 + (i % 5)}s`,
@@ -86,8 +81,12 @@ function SuccessContent() {
 
       <style jsx global>{`
         @keyframes confettiFall {
-          0% { transform: translateY(-10vh) rotate(0deg); }
-          100% { transform: translateY(110vh) rotate(380deg); }
+          0% {
+            transform: translateY(-10vh) rotate(0deg);
+          }
+          100% {
+            transform: translateY(110vh) rotate(380deg);
+          }
         }
         .animate-confetti {
           animation-name: confettiFall;
@@ -120,16 +119,12 @@ function SuccessContent() {
               <div>
                 <div className="text-white font-semibold">@{handle}</div>
                 <div className="text-gray-400 text-sm">{reponame}</div>
-                {avatarError && (
-                  <div className="text-xs text-red-400 mt-1">{avatarError}</div>
-                )}
+                {avatarError && <div className="text-xs text-red-400 mt-1">{avatarError}</div>}
               </div>
             </div>
 
             <div className="bg-[#7235e5]/10 border border-[#7235e5]/20 rounded-lg p-4 mb-4">
-              <div className="text-[#7235e5] text-xl font-semibold">
-                {contributions} contributions verified
-              </div>
+              <div className="text-[#7235e5] text-xl font-semibold">{contributions} contributions verified</div>
               <div className="text-gray-400 text-sm mt-1">Proven and recorded via smart contract.</div>
             </div>
 
@@ -150,10 +145,7 @@ function SuccessContent() {
             </div>
 
             <div className="mt-8 flex gap-3">
-              <button
-                onClick={() => router.push("/")}
-                className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700"
-              >
+              <button onClick={() => router.push('/')} className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700">
                 Back to main
               </button>
               {explorerUrl && (
@@ -176,10 +168,10 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading…</div>}>
+    <Suspense
+      fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading…</div>}
+    >
       <SuccessContent />
     </Suspense>
   );
 }
-
-

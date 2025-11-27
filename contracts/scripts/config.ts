@@ -9,7 +9,7 @@ export interface NetworkConfig {
 
 export const networks: Record<string, NetworkConfig> = {
   anvil: {
-    chain: (foundry as unknown as Chain),
+    chain: foundry as unknown as Chain,
     rpcUrl: process.env.ANVIL_RPC_URL || 'http://127.0.0.1:8545',
     contractAddress: process.env.ANVIL_CONTRACT_ADDRESS,
   },
