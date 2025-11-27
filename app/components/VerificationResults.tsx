@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React from "react";
-import type { PageResult } from "../lib/types";
+import React from 'react';
+import type { PageResult } from '../lib/types';
 
 export function VerificationResults(props: { result: PageResult }) {
   const r = props.result;
@@ -16,15 +16,23 @@ export function VerificationResults(props: { result: PageResult }) {
             <p className="text-gray-400 text-sm">GitHub Contributor</p>
           </div>
           <div className="bg-[#7235e5]/10 border border-[#7235e5]/20 rounded-lg p-4">
-            <p className="text-[#7235e5] font-semibold text-xl">{r.data.contributionData.total} contributions verified</p>
-            <p className="text-gray-400 text-sm mt-1">Your contributions to this repository have been cryptographically verified</p>
+            <p className="text-[#7235e5] font-semibold text-xl">
+              {r.data.contributionData.total} contributions verified
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              Your contributions to this repository have been cryptographically verified
+            </p>
           </div>
         </div>
 
         <details className="bg-gray-900 border border-gray-700 rounded-lg">
-          <summary className="p-4 text-sm font-medium text-gray-300 cursor-pointer hover:text-white">Full Verification Response</summary>
+          <summary className="p-4 text-sm font-medium text-gray-300 cursor-pointer hover:text-white">
+            Full Verification Response
+          </summary>
           <div className="p-4 pt-0">
-            <pre className="text-xs text-gray-400 overflow-x-auto bg-gray-800 p-3 rounded">{JSON.stringify(r.data, null, 2)}</pre>
+            <pre className="text-xs text-gray-400 overflow-x-auto bg-gray-800 p-3 rounded">
+              {JSON.stringify(r.data, null, 2)}
+            </pre>
           </div>
         </details>
       </div>
@@ -33,12 +41,14 @@ export function VerificationResults(props: { result: PageResult }) {
 
   return (
     <details className="bg-gray-900 border border-gray-700 rounded-lg">
-      <summary className="p-4 text-sm font-medium text-gray-300 cursor-pointer hover:text-white">{r.type === 'prove' ? 'GitHub Contribution Proof' : 'Verification Result'}</summary>
+      <summary className="p-4 text-sm font-medium text-gray-300 cursor-pointer hover:text-white">
+        {r.type === 'prove' ? 'GitHub Contribution Proof' : 'Verification Result'}
+      </summary>
       <div className="p-4 pt-0">
-        <pre className="text-xs text-gray-400 overflow-x-auto bg-gray-800 p-3 rounded">{JSON.stringify(r.data, null, 2)}</pre>
+        <pre className="text-xs text-gray-400 overflow-x-auto bg-gray-800 p-3 rounded">
+          {JSON.stringify(r.data, null, 2)}
+        </pre>
       </div>
     </details>
   );
 }
-
-

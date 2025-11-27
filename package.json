@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test:e2e": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
@@ -25,6 +27,7 @@
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "latest",
+    "prettier": "^3.7.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite": "^7.2.2",

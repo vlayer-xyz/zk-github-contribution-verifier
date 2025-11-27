@@ -1,0 +1,22 @@
+# Ignore YAML files
+*.yaml
+*.yml
+
+# Common ignores
+node_modules
+.next
+out
+build
+dist
+coverage
+
+# Build artifacts
+*.log
+*.lock
+package-lock.json
+
+# Contracts build output
+contracts/out
+contracts/cache
+contracts/broadcast
+

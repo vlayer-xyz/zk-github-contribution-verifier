@@ -36,6 +36,7 @@ npm install
 ## Configuration
 
 1. Copy the example environment file:
+
 ```bash
 cp .env.example .env
 ```
@@ -50,6 +51,7 @@ cp .env.example .env
    - API keys for contract verification
 
 Note: To fetch `ZK_PROVER_GUEST_ID` automatically:
+
 ```bash
 export ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0
 export ZK_PROVER_GUEST_ID=$(curl -s ${ZK_PROVER_API_URL}/guest-id | jq -r '.data.guestId')
@@ -152,6 +154,7 @@ Create a JSON file with your ZK proof data (from `/api/compress` endpoint):
 ```
 
 The `journalDataAbi` is ABI-encoded data containing:
+
 - `notaryKeyFingerprint` (bytes32)
 - `method` (string) - e.g., "POST"
 - `url` (string) - e.g., "https://api.github.com/graphql"

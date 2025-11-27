@@ -60,9 +60,9 @@ async function main() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'User-Agent': 'zk-github-contribution-verifier',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     });
@@ -85,5 +85,3 @@ async function main() {
 }
 
 main();
-
-

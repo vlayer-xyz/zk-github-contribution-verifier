@@ -1,6 +1,6 @@
-import { useMemo } from "react";
-import { baseSepolia, optimismSepolia, sepolia } from "viem/chains";
-import { anvil } from "../lib/chains";
+import { useMemo } from 'react';
+import { baseSepolia, optimismSepolia, sepolia } from 'viem/chains';
+import { anvil } from '../lib/chains';
 
 export function useSupportedChains() {
   return useMemo(() => {
@@ -20,5 +20,3 @@ export function useSupportedChains() {
     return chains;
   }, []);
 }
-
-

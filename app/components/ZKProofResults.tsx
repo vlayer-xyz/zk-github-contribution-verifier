@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React from "react";
-import { decodeJournalData } from "../lib/utils";
+import React from 'react';
+import { decodeJournalData } from '../lib/utils';
 
 export function ZKProofResults(props: { zkProofResult: any }) {
   const z = props.zkProofResult;
@@ -12,7 +12,7 @@ export function ZKProofResults(props: { zkProofResult: any }) {
     try {
       decoded = decodeJournalData(z.journalDataAbi);
     } catch (error) {
-      console.error("Failed to decode journalDataAbi for display:", error);
+      console.error('Failed to decode journalDataAbi for display:', error);
     }
   }
 
@@ -21,7 +21,9 @@ export function ZKProofResults(props: { zkProofResult: any }) {
       {z.userData ? (
         <>
           <div className="p-6 bg-gray-900 border border-green-700 rounded-lg">
-            <h3 className="text-lg font-medium text-green-400 mb-4">ZK Proof Generated Successfully</h3>
+            <h3 className="text-lg font-medium text-green-400 mb-4">
+              ZK Proof Generated Successfully
+            </h3>
             <div className="flex items-center space-x-4 mb-4">
               <div className="w-12 h-12 rounded-full bg-green-600/20 flex items-center justify-center">
                 <span className="text-green-400 text-xl">✓</span>
@@ -57,23 +59,35 @@ export function ZKProofResults(props: { zkProofResult: any }) {
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Timestamp:</span>
-                  <span className="text-gray-300">{new Date(decoded.tlsTimestamp * 1000).toLocaleString()}</span>
+                  <span className="text-gray-300">
+                    {new Date(decoded.tlsTimestamp * 1000).toLocaleString()}
+                  </span>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Extracted Values:</span>
                   <div className="text-gray-300">
-                    <div className="font-mono text-xs bg-gray-800 px-2 py-1 rounded mb-1">[0] Repository: {decoded.repo}</div>
-                    <div className="font-mono text-xs bg-gray-800 px-2 py-1 rounded mb-1">[1] Username: {decoded.username}</div>
-                    <div className="font-mono text-xs bg-gray-800 px-2 py-1 rounded">[2] Contributions: {decoded.contributions.toString()}</div>
+                    <div className="font-mono text-xs bg-gray-800 px-2 py-1 rounded mb-1">
+                      [0] Repository: {decoded.repo}
+                    </div>
+                    <div className="font-mono text-xs bg-gray-800 px-2 py-1 rounded mb-1">
+                      [1] Username: {decoded.username}
+                    </div>
+                    <div className="font-mono text-xs bg-gray-800 px-2 py-1 rounded">
+                      [2] Contributions: {decoded.contributions.toString()}
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Extraction Hash:</span>
-                  <span className="text-gray-300 font-mono text-xs break-all">{decoded.extractionHash}</span>
+                  <span className="text-gray-300 font-mono text-xs break-all">
+                    {decoded.extractionHash}
+                  </span>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Notary Fingerprint:</span>
-                  <span className="text-gray-300 font-mono text-xs break-all">{decoded.notaryKeyFingerprint}</span>
+                  <span className="text-gray-300 font-mono text-xs break-all">
+                    {decoded.notaryKeyFingerprint}
+                  </span>
                 </div>
               </div>
             </details>
@@ -84,7 +98,9 @@ export function ZKProofResults(props: { zkProofResult: any }) {
               ZK Proof Data
             </summary>
             <div className="p-4 pt-0">
-              <pre className="text-xs text-gray-400 overflow-x-auto break-all bg-gray-800 p-3 rounded">{JSON.stringify(z.zkProof, null, 2)}</pre>
+              <pre className="text-xs text-gray-400 overflow-x-auto break-all bg-gray-800 p-3 rounded">
+                {JSON.stringify(z.zkProof, null, 2)}
+              </pre>
             </div>
           </details>
         </>
@@ -97,5 +113,3 @@ export function ZKProofResults(props: { zkProofResult: any }) {
     </div>
   );
 }
-
-

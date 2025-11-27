@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 
 export function ErrorDisplay(props: { error: string | null }) {
   if (!props.error) return null;
@@ -10,5 +10,3 @@ export function ErrorDisplay(props: { error: string | null }) {
     </div>
   );
 }
-
-

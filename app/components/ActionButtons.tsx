@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 
 export function ActionButtons(props: {
   onProve: () => void;
@@ -12,7 +12,16 @@ export function ActionButtons(props: {
   isVerifying: boolean;
   isCompressing: boolean;
 }) {
-  const { onProve, onVerify, onCompress, canAct, hasPresentation, isProving, isVerifying, isCompressing } = props;
+  const {
+    onProve,
+    onVerify,
+    onCompress,
+    canAct,
+    hasPresentation,
+    isProving,
+    isVerifying,
+    isCompressing,
+  } = props;
   return (
     <div className="space-y-4">
       <button
@@ -45,5 +54,3 @@ export function ActionButtons(props: {
     </div>
   );
 }
-
-

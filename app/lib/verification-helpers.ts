@@ -1,6 +1,6 @@
-import { type PublicClient, type Address, decodeErrorResult } from "viem";
-import { GitHubContributionVerifierAbi } from "./abi";
-import { parseOwnerRepo, decodeJournalData } from "./utils";
+import { type PublicClient, type Address, decodeErrorResult } from 'viem';
+import { GitHubContributionVerifierAbi } from './abi';
+import { parseOwnerRepo, decodeJournalData } from './utils';
 
 export type DecodedJournalData = ReturnType<typeof decodeJournalData>;
 
@@ -15,8 +15,8 @@ export async function decodeTransactionError(params: {
   seal: `0x${string}`;
   accountAddress: Address;
 }): Promise<{ errorMessage: string; errorName: string }> {
-  let errorMessage = "Transaction reverted on-chain";
-  let errorName = "UnknownError";
+  let errorMessage = 'Transaction reverted on-chain';
+  let errorName = 'UnknownError';
 
   try {
     const tx = await params.publicClient.getTransaction({ hash: params.hash });
@@ -28,7 +28,7 @@ export async function decodeTransactionError(params: {
       await params.publicClient.simulateContract({
         address: params.contractAddress,
         abi: GitHubContributionVerifierAbi,
-        functionName: "submitContribution",
+        functionName: 'submitContribution',
         args: [params.journalData, params.seal],
         account: params.accountAddress,
       });
@@ -37,7 +37,7 @@ export async function decodeTransactionError(params: {
         (simError as { data?: string })?.data ||
         (simError as { cause?: { data?: string } })?.cause?.data;
 
-      if (revertData && typeof revertData === "string" && revertData.startsWith("0x")) {
+      if (revertData && typeof revertData === 'string' && revertData.startsWith('0x')) {
         try {
           const decoded = decodeErrorResult({
             abi: GitHubContributionVerifierAbi,
@@ -46,17 +46,17 @@ export async function decodeTransactionError(params: {
           errorName = decoded.errorName;
           errorMessage = `Transaction reverted: ${decoded.errorName}`;
         } catch {
-          errorMessage = "Transaction reverted (unable to decode error)";
+          errorMessage = 'Transaction reverted (unable to decode error)';
         }
       } else {
         const msg = (simError as Error)?.message || String(simError);
-        if (msg.includes("revert") || msg.includes("Revert")) {
+        if (msg.includes('revert') || msg.includes('Revert')) {
           errorMessage = msg;
         }
       }
     }
   } catch {
-    errorMessage = "Transaction reverted (unable to decode error)";
+    errorMessage = 'Transaction reverted (unable to decode error)';
   }
 
   return { errorMessage, errorName };
@@ -65,10 +65,7 @@ export async function decodeTransactionError(params: {
 /**
  * Gets the repo name for redirect, falling back to parsing from inputUrl
  */
-export function getRepoForRedirect(
-  decoded: DecodedJournalData,
-  inputUrl: string
-): string {
+export function getRepoForRedirect(decoded: DecodedJournalData, inputUrl: string): string {
   if (decoded.repo) {
     return decoded.repo;
   }
@@ -78,7 +75,7 @@ export function getRepoForRedirect(
     return `${owner}/${name}`;
   }
 
-  return "";
+  return '';
 }
 
 /**
@@ -133,17 +130,16 @@ export function buildSuccessRedirectParams(params: {
 export function getContractAddressFromEnv(chainId: number): string {
   if (chainId === 31337) {
     // anvil
-    return process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || "";
+    return process.env.NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS || '';
   } else if (chainId === 11155111) {
     // sepolia
-    return process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS || "";
+    return process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS || '';
   } else if (chainId === 84532) {
     // baseSepolia
-    return process.env.NEXT_PUBLIC_BASE_SEPOLIA_CONTRACT_ADDRESS || "";
+    return process.env.NEXT_PUBLIC_BASE_SEPOLIA_CONTRACT_ADDRESS || '';
   } else if (chainId === 11155420) {
     // optimismSepolia
-    return process.env.NEXT_PUBLIC_OP_SEPOLIA_CONTRACT_ADDRESS || "";
+    return process.env.NEXT_PUBLIC_OP_SEPOLIA_CONTRACT_ADDRESS || '';
   }
-  return "";
+  return '';
 }
-

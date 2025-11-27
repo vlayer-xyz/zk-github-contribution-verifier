@@ -22,6 +22,7 @@ npm run test:gas
 ## Deployment
 
 ### Testnets
+
 ```bash
 npm run deploy:sepolia          # Deploy to Sepolia
 npm run deploy:base-sepolia     # Deploy to Base Sepolia
@@ -30,9 +31,11 @@ npm run deploy:anvil            # Deploy to local Anvil
 ```
 
 ### Mainnets
+
 Removed: only testnets supported (Sepolia, Base Sepolia, OP Sepolia) plus Anvil.
 
 ### Deploy with Verification
+
 ```bash
 npm run deploy sepolia -- --verify
 ```

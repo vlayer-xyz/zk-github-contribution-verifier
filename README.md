@@ -36,6 +36,7 @@ ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0
 ## Usage
 
 1. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -63,6 +64,7 @@ npm run test:e2e
 ```
 
 Requirements:
+
 - Foundry's `anvil` and `forge` must be available on your `PATH`
 - `contracts` dependencies installed (`npm install` inside `contracts/`)
 - No other services bound to the random ports the test selects
@@ -106,6 +108,7 @@ node testScripts/test-graphql-prove.js
 ```
 
 **Environment Variables:**
+
 - `GITHUB_TOKEN` (required): GitHub Personal Access Token with appropriate permissions
 - `OWNER` (optional, default: `vlayer-xyz`): Repository owner/organization
 - `NAME` (optional, default: `vouch`): Repository name
@@ -113,6 +116,7 @@ node testScripts/test-graphql-prove.js
 - `GITHUB_URL` (optional, default: `https://api.github.com/graphql`): GitHub API endpoint
 
 **Features:**
+
 - Automatically loads `.env` and `.env.local` files (`.env.local` overrides `.env`)
 - Tests direct GraphQL queries to GitHub API
 - Useful for verifying token permissions and repository access
@@ -165,6 +169,7 @@ forge soldeer install
 # Regenerate remappings.txt if needed
 forge soldeer remap
 ```
+
 ### Supported Networks
 
 - Sepolia (testnet)
@@ -174,18 +179,20 @@ forge soldeer remap
 
 ### Local Anvil testing (contracts + zk proof submission)
 
-1) Start Anvil in a terminal:
+1. Start Anvil in a terminal:
+
 ```bash
 anvil
 ```
 
-2) In a new terminal, export env vars (use one private key printed by Anvil):
+2. In a new terminal, export env vars (use one private key printed by Anvil):
+
 ```bash
 export ANVIL_RPC_URL=http://127.0.0.1:8545
 export PRIVATE_KEY=0x<one_of_anvil_accounts_private_keys>
 
 # Fetch the ZK Prover guest ID from the server
-export ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0  
+export ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0
 export ZK_PROVER_GUEST_ID=$(curl -s ${ZK_PROVER_API_URL}/guest-id | jq -r '.data.guestId')
 
 # Match these to your compressed proof (example from zk_proof_compress_*.json)
@@ -194,7 +201,8 @@ export QUERIES_HASH=0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1face
 export EXPECTED_URL=https://api.github.com/graphql
 ```
 
-3) Build, install and deploy the contract to Anvil:
+3. Build, install and deploy the contract to Anvil:
+
 ```bash
 cd contracts
 forge soldeer install
@@ -205,12 +213,15 @@ npm run deploy:anvil
 # Or directly
 npx ts-node --transpile-only scripts/deploy.ts anvil
 ```
+
 Note the printed contract address and optionally export it:
+
 ```bash
 export ANVIL_CONTRACT_ADDRESS=0x<deployed_address>
 ```
 
-4) Submit your compressed zk proof to the contract:
+4. Submit your compressed zk proof to the contract:
+
 ```bash
 cd ..
 PROOF=./zk_proof_compress_YYYYMMDD_HHMMSS.json  # your file path
@@ -222,6 +233,7 @@ npx ts-node --transpile-only contracts/scripts/submitProof.ts anvil "$PROOF" ${A
 ```
 
 Expected output:
+
 - Simulation success, transaction hash, receipt details
 
 ### Local Sepolia testing (contracts + zk proof submission)
@@ -248,6 +260,7 @@ NEXT_PUBLIC_DEFAULT_CHAIN_ID=11155111
 4. Submit your compressed zk proof to the contract
 
 Troubleshooting:
+
 - If you see "Contract not compiled", run `forge build` in `contracts`.
 - If deployment fails with "`ZK_PROVER_GUEST_ID not set`", ensure you've fetched it from the ZK prover server (see step 2 above). Note: In e2e tests, this is fetched automatically.
 - If simulation reverts, ensure env vars match the proof:

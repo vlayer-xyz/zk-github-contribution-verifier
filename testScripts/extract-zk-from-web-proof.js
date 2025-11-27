@@ -34,7 +34,8 @@ function nowTs() {
   return (
     d.getFullYear().toString() +
     pad(d.getMonth() + 1) +
-    pad(d.getDate()) + '_' +
+    pad(d.getDate()) +
+    '_' +
     pad(d.getHours()) +
     pad(d.getMinutes()) +
     pad(d.getSeconds())
@@ -171,7 +172,9 @@ async function main() {
   console.log('Results:');
   console.log('==========================================');
   console.log('HTTP Status Code:', status);
-  console.log(`Duration: ${durationSec} seconds (${Math.floor(durationSec / 60)}m ${durationSec % 60}s)`);
+  console.log(
+    `Duration: ${durationSec} seconds (${Math.floor(durationSec / 60)}m ${durationSec % 60}s)`
+  );
   console.log('');
 
   const outFile = path.resolve(process.cwd(), `zk_proof_compress_${nowTs()}.json`);
@@ -206,5 +209,3 @@ main().catch((err) => {
   console.error('Unexpected error:', err?.message || err);
   process.exit(1);
 });
-
-

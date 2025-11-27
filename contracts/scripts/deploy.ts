@@ -10,7 +10,10 @@ dotenv.config();
 
 // Contract bytecode and ABI (will be loaded from forge artifacts)
 function loadContractArtifact() {
-  const artifactPath = path.join(__dirname, '../out/GitHubContributionVerifier.sol/GitHubContributionVerifier.json');
+  const artifactPath = path.join(
+    __dirname,
+    '../out/GitHubContributionVerifier.sol/GitHubContributionVerifier.json'
+  );
 
   if (!fs.existsSync(artifactPath)) {
     throw new Error('Contract not compiled. Run: forge build');
@@ -132,15 +135,24 @@ async function deploy(options: DeployOptions) {
   const queriesHash = process.env.QUERIES_HASH as Hex;
   const expectedUrl = process.env.EXPECTED_URL || 'https://api.github.com';
 
-  if (!imageId || imageId === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+  if (
+    !imageId ||
+    imageId === '0x0000000000000000000000000000000000000000000000000000000000000000'
+  ) {
     throw new Error('ZK_PROVER_GUEST_ID not set');
   }
 
-  if (!notaryKeyFingerprint || notaryKeyFingerprint === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+  if (
+    !notaryKeyFingerprint ||
+    notaryKeyFingerprint === '0x0000000000000000000000000000000000000000000000000000000000000000'
+  ) {
     throw new Error('NOTARY_KEY_FINGERPRINT not set');
   }
 
-  if (!queriesHash || queriesHash === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+  if (
+    !queriesHash ||
+    queriesHash === '0x0000000000000000000000000000000000000000000000000000000000000000'
+  ) {
     throw new Error('QUERIES_HASH not set');
   }
 
@@ -208,7 +220,9 @@ async function deploy(options: DeployOptions) {
   if (verify) {
     console.log(`\n=== Contract Verification ===`);
     console.log(`To verify on block explorer, run:`);
-    console.log(`forge verify-contract ${receipt.contractAddress} GitHubContributionVerifier --chain ${network} --watch`);
+    console.log(
+      `forge verify-contract ${receipt.contractAddress} GitHubContributionVerifier --chain ${network} --watch`
+    );
     console.log(`\nOr use the verify script:`);
     console.log(`npm run verify ${network} ${receipt.contractAddress}`);
   }
@@ -280,16 +294,23 @@ Examples:
     console.log(`Transaction: ${result.transactionHash}`);
     console.log(`\nNext steps:`);
     if (network.toLowerCase() === 'anvil') {
-      console.log(`1. Update your .env with: NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS=${result.address}`);
+      console.log(
+        `1. Update your .env with: NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS=${result.address}`
+      );
     } else {
       const prefix = network.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
-      console.log(`1. Update your .env with: NEXT_PUBLIC_${prefix}_CONTRACT_ADDRESS=${result.address}`);
+      console.log(
+        `1. Update your .env with: NEXT_PUBLIC_${prefix}_CONTRACT_ADDRESS=${result.address}`
+      );
     }
-    console.log(`2. Test the contract: npm run submit-proof ${network} ./proof.json ${result.address}`);
+    console.log(
+      `2. Test the contract: npm run submit-proof ${network} ./proof.json ${result.address}`
+    );
     if (!shouldVerify) {
-      console.log(`3. Verify contract code in blockchain explorer: npm run verify ${network} ${result.address}`);
+      console.log(
+        `3. Verify contract code in blockchain explorer: npm run verify ${network} ${result.address}`
+      );
     }
-
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`\n✗ Deployment failed:`, message);

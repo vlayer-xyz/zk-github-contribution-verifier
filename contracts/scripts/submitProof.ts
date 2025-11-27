@@ -1,4 +1,11 @@
-import { createWalletClient, createPublicClient, http, type Hex, encodeAbiParameters, decodeErrorResult } from 'viem';
+import {
+  createWalletClient,
+  createPublicClient,
+  http,
+  type Hex,
+  encodeAbiParameters,
+  decodeErrorResult,
+} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import * as dotenv from 'dotenv';
 import { getNetworkConfig } from './config';
@@ -13,29 +20,31 @@ const contractABI = [
   {
     inputs: [
       { name: 'journalData', type: 'bytes' },
-      { name: 'seal', type: 'bytes' }
+      { name: 'seal', type: 'bytes' },
     ],
     name: 'submitContribution',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [{ name: 'username', type: 'string' }],
     name: 'getLatestContribution',
-    outputs: [{
-      components: [
-        { name: 'username', type: 'string' },
-        { name: 'contributions', type: 'uint256' },
-        { name: 'timestamp', type: 'uint256' },
-        { name: 'blockNumber', type: 'uint256' },
-        { name: 'repoUrl', type: 'string' }
-      ],
-      name: '',
-      type: 'tuple'
-    }],
+    outputs: [
+      {
+        components: [
+          { name: 'username', type: 'string' },
+          { name: 'contributions', type: 'uint256' },
+          { name: 'timestamp', type: 'uint256' },
+          { name: 'blockNumber', type: 'uint256' },
+          { name: 'repoUrl', type: 'string' },
+        ],
+        name: '',
+        type: 'tuple',
+      },
+    ],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   // Custom errors for better revert decoding
   { name: 'InvalidNotaryKeyFingerprint', type: 'error', inputs: [] },
@@ -114,22 +123,30 @@ async function submitProof(options: SubmitProofOptions) {
   const seal: Hex = '0x';
   const po = (zkProofData.publicOutputs || {}) as Record<string, unknown>;
   const url: string = String(po.url ?? '');
-  const tsRaw = (po as { tlsTimestamp?: unknown; timestamp?: unknown }).tlsTimestamp ?? (po as { timestamp?: unknown }).timestamp;
-  const queriesHashRaw = (po as { extractionHash?: unknown; queriesHash?: unknown }).extractionHash ?? (po as { queriesHash?: unknown }).queriesHash;
-  const valuesRaw = (po as { extractedValues?: unknown; values?: unknown }).extractedValues ?? (po as { values?: unknown }).values;
+  const tsRaw =
+    (po as { tlsTimestamp?: unknown; timestamp?: unknown }).tlsTimestamp ??
+    (po as { timestamp?: unknown }).timestamp;
+  const queriesHashRaw =
+    (po as { extractionHash?: unknown; queriesHash?: unknown }).extractionHash ??
+    (po as { queriesHash?: unknown }).queriesHash;
+  const valuesRaw =
+    (po as { extractedValues?: unknown; values?: unknown }).extractedValues ??
+    (po as { values?: unknown }).values;
   const notaryRaw = (po as { notaryKeyFingerprint?: unknown }).notaryKeyFingerprint;
 
   // Normalize notary fingerprint (ensure 0x prefix)
   const notaryKeyFingerprint: Hex = String(notaryRaw || '').startsWith('0x')
-    ? String(notaryRaw) as Hex
+    ? (String(notaryRaw) as Hex)
     : (`0x${String(notaryRaw || '')}` as Hex);
 
   // Normalize timestamp
-  const timestampBigInt = BigInt(typeof tsRaw === 'string' || typeof tsRaw === 'number' ? tsRaw : 0);
+  const timestampBigInt = BigInt(
+    typeof tsRaw === 'string' || typeof tsRaw === 'number' ? tsRaw : 0
+  );
 
   // Normalize queries/extraction hash (ensure 0x prefix)
   const queriesHash: Hex = String(queriesHashRaw || '').startsWith('0x')
-    ? String(queriesHashRaw) as Hex
+    ? (String(queriesHashRaw) as Hex)
     : (`0x${String(queriesHashRaw || '')}` as Hex);
 
   // Normalize values [repo?, username, contributions]
@@ -164,14 +181,7 @@ async function submitProof(options: SubmitProofOptions) {
       { type: 'string' },
       { type: 'uint256' },
     ],
-    [
-      notaryKeyFingerprint,
-      url,
-      timestampBigInt,
-      queriesHash,
-      username,
-      contributions,
-    ]
+    [notaryKeyFingerprint, url, timestampBigInt, queriesHash, username, contributions]
   );
 
   console.log(`\nTransaction Details:`);
@@ -316,19 +326,22 @@ Example:
   const raw: unknown = JSON.parse(fs.readFileSync(zkProofPath, 'utf-8')) as unknown;
 
   const hasZkProof = (obj: unknown): obj is ZKProofDataLike =>
-    typeof obj === 'object' && obj !== null &&
-    'zkProof' in obj && 'publicOutputs' in obj;
+    typeof obj === 'object' && obj !== null && 'zkProof' in obj && 'publicOutputs' in obj;
 
   const hasDataWithZk = (obj: unknown): obj is Wrapped =>
-    typeof obj === 'object' && obj !== null &&
-    'data' in obj && hasZkProof((obj as { data?: unknown }).data);
+    typeof obj === 'object' &&
+    obj !== null &&
+    'data' in obj &&
+    hasZkProof((obj as { data?: unknown }).data);
 
   const extracted: ZKProofDataLike = hasDataWithZk(raw)
-    ? (raw as Wrapped).data as ZKProofDataLike
+    ? ((raw as Wrapped).data as ZKProofDataLike)
     : (raw as ZKProofDataLike);
 
   if (!extracted || !extracted.zkProof || !extracted.publicOutputs) {
-    throw new Error('Invalid zk proof file: expected { zkProof, publicOutputs } or { success, data: { ... } }');
+    throw new Error(
+      'Invalid zk proof file: expected { zkProof, publicOutputs } or { success, data: { ... } }'
+    );
   }
 
   // Use data as-is without normalization
@@ -345,7 +358,6 @@ Example:
     console.log(`\n=== Submission Complete ===\n`);
     console.log(`Transaction: ${result.transactionHash}`);
     console.log(`View on explorer: [Add explorer URL here]`);
-
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`\n✗ Error:`, message);

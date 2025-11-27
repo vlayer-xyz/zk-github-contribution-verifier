@@ -9,9 +9,7 @@ export type ZKProofNormalized = {
   userData: ContributionData;
 };
 
-export type ProveResult = { type: "prove"; data: any };
-export type VerifyResult = { type: "verify"; data: any & { contributionData?: ContributionData } };
-export type OnchainResult = { type: "onchain"; data: any };
+export type ProveResult = { type: 'prove'; data: any };
+export type VerifyResult = { type: 'verify'; data: any & { contributionData?: ContributionData } };
+export type OnchainResult = { type: 'onchain'; data: any };
 export type PageResult = ProveResult | VerifyResult | OnchainResult;
-
-

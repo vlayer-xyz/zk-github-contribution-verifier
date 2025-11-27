@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { proveContributions, verifyPresentation, compressPresentation } from "../lib/api";
-import { extractContributionData, parseOwnerRepo, decodeJournalData } from "../lib/utils";
-import type { PageResult, ZKProofNormalized } from "../lib/types";
+import { useState } from 'react';
+import { proveContributions, verifyPresentation, compressPresentation } from '../lib/api';
+import { extractContributionData, parseOwnerRepo, decodeJournalData } from '../lib/utils';
+import type { PageResult, ZKProofNormalized } from '../lib/types';
 
 export function useProveFlow() {
   const [url, setUrl] = useState('vlayer-xyz/vlayer');
@@ -33,7 +33,9 @@ export function useProveFlow() {
     try {
       const { owner, name } = parseOwnerRepo(url);
       if (!owner || !name) {
-        throw new Error('Could not parse owner/repo from the URL. Use formats like: owner/repo, https://github.com/owner/repo, or https://api.github.com/repos/owner/repo/contributors');
+        throw new Error(
+          'Could not parse owner/repo from the URL. Use formats like: owner/repo, https://github.com/owner/repo, or https://api.github.com/repos/owner/repo/contributors'
+        );
       }
 
       const query = `query($login: String!, $owner: String!, $name: String!, $q: String!) {\n        repository(owner: $owner, name: $name) { name nameWithOwner owner { login } }\n        mergedPRs: search(type: ISSUE, query: $q) { issueCount }\n        user(login: $login) { login }\n      }`;
@@ -45,7 +47,11 @@ export function useProveFlow() {
         q: `repo:${owner}/${name} is:pr is:merged author:${username.trim() || ''}`,
       };
 
-      const data = await proveContributions({ query, variables, githubToken: githubToken.trim() || undefined });
+      const data = await proveContributions({
+        query,
+        variables,
+        githubToken: githubToken.trim() || undefined,
+      });
       setPresentation(data);
       setResult({ type: 'prove', data });
     } catch (err: any) {
@@ -99,10 +105,10 @@ export function useProveFlow() {
       const decoded = decodeJournalData(journalDataAbi);
       const userData = { username: decoded.username, total: Number(decoded.contributions) };
 
-      setZkProofResult({ 
+      setZkProofResult({
         zkProof: zkProof as `0x${string}`,
-        journalDataAbi: journalDataAbi as `0x${string}`, 
-        userData 
+        journalDataAbi: journalDataAbi as `0x${string}`,
+        userData,
       });
     } catch (err: any) {
       setError(err?.message || 'Failed to generate ZK proof');
@@ -113,15 +119,22 @@ export function useProveFlow() {
 
   return {
     // state
-    url, setUrl,
-    githubToken, setGithubToken,
-    username, setUsername,
-    isPrivateRepo, setIsPrivateRepo,
-    isProving, isVerifying, isCompressing,
+    url,
+    setUrl,
+    githubToken,
+    setGithubToken,
+    username,
+    setUsername,
+    isPrivateRepo,
+    setIsPrivateRepo,
+    isProving,
+    isVerifying,
+    isCompressing,
     presentation,
     result,
     zkProofResult,
-    error, setError,
+    error,
+    setError,
     // actions
     handleProve,
     handleVerify,
