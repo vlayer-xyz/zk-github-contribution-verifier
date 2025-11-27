@@ -47,7 +47,11 @@ export function useProveFlow() {
         q: `repo:${owner}/${name} is:pr is:merged author:${username.trim() || ''}`,
       };
 
-      const data = await proveContributions({ query, variables, githubToken: githubToken.trim() || undefined });
+      const data = await proveContributions({
+        query,
+        variables,
+        githubToken: githubToken.trim() || undefined,
+      });
       setPresentation(data);
       setResult({ type: 'prove', data });
     } catch (err: any) {

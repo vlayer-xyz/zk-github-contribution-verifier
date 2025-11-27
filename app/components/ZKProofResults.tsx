@@ -21,7 +21,9 @@ export function ZKProofResults(props: { zkProofResult: any }) {
       {z.userData ? (
         <>
           <div className="p-6 bg-gray-900 border border-green-700 rounded-lg">
-            <h3 className="text-lg font-medium text-green-400 mb-4">ZK Proof Generated Successfully</h3>
+            <h3 className="text-lg font-medium text-green-400 mb-4">
+              ZK Proof Generated Successfully
+            </h3>
             <div className="flex items-center space-x-4 mb-4">
               <div className="w-12 h-12 rounded-full bg-green-600/20 flex items-center justify-center">
                 <span className="text-green-400 text-xl">✓</span>
@@ -32,7 +34,9 @@ export function ZKProofResults(props: { zkProofResult: any }) {
               </div>
             </div>
             <div className="bg-green-600/10 border border-green-600/20 rounded-lg p-4">
-              <p className="text-green-400 font-semibold text-xl">{z.userData.total} contributions proven with ZK</p>
+              <p className="text-green-400 font-semibold text-xl">
+                {z.userData.total} contributions proven with ZK
+              </p>
               <p className="text-gray-400 text-sm mt-1">
                 Your contributions have been cryptographically proven using zero-knowledge proofs
               </p>
@@ -55,7 +59,9 @@ export function ZKProofResults(props: { zkProofResult: any }) {
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Timestamp:</span>
-                  <span className="text-gray-300">{new Date(decoded.tlsTimestamp * 1000).toLocaleString()}</span>
+                  <span className="text-gray-300">
+                    {new Date(decoded.tlsTimestamp * 1000).toLocaleString()}
+                  </span>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Extracted Values:</span>
@@ -73,11 +79,15 @@ export function ZKProofResults(props: { zkProofResult: any }) {
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Extraction Hash:</span>
-                  <span className="text-gray-300 font-mono text-xs break-all">{decoded.extractionHash}</span>
+                  <span className="text-gray-300 font-mono text-xs break-all">
+                    {decoded.extractionHash}
+                  </span>
                 </div>
                 <div className="grid grid-cols-[140px_1fr] gap-2">
                   <span className="text-gray-500">Notary Fingerprint:</span>
-                  <span className="text-gray-300 font-mono text-xs break-all">{decoded.notaryKeyFingerprint}</span>
+                  <span className="text-gray-300 font-mono text-xs break-all">
+                    {decoded.notaryKeyFingerprint}
+                  </span>
                 </div>
               </div>
             </details>

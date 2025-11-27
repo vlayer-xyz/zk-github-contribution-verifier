@@ -1,4 +1,11 @@
-import { createWalletClient, createPublicClient, http, type Hex, encodeAbiParameters, decodeErrorResult } from 'viem';
+import {
+  createWalletClient,
+  createPublicClient,
+  http,
+  type Hex,
+  encodeAbiParameters,
+  decodeErrorResult,
+} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import * as dotenv from 'dotenv';
 import { getNetworkConfig } from './config';
@@ -117,12 +124,14 @@ async function submitProof(options: SubmitProofOptions) {
   const po = (zkProofData.publicOutputs || {}) as Record<string, unknown>;
   const url: string = String(po.url ?? '');
   const tsRaw =
-    (po as { tlsTimestamp?: unknown; timestamp?: unknown }).tlsTimestamp ?? (po as { timestamp?: unknown }).timestamp;
+    (po as { tlsTimestamp?: unknown; timestamp?: unknown }).tlsTimestamp ??
+    (po as { timestamp?: unknown }).timestamp;
   const queriesHashRaw =
     (po as { extractionHash?: unknown; queriesHash?: unknown }).extractionHash ??
     (po as { queriesHash?: unknown }).queriesHash;
   const valuesRaw =
-    (po as { extractedValues?: unknown; values?: unknown }).extractedValues ?? (po as { values?: unknown }).values;
+    (po as { extractedValues?: unknown; values?: unknown }).extractedValues ??
+    (po as { values?: unknown }).values;
   const notaryRaw = (po as { notaryKeyFingerprint?: unknown }).notaryKeyFingerprint;
 
   // Normalize notary fingerprint (ensure 0x prefix)
@@ -131,7 +140,9 @@ async function submitProof(options: SubmitProofOptions) {
     : (`0x${String(notaryRaw || '')}` as Hex);
 
   // Normalize timestamp
-  const timestampBigInt = BigInt(typeof tsRaw === 'string' || typeof tsRaw === 'number' ? tsRaw : 0);
+  const timestampBigInt = BigInt(
+    typeof tsRaw === 'string' || typeof tsRaw === 'number' ? tsRaw : 0
+  );
 
   // Normalize queries/extraction hash (ensure 0x prefix)
   const queriesHash: Hex = String(queriesHashRaw || '').startsWith('0x')
@@ -318,14 +329,19 @@ Example:
     typeof obj === 'object' && obj !== null && 'zkProof' in obj && 'publicOutputs' in obj;
 
   const hasDataWithZk = (obj: unknown): obj is Wrapped =>
-    typeof obj === 'object' && obj !== null && 'data' in obj && hasZkProof((obj as { data?: unknown }).data);
+    typeof obj === 'object' &&
+    obj !== null &&
+    'data' in obj &&
+    hasZkProof((obj as { data?: unknown }).data);
 
   const extracted: ZKProofDataLike = hasDataWithZk(raw)
     ? ((raw as Wrapped).data as ZKProofDataLike)
     : (raw as ZKProofDataLike);
 
   if (!extracted || !extracted.zkProof || !extracted.publicOutputs) {
-    throw new Error('Invalid zk proof file: expected { zkProof, publicOutputs } or { success, data: { ... } }');
+    throw new Error(
+      'Invalid zk proof file: expected { zkProof, publicOutputs } or { success, data: { ... } }'
+    );
   }
 
   // Use data as-is without normalization

@@ -1,8 +1,17 @@
-import { spawn, type ChildProcessWithoutNullStreams, type SpawnOptionsWithoutStdio } from 'node:child_process';
+import {
+  spawn,
+  type ChildProcessWithoutNullStreams,
+  type SpawnOptionsWithoutStdio,
+} from 'node:child_process';
 
 export type ManagedProcess = ChildProcessWithoutNullStreams & { label: string };
 
-export function startProcess(command: string, args: string[], label: string, options: SpawnOptionsWithoutStdio = {}) {
+export function startProcess(
+  command: string,
+  args: string[],
+  label: string,
+  options: SpawnOptionsWithoutStdio = {}
+) {
   const child = spawn(command, args, {
     ...options,
     stdio: 'pipe',
@@ -63,7 +72,11 @@ export async function stopProcess(proc?: ManagedProcess | null) {
   });
 }
 
-export async function runCommand(command: string, args: string[], options: SpawnOptionsWithoutStdio = {}) {
+export async function runCommand(
+  command: string,
+  args: string[],
+  options: SpawnOptionsWithoutStdio = {}
+) {
   return await new Promise<void>((resolve, reject) => {
     const child = spawn(command, args, {
       ...options,

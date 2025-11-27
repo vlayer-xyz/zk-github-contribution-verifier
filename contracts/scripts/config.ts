@@ -33,7 +33,9 @@ export const networks: Record<string, NetworkConfig> = {
 export function getNetworkConfig(networkName: string): NetworkConfig {
   const config = networks[networkName];
   if (!config) {
-    throw new Error(`Unsupported network: ${networkName}. Supported networks: ${Object.keys(networks).join(', ')}`);
+    throw new Error(
+      `Unsupported network: ${networkName}. Supported networks: ${Object.keys(networks).join(', ')}`
+    );
   }
   return config;
 }

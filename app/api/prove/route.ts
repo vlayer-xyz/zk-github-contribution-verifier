@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
     const query = body.query as string | undefined;
     const variables = (body.variables as Record<string, unknown>) || {};
     const githubToken =
-      (body.githubToken as string) || process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN || '';
+      (body.githubToken as string) ||
+      process.env.GITHUB_TOKEN ||
+      process.env.GITHUB_GRAPHQL_TOKEN ||
+      '';
 
     if (!query || typeof query !== 'string') {
       return NextResponse.json({ error: 'Missing GraphQL query in body.query' }, { status: 400 });
@@ -44,7 +47,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!accessResult.success) {
-      return NextResponse.json({ error: accessResult.error }, { status: accessResult.statusCode || 500 });
+      return NextResponse.json(
+        { error: accessResult.error },
+        { status: accessResult.statusCode || 500 }
+      );
     }
 
     const requestBody = {
@@ -66,7 +72,9 @@ export async function POST(request: NextRequest) {
     console.log('Upstream URL being proved:', requestBody.url);
     console.log('Headers being sent:', requestBody.headers);
 
-    const baseUrl = (process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v1').replace(/\/$/, '');
+    const baseUrl = (
+      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v1'
+    ).replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: {

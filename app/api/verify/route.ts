@@ -7,7 +7,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const baseUrl = (process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v1').replace(/\/$/, '');
+    const baseUrl = (
+      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v1'
+    ).replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/verify`, {
       method: 'POST',
       headers: {

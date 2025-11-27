@@ -34,7 +34,8 @@ export async function decodeTransactionError(params: {
       });
     } catch (simError: any) {
       const revertData =
-        (simError as { data?: string })?.data || (simError as { cause?: { data?: string } })?.cause?.data;
+        (simError as { data?: string })?.data ||
+        (simError as { cause?: { data?: string } })?.cause?.data;
 
       if (revertData && typeof revertData === 'string' && revertData.startsWith('0x')) {
         try {

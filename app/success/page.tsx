@@ -111,7 +111,11 @@ function SuccessContent() {
               <div className="w-16 h-16 rounded-full bg-gray-800 overflow-hidden flex items-center justify-center">
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl} alt={`${handle} avatar`} className="w-full h-full object-cover" />
+                  <img
+                    src={avatarUrl}
+                    alt={`${handle} avatar`}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <span className="text-gray-500 text-xl">@</span>
                 )}
@@ -124,8 +128,12 @@ function SuccessContent() {
             </div>
 
             <div className="bg-[#7235e5]/10 border border-[#7235e5]/20 rounded-lg p-4 mb-4">
-              <div className="text-[#7235e5] text-xl font-semibold">{contributions} contributions verified</div>
-              <div className="text-gray-400 text-sm mt-1">Proven and recorded via smart contract.</div>
+              <div className="text-[#7235e5] text-xl font-semibold">
+                {contributions} contributions verified
+              </div>
+              <div className="text-gray-400 text-sm mt-1">
+                Proven and recorded via smart contract.
+              </div>
             </div>
 
             <div className="flex items-center justify-between gap-3 text-sm">
@@ -145,7 +153,10 @@ function SuccessContent() {
             </div>
 
             <div className="mt-8 flex gap-3">
-              <button onClick={() => router.push('/')} className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700">
+              <button
+                onClick={() => router.push('/')}
+                className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700"
+              >
                 Back to main
               </button>
               {explorerUrl && (
@@ -169,7 +180,11 @@ function SuccessContent() {
 export default function SuccessPage() {
   return (
     <Suspense
-      fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading…</div>}
+      fallback={
+        <div className="min-h-screen bg-black text-white flex items-center justify-center">
+          Loading…
+        </div>
+      }
     >
       <SuccessContent />
     </Suspense>

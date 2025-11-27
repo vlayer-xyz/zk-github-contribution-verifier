@@ -65,7 +65,10 @@ export async function POST(request: NextRequest) {
     // Handle timeout errors specifically
     if (error instanceof Error && error.name === 'TimeoutError') {
       return NextResponse.json(
-        { error: 'Request timed out. ZK proof generation took too long to complete. Please try again.' },
+        {
+          error:
+            'Request timed out. ZK proof generation took too long to complete. Please try again.',
+        },
         { status: 408 }
       );
     }

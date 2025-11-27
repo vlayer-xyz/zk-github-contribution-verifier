@@ -80,7 +80,9 @@ function ErrorContent() {
               <div className="bg-black/50 p-3 rounded border border-red-500/20">
                 <div className="font-mono text-sm">
                   <div className="text-red-300 break-words whitespace-pre-wrap">{error}</div>
-                  {errorName !== 'UnknownError' && <div className="text-gray-400 mt-1">Error Type: {errorName}</div>}
+                  {errorName !== 'UnknownError' && (
+                    <div className="text-gray-400 mt-1">Error Type: {errorName}</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -167,13 +169,14 @@ function ErrorContent() {
               <li>Check that you're using the correct chain/network</li>
               {errorName === 'InvalidNotaryKeyFingerprint' && (
                 <li className="text-yellow-400">
-                  The notary configuration may have changed. Regenerate your proof with the current notary settings.
+                  The notary configuration may have changed. Regenerate your proof with the current
+                  notary settings.
                 </li>
               )}
               {errorName === 'InvalidQueriesHash' && (
                 <li className="text-yellow-400">
-                  The extraction queries may have changed. Ensure you're using the correct queries that match the
-                  contract configuration.
+                  The extraction queries may have changed. Ensure you're using the correct queries
+                  that match the contract configuration.
                 </li>
               )}
               {errorName === 'ZKProofVerificationFailed' && (
@@ -186,7 +189,10 @@ function ErrorContent() {
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <button onClick={() => router.push('/')} className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700">
+            <button
+              onClick={() => router.push('/')}
+              className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700"
+            >
               Back to main
             </button>
             {explorerUrl && (
@@ -209,7 +215,11 @@ function ErrorContent() {
 export default function ErrorPage() {
   return (
     <Suspense
-      fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading…</div>}
+      fallback={
+        <div className="min-h-screen bg-black text-white flex items-center justify-center">
+          Loading…
+        </div>
+      }
     >
       <ErrorContent />
     </Suspense>

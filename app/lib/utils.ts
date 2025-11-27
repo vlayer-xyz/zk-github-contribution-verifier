@@ -6,12 +6,24 @@ export function parseOwnerRepo(input: string): { owner: string; name: string } {
   const ownerRepoFromGit = urlStr.match(/github\.com\/([^/]+)\/([^/]+)\b/i);
   const ownerRepoFromPlain = urlStr.match(/^([^/]+)\/([^/]+)$/);
 
-  const owner = (ownerRepoFromApi?.[1] || ownerRepoFromGit?.[1] || ownerRepoFromPlain?.[1] || '').trim();
-  const name = (ownerRepoFromApi?.[2] || ownerRepoFromGit?.[2] || ownerRepoFromPlain?.[2] || '').trim();
+  const owner = (
+    ownerRepoFromApi?.[1] ||
+    ownerRepoFromGit?.[1] ||
+    ownerRepoFromPlain?.[1] ||
+    ''
+  ).trim();
+  const name = (
+    ownerRepoFromApi?.[2] ||
+    ownerRepoFromGit?.[2] ||
+    ownerRepoFromPlain?.[2] ||
+    ''
+  ).trim();
   return { owner, name };
 }
 
-export function extractContributionData(graphLike: unknown): { username: string; total: number } | null {
+export function extractContributionData(
+  graphLike: unknown
+): { username: string; total: number } | null {
   const body = (graphLike as any)?.response?.body ?? graphLike;
   let graph: any = null;
   if (typeof body === 'string') {

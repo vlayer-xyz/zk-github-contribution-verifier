@@ -8,8 +8,15 @@ import { GitHubContributionVerifierAbi } from '../../app/lib/abi';
 import { decodeJournalData } from '../../app/lib/utils';
 import { contractsDir, projectRoot } from '../helpers/env';
 import { getAvailablePort, waitForServer } from '../helpers/network';
-import { ManagedProcess, runCommand, startProcess, stopProcess, waitForOutput } from '../helpers/process';
-const DEFAULT_ANVIL_PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+import {
+  ManagedProcess,
+  runCommand,
+  startProcess,
+  stopProcess,
+  waitForOutput,
+} from '../helpers/process';
+const DEFAULT_ANVIL_PRIVATE_KEY =
+  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const CONTRIBUTIONS_GETTER_ABI = [
   {
     type: 'function',
@@ -49,7 +56,9 @@ describe('vlayer web proof e2e', () => {
     const proverClientId = process.env.WEB_PROVER_API_CLIENT_ID;
     const proverSecret = process.env.WEB_PROVER_API_SECRET;
     if (!proverClientId || !proverSecret) {
-      throw new Error('Set WEB_PROVER_API_CLIENT_ID and WEB_PROVER_API_SECRET to reach the vlayer Web Prover API');
+      throw new Error(
+        'Set WEB_PROVER_API_CLIENT_ID and WEB_PROVER_API_SECRET to reach the vlayer Web Prover API'
+      );
     }
 
     ctx.githubToken = githubToken;
@@ -82,7 +91,8 @@ describe('vlayer web proof e2e', () => {
       env: {
         ...process.env,
         PRIVATE_KEY: DEFAULT_ANVIL_PRIVATE_KEY,
-        NOTARY_KEY_FINGERPRINT: '0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af',
+        NOTARY_KEY_FINGERPRINT:
+          '0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af',
         QUERIES_HASH: '0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1faceb5c6c6',
         EXPECTED_URL: 'https://api.github.com/graphql',
         ANVIL_RPC_URL: ctx.anvilRpcUrl,
@@ -164,7 +174,9 @@ describe('vlayer web proof e2e', () => {
     expect(compressResponse.status).toBe(200);
     const compressionPayload = await compressResponse.json();
 
-    const zkProof = compressionPayload.success ? compressionPayload.data.zkProof : compressionPayload.zkProof;
+    const zkProof = compressionPayload.success
+      ? compressionPayload.data.zkProof
+      : compressionPayload.zkProof;
     const journalDataAbi = compressionPayload.success
       ? compressionPayload.data.journalDataAbi
       : compressionPayload.journalDataAbi;
