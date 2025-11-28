@@ -34,7 +34,7 @@ const anvil = defineChain({
   },
 });
 
-// Toggle between live API calls and cached presentations
+const ZK_PROVER_API_V0_URL = 'https://zk-prover.vlayer.xyz/api/v0';
 const USE_CACHED_PRESENTATION = process.env.USE_CACHED_PRESENTATION === 'true';
 const CACHE_DIR = path.join(projectRoot, 'tests', '.cache');
 const PRESENTATION_CACHE_FILE = path.join(CACHE_DIR, 'presentation.json');
@@ -51,7 +51,7 @@ const CONTRIBUTIONS_GETTER_ABI = [
   },
 ] as const;
 
-describe('Original web proof (Anvil + Mock Verifier)', () => {
+describe('Dev web proof (Anvil + Mock Verifier)', () => {
   const anvilDeploymentsPath = path.join(contractsDir, 'deployments', 'anvil.json');
 
   const ctx: {
@@ -99,7 +99,7 @@ describe('Original web proof (Anvil + Mock Verifier)', () => {
       clientId: proverClientId,
       secret: proverSecret,
     };
-    ctx.zkProverUrl = 'https://zk-prover.vlayer.xyz/api/v0';
+    ctx.zkProverUrl = ZK_PROVER_API_V0_URL;
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
@@ -155,7 +155,7 @@ describe('Original web proof (Anvil + Mock Verifier)', () => {
             process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v1',
           WEB_PROVER_API_CLIENT_ID: ctx.proverEnv.clientId,
           WEB_PROVER_API_SECRET: ctx.proverEnv.secret,
-          ZK_PROVER_API_URL: 'https://zk-prover.vlayer.xyz/api/v0',
+          ZK_PROVER_API_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
       }
@@ -378,7 +378,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
       clientId: proverClientId,
       secret: proverSecret,
     };
-    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
+    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL;
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
@@ -427,7 +427,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
             ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v1.0_beta',
           WEB_PROVER_API_CLIENT_ID: ctx.proverEnv.clientId,
           WEB_PROVER_API_SECRET: ctx.proverEnv.secret,
-          ZK_PROVER_API_URL: ctx.zkProverUrl || 'https://zk-prover.vlayer.xyz/api/v0',
+          ZK_PROVER_API_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
       }
