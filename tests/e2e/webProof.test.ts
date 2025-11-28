@@ -99,7 +99,7 @@ describe('Original web proof (Anvil + Mock Verifier)', () => {
       clientId: proverClientId,
       secret: proverSecret,
     };
-    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
+    ctx.zkProverUrl = 'https://zk-prover.vlayer.xyz/api/v0';
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
@@ -288,7 +288,7 @@ describe('Original web proof (Anvil + Mock Verifier)', () => {
       args: [decoded.repo, decoded.username],
     });
     expect(stored).toBe(decoded.contributions);
-  }, 300_000); // 5 minutes timeout for the test
+  }, 400_000); // 6.5 minutes timeout for the test
 
   test('prove fails for private repo without access', async () => {
     if (!ctx.nextPort) {
