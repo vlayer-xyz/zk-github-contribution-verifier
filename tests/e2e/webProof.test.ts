@@ -36,6 +36,7 @@ const anvil = defineChain({
 
 const ZK_PROVER_API_V0_URL = 'https://zk-prover.vlayer.xyz/api/v0';
 const USE_CACHED_PRESENTATION = false;
+const UPDATE_CACHED_PRESENTATION = false;
 const PRESENTATION_CACHE_FILE = path.join(projectRoot, 'tests', '.cache', 'presentation.json');
 const CONTRIBUTIONS_GETTER_ABI = [
   {
@@ -51,8 +52,6 @@ const CONTRIBUTIONS_GETTER_ABI = [
 ] as const;
 
 describe('Dev web proof (Anvil + Mock Verifier)', () => {
-  const anvilDeploymentsPath = path.join(contractsDir, 'deployments', 'anvil.json');
-
   const ctx: {
     anvil?: ManagedProcess;
     next?: ManagedProcess;
@@ -71,24 +70,13 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
   } = {};
 
   beforeAll(async () => {
-    const githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN;
-    if (!githubToken) {
-      throw new Error('Set GITHUB_TOKEN (or GITHUB_GRAPHQL_TOKEN) for the GitHub GraphQL API call');
-    }
-    const proverClientId = process.env.WEB_PROVER_API_CLIENT_ID;
-    const proverSecret = process.env.WEB_PROVER_API_SECRET;
-    if (!proverClientId || !proverSecret) {
-      throw new Error(
-        'Set WEB_PROVER_API_CLIENT_ID and WEB_PROVER_API_SECRET to reach the vlayer Web Prover API'
-      );
-    }
+    const { githubToken, proverClientId, proverSecret } = validateRequiredEnvVars();
 
     const privateKey = process.env.PRIVATE_KEY;
     if (!privateKey) {
       throw new Error('PRIVATE_KEY not set - need private key with ETH for testing');
     }
 
-    // For Anvil, use the first default account which has 10000 ETH pre-funded
     const anvilPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
     ctx.githubToken = githubToken;
@@ -114,26 +102,13 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
     await waitForOutput(ctx.anvil, /Listening on/i, 30_000);
     console.log('Anvil started successfully');
 
-    // Build and deploy contract to Anvil
-    console.log('Building contracts...');
-    await runCommand('forge', ['build'], { cwd: contractsDir });
-
-    console.log('Deploying to Anvil...');
-    await runCommand('npm', ['run', 'deploy', 'anvil'], {
-      cwd: contractsDir,
-      env: {
-        ...process.env,
-        ANVIL_RPC_URL: ctx.anvilRpcUrl,
-        PRIVATE_KEY: anvilPrivateKey,
-        ZK_PROVER_GUEST_ID: ctx.imageId,
-        NOTARY_KEY_FINGERPRINT:
-          '0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af',
-        QUERIES_HASH: '0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1faceb5c6c6',
-        EXPECTED_URL: 'https://api.github.com/graphql',
-      },
+    // Deploy contract to Anvil
+    const deployment = await deployContract({
+      network: 'anvil',
+      privateKey: anvilPrivateKey,
+      rpcUrl: ctx.anvilRpcUrl,
+      imageId: ctx.imageId,
     });
-
-    const deployment = JSON.parse(await readFile(anvilDeploymentsPath, 'utf-8'));
     ctx.contractAddress = deployment.contractAddress;
     console.log('Contract deployed to Anvil at:', ctx.contractAddress);
 
@@ -163,7 +138,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
     await waitForOutput(ctx.next, /Ready in/i, 120_000);
     await waitForServer(`http://127.0.0.1:${ctx.nextPort}`, 60_000);
     console.log('Next.js dev server started on port:', ctx.nextPort);
-  }, 1_080_000);
+  }, 1_00_000);
 
   afterAll(async () => {
     await stopProcess(ctx.next);
@@ -192,46 +167,14 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
     const login = process.env.GITHUB_LOGIN || 'Chmarusso';
     const owner = process.env.GITHUB_REPO_OWNER || 'vlayer-xyz';
     const repoName = process.env.GITHUB_REPO_NAME || 'vlayer';
-    const query = `query($login: String!, $owner: String!, $name: String!, $q: String!) {
-        repository(owner: $owner, name: $name) { name nameWithOwner owner { login } }
-        mergedPRs: search(type: ISSUE, query: $q) { issueCount }
-        user(login: $login) { login }
-      }`;
 
-    let presentation;
-
-    if (USE_CACHED_PRESENTATION && existsSync(PRESENTATION_CACHE_FILE)) {
-      // Load cached presentation
-      console.log('📂 Loading cached presentation from:', PRESENTATION_CACHE_FILE);
-      const cachedData = await readFile(PRESENTATION_CACHE_FILE, 'utf-8');
-      presentation = JSON.parse(cachedData);
-      console.log('✅ Loaded cached presentation successfully');
-    } else {
-      // Make live API call
-      console.log('🌐 Making live API call to prove endpoint...');
-      const proveResponse = await fetch(`http://127.0.0.1:${ctx.nextPort}/api/prove`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query,
-          variables: {
-            login,
-            owner,
-            name: repoName,
-            q: `repo:${owner}/${repoName} is:pr is:merged author:${login}`,
-          },
-          githubToken: ctx.githubToken,
-        }),
-        signal: AbortSignal.timeout(60_000),
-      });
-      expect(proveResponse.status).toBe(200);
-      presentation = await proveResponse.json();
-
-      // Save to cache for future use
-      await mkdir(path.dirname(PRESENTATION_CACHE_FILE), { recursive: true });
-      await writeFile(PRESENTATION_CACHE_FILE, JSON.stringify(presentation, null, 2));
-      console.log('💾 Saved presentation to cache:', PRESENTATION_CACHE_FILE);
-    }
+    const presentation = await getOrGeneratePresentation(
+      ctx.nextPort,
+      ctx.githubToken,
+      login,
+      owner,
+      repoName
+    );
 
     expect(typeof presentation).toBe('object');
     expect(presentation).not.toHaveProperty('error');
@@ -297,53 +240,13 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
     expect(stored).toBe(decoded.contributions);
   }, 400_000); // 6.5 minutes timeout for the test
 
-  test('prove fails for private repo without access', async () => {
-    if (!ctx.nextPort) {
-      throw new Error('Test context not initialized');
-    }
-
-    const login = process.env.GITHUB_LOGIN || 'Chmarusso';
-    const owner = process.env.GITHUB_REPO_OWNER || 'vlayer-xyz';
-    const repoName = process.env.GITHUB_PRIVATE_REPO_NAME || 'vouch';
-    const query = `query($login: String!, $owner: String!, $name: String!, $q: String!) {
-        repository(owner: $owner, name: $name) { name nameWithOwner owner { login } }
-        mergedPRs: search(type: ISSUE, query: $q) { issueCount }
-        user(login: $login) { login }
-      }`;
-
-    const invalidToken = 'invalid_token_that_has_no_access';
-
-    const proveResponse = await fetch(`http://127.0.0.1:${ctx.nextPort}/api/prove`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query,
-        variables: {
-          login,
-          owner,
-          name: repoName,
-          q: `repo:${owner}/${repoName} is:pr is:merged author:${login}`,
-        },
-        githubToken: invalidToken,
-      }),
-      signal: AbortSignal.timeout(60_000),
-    });
-
-    expect([401, 403]).toContain(proveResponse.status);
-
-    const errorResponse = await proveResponse.json();
-    expect(errorResponse).toHaveProperty('error');
-    expect(typeof errorResponse.error).toBe('string');
-
-    const errorMessage = errorResponse.error.toLowerCase();
-    console.log('Error message:', errorMessage);
-    expect(errorMessage.includes('invalid or expired github token')).toBe(true);
-  });
+  test(
+    'prove fails for private repo without access',
+    createPrivateRepoFailureTest(() => ctx.nextPort)
+  );
 });
 
 describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
-  const baseSepoliaDeploymentsPath = path.join(contractsDir, 'deployments', 'base-sepolia.json');
-
   const ctx: {
     next?: ManagedProcess;
     baseSepoliaRpcUrl?: string;
@@ -363,17 +266,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
   beforeAll(async () => {
     console.log('\n=== Starting Boundless Test Suite Setup ===\n');
 
-    const githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN;
-    if (!githubToken) {
-      throw new Error('Set GITHUB_TOKEN (or GITHUB_GRAPHQL_TOKEN) for the GitHub GraphQL API call');
-    }
-    const proverClientId = process.env.WEB_PROVER_API_CLIENT_ID;
-    const proverSecret = process.env.WEB_PROVER_API_SECRET;
-    if (!proverClientId || !proverSecret) {
-      throw new Error(
-        'Set WEB_PROVER_API_CLIENT_ID and WEB_PROVER_API_SECRET to reach the vlayer Web Prover API'
-      );
-    }
+    const { githubToken, proverClientId, proverSecret } = validateRequiredEnvVars();
 
     const privateKey = process.env.PRIVATE_KEY;
     if (!privateKey) {
@@ -409,28 +302,12 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
 
     // Always deploy fresh contract to ensure IMAGE_ID matches current ZK_PROVER_GUEST_ID
     console.log('=== Deploying Contract to Base Sepolia ===');
-    console.log('Building contracts with forge...');
-    await runCommand('forge', ['build'], { cwd: contractsDir });
-    console.log('Forge build complete');
-
-    console.log('Running deployment script...');
-    await runCommand('npm', ['run', 'deploy', 'base-sepolia'], {
-      cwd: contractsDir,
-      env: {
-        ...process.env,
-        PRIVATE_KEY: privateKey,
-        BASE_SEPOLIA_RPC_URL: ctx.baseSepoliaRpcUrl,
-        ZK_PROVER_GUEST_ID: ctx.imageId,
-        NOTARY_KEY_FINGERPRINT:
-          '0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af',
-        QUERIES_HASH: '0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1faceb5c6c6',
-        EXPECTED_URL: 'https://api.github.com/graphql',
-      },
+    const deployment = await deployContract({
+      network: 'base-sepolia',
+      privateKey,
+      rpcUrl: ctx.baseSepoliaRpcUrl,
+      imageId: ctx.imageId,
     });
-    console.log('Deployment script complete');
-
-    console.log('Reading deployment file from:', baseSepoliaDeploymentsPath);
-    const deployment = JSON.parse(await readFile(baseSepoliaDeploymentsPath, 'utf-8'));
     ctx.contractAddress = deployment.contractAddress;
     console.log('Contract deployed successfully!');
     console.log('Contract address:', ctx.contractAddress);
@@ -514,46 +391,15 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     const login = process.env.GITHUB_LOGIN || 'Chmarusso';
     const owner = process.env.GITHUB_REPO_OWNER || 'vlayer-xyz';
     const repoName = process.env.GITHUB_REPO_NAME || 'vlayer';
-    const query = `query($login: String!, $owner: String!, $name: String!, $q: String!) {
-        repository(owner: $owner, name: $name) { name nameWithOwner owner { login } }
-        mergedPRs: search(type: ISSUE, query: $q) { issueCount }
-        user(login: $login) { login }
-      }`;
 
-    let presentation;
-
-    if (USE_CACHED_PRESENTATION && existsSync(PRESENTATION_CACHE_FILE)) {
-      // Load cached presentation
-      console.log('📂 Loading cached presentation from:', PRESENTATION_CACHE_FILE);
-      const cachedData = await readFile(PRESENTATION_CACHE_FILE, 'utf-8');
-      presentation = JSON.parse(cachedData);
-      console.log('✅ Loaded cached presentation successfully');
-    } else {
-      // Make live API call
-      console.log('🌐 Making live API call to prove endpoint...');
-      const proveResponse = await fetch(`http://127.0.0.1:${ctx.nextPort}/api/prove`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query,
-          variables: {
-            login,
-            owner,
-            name: repoName,
-            q: `repo:${owner}/${repoName} is:pr is:merged author:${login}`,
-          },
-          githubToken: ctx.githubToken,
-        }),
-        signal: AbortSignal.timeout(60_000),
-      });
-      expect(proveResponse.status).toBe(200);
-      presentation = await proveResponse.json();
-
-      // Save to cache for future use
-      await mkdir(path.dirname(PRESENTATION_CACHE_FILE), { recursive: true });
-      await writeFile(PRESENTATION_CACHE_FILE, JSON.stringify(presentation, null, 2));
-      console.log('💾 Saved presentation to cache:', PRESENTATION_CACHE_FILE);
-    }
+    const presentation = await getOrGeneratePresentation(
+      ctx.nextPort,
+      ctx.githubToken,
+      login,
+      owner,
+      repoName,
+      600_000 // 10 minutes for boundless web proof generation
+    );
 
     expect(typeof presentation).toBe('object');
     expect(presentation).not.toHaveProperty('error');
@@ -622,8 +468,84 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     expect(receipt.status).toBe('success');
   }, 1_200_000); // 20 minutes timeout for the boundless test (ZK proof takes 3-6 minutes)
 
-  test('prove fails for private repo without access', async () => {
-    if (!ctx.nextPort) {
+  test(
+    'prove fails for private repo without access',
+    createPrivateRepoFailureTest(() => ctx.nextPort)
+  );
+});
+
+// Helper Functions
+
+function validateRequiredEnvVars() {
+  const githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN;
+  if (!githubToken) {
+    throw new Error('Set GITHUB_TOKEN (or GITHUB_GRAPHQL_TOKEN) for the GitHub GraphQL API call');
+  }
+  const proverClientId = process.env.WEB_PROVER_API_CLIENT_ID;
+  const proverSecret = process.env.WEB_PROVER_API_SECRET;
+  if (!proverClientId || !proverSecret) {
+    throw new Error(
+      'Set WEB_PROVER_API_CLIENT_ID and WEB_PROVER_API_SECRET to reach the vlayer Web Prover API'
+    );
+  }
+  return { githubToken, proverClientId, proverSecret };
+}
+
+async function getOrGeneratePresentation(
+  nextPort: number,
+  githubToken: string,
+  login: string,
+  owner: string,
+  repoName: string,
+  timeoutMs: number = 60_000
+) {
+  const query = `query($login: String!, $owner: String!, $name: String!, $q: String!) {
+        repository(owner: $owner, name: $name) { name nameWithOwner owner { login } }
+        mergedPRs: search(type: ISSUE, query: $q) { issueCount }
+        user(login: $login) { login }
+      }`;
+
+  if (USE_CACHED_PRESENTATION && existsSync(PRESENTATION_CACHE_FILE)) {
+    console.log('📂 Loading cached presentation from:', PRESENTATION_CACHE_FILE);
+    const cachedData = await readFile(PRESENTATION_CACHE_FILE, 'utf-8');
+    const presentation = JSON.parse(cachedData);
+    console.log('✅ Loaded cached presentation successfully');
+    return presentation;
+  } else {
+    console.log('🌐 Making live API call to prove endpoint...');
+    const proveResponse = await fetch(`http://127.0.0.1:${nextPort}/api/prove`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        variables: {
+          login,
+          owner,
+          name: repoName,
+          q: `repo:${owner}/${repoName} is:pr is:merged author:${login}`,
+        },
+        githubToken,
+      }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    expect(proveResponse.status).toBe(200);
+    const presentation = await proveResponse.json();
+
+    if (UPDATE_CACHED_PRESENTATION) {
+      await mkdir(path.dirname(PRESENTATION_CACHE_FILE), { recursive: true });
+      await writeFile(PRESENTATION_CACHE_FILE, JSON.stringify(presentation, null, 2));
+      console.log('💾 Saved presentation to cache:', PRESENTATION_CACHE_FILE);
+    } else {
+      console.log('⏭️  Skipping cache update (UPDATE_CACHED_PRESENTATION=false)');
+    }
+    return presentation;
+  }
+}
+
+function createPrivateRepoFailureTest(getNextPort: () => number | undefined) {
+  return async () => {
+    const nextPort = getNextPort();
+    if (!nextPort) {
       throw new Error('Test context not initialized');
     }
 
@@ -638,7 +560,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
 
     const invalidToken = 'invalid_token_that_has_no_access';
 
-    const proveResponse = await fetch(`http://127.0.0.1:${ctx.nextPort}/api/prove`, {
+    const proveResponse = await fetch(`http://127.0.0.1:${nextPort}/api/prove`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -663,5 +585,37 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     const errorMessage = errorResponse.error.toLowerCase();
     console.log('Error message:', errorMessage);
     expect(errorMessage.includes('invalid or expired github token')).toBe(true);
+  };
+}
+
+interface DeployContractOptions {
+  network: 'anvil' | 'base-sepolia';
+  privateKey: string;
+  rpcUrl: string;
+  imageId: string;
+}
+
+async function deployContract(options: DeployContractOptions) {
+  const { network, privateKey, rpcUrl, imageId } = options;
+
+  console.log(`Deploying to ${network}...`);
+  await runCommand('forge', ['build'], { cwd: contractsDir });
+
+  const envKey = network === 'anvil' ? 'ANVIL_RPC_URL' : 'BASE_SEPOLIA_RPC_URL';
+  await runCommand('npm', ['run', 'deploy', network], {
+    cwd: contractsDir,
+    env: {
+      ...process.env,
+      PRIVATE_KEY: privateKey,
+      [envKey]: rpcUrl,
+      ZK_PROVER_GUEST_ID: imageId,
+      NOTARY_KEY_FINGERPRINT: '0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af',
+      QUERIES_HASH: '0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1faceb5c6c6',
+      EXPECTED_URL: 'https://api.github.com/graphql',
+    },
   });
-});
+
+  const deploymentsPath = path.join(contractsDir, 'deployments', `${network}.json`);
+  const deployment = JSON.parse(await readFile(deploymentsPath, 'utf-8'));
+  return deployment;
+}
