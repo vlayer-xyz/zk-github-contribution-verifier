@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import path from 'node:path';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { createPublicClient, createWalletClient, http, defineChain } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -168,6 +168,14 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
   afterAll(async () => {
     await stopProcess(ctx.next);
     await stopProcess(ctx.anvil);
+
+    // Clean up Next.js lock files to prevent issues with subsequent test suites
+    const nextDevLockPath = path.join(projectRoot, '.next', 'dev');
+    try {
+      await rm(nextDevLockPath, { recursive: true, force: true });
+    } catch {
+      // Ignore errors during cleanup
+    }
   });
 
   test('prove, compress, and submit contribution on-chain', async () => {
@@ -432,6 +440,17 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
 
     console.log('=== Starting Next.js Server ===');
     console.log('Next.js port:', ctx.nextPort);
+
+    // Clean up any stale Next.js lock files from previous test suite
+    const nextDevLockPath = path.join(projectRoot, '.next', 'dev');
+    try {
+      console.log('Cleaning Next.js dev lock files...');
+      await rm(nextDevLockPath, { recursive: true, force: true });
+      console.log('Next.js dev lock files cleaned');
+    } catch {
+      console.log('No lock files to clean (this is normal)');
+    }
+
     console.log(
       'WEB_PROVER_API_URL will be:',
       ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v1.0_beta'
@@ -471,6 +490,14 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
 
   afterAll(async () => {
     await stopProcess(ctx.next);
+
+    // Clean up Next.js lock files
+    const nextDevLockPath = path.join(projectRoot, '.next', 'dev');
+    try {
+      await rm(nextDevLockPath, { recursive: true, force: true });
+    } catch {
+      // Ignore errors during cleanup
+    }
   });
 
   test('prove, compress, and submit contribution on-chain', async () => {
