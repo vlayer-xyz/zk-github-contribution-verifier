@@ -36,8 +36,7 @@ const anvil = defineChain({
 
 const ZK_PROVER_API_V0_URL = 'https://zk-prover.vlayer.xyz/api/v0';
 const USE_CACHED_PRESENTATION = false;
-const CACHE_DIR = path.join(projectRoot, 'tests', '.cache');
-const PRESENTATION_CACHE_FILE = path.join(CACHE_DIR, 'presentation.json');
+const PRESENTATION_CACHE_FILE = path.join(projectRoot, 'tests', '.cache', 'presentation.json');
 const CONTRIBUTIONS_GETTER_ABI = [
   {
     type: 'function',
@@ -221,7 +220,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
       presentation = await proveResponse.json();
 
       // Save to cache for future use
-      await mkdir(CACHE_DIR, { recursive: true });
+      await mkdir(path.dirname(PRESENTATION_CACHE_FILE), { recursive: true });
       await writeFile(PRESENTATION_CACHE_FILE, JSON.stringify(presentation, null, 2));
       console.log('💾 Saved presentation to cache:', PRESENTATION_CACHE_FILE);
     }
@@ -491,7 +490,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
       presentation = await proveResponse.json();
 
       // Save to cache for future use
-      await mkdir(CACHE_DIR, { recursive: true });
+      await mkdir(path.dirname(PRESENTATION_CACHE_FILE), { recursive: true });
       await writeFile(PRESENTATION_CACHE_FILE, JSON.stringify(presentation, null, 2));
       console.log('💾 Saved presentation to cache:', PRESENTATION_CACHE_FILE);
     }
