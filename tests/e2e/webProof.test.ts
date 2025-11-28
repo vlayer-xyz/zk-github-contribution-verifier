@@ -353,6 +353,8 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
   } = {};
 
   beforeAll(async () => {
+    console.log('\n=== Starting Boundless Test Suite Setup ===\n');
+
     const githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN;
     if (!githubToken) {
       throw new Error('Set GITHUB_TOKEN (or GITHUB_GRAPHQL_TOKEN) for the GitHub GraphQL API call');
@@ -377,21 +379,33 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
       clientId: proverClientId,
       secret: proverSecret,
     };
+
+    // Log environment variables for debugging
+    console.log('=== Boundless Test Environment Variables ===');
+    console.log('WEB_PROVER_API_URL (from env):', process.env.WEB_PROVER_API_URL);
+    console.log('ZK_PROVER_API_URL (from env):', process.env.ZK_PROVER_API_URL);
+    console.log('ZK_PROVER_GUEST_ID (from env):', process.env.ZK_PROVER_GUEST_ID);
+
     ctx.zkProverUrl = process.env.ZK_PROVER_API_URL;
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
     }
-    console.log('ZK_PROVER_GUEST_ID:', ctx.imageId);
+    console.log('ctx.zkProverUrl set to:', ctx.zkProverUrl);
+    console.log('ctx.imageId set to:', ctx.imageId);
+    console.log('=== End Environment Variables ===');
 
     // Use Base Sepolia RPC
     ctx.baseSepoliaRpcUrl = process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org';
     console.log('Base Sepolia RPC URL:', ctx.baseSepoliaRpcUrl);
 
     // Always deploy fresh contract to ensure IMAGE_ID matches current ZK_PROVER_GUEST_ID
-    console.log('Deploying fresh contract to Base Sepolia...');
+    console.log('=== Deploying Contract to Base Sepolia ===');
+    console.log('Building contracts with forge...');
     await runCommand('forge', ['build'], { cwd: contractsDir });
+    console.log('Forge build complete');
 
+    console.log('Running deployment script...');
     await runCommand('npm', ['run', 'deploy', 'base-sepolia'], {
       cwd: contractsDir,
       env: {
@@ -405,12 +419,26 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
         EXPECTED_URL: 'https://api.github.com/graphql',
       },
     });
+    console.log('Deployment script complete');
 
+    console.log('Reading deployment file from:', baseSepoliaDeploymentsPath);
     const deployment = JSON.parse(await readFile(baseSepoliaDeploymentsPath, 'utf-8'));
     ctx.contractAddress = deployment.contractAddress;
+    console.log('Contract deployed successfully!');
     console.log('Contract address:', ctx.contractAddress);
+    console.log('Deployment imageId:', deployment.parameters?.imageId);
 
     ctx.nextPort = await getAvailablePort();
+
+    console.log('=== Starting Next.js Server ===');
+    console.log('Next.js port:', ctx.nextPort);
+    console.log(
+      'WEB_PROVER_API_URL will be:',
+      ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v1.0_beta'
+    );
+    console.log('ZK_PROVER_API_URL will be:', ctx.zkProverUrl);
+    console.log('CONTRACT_ADDRESS will be:', ctx.contractAddress);
+
     ctx.next = startProcess(
       'npx',
       ['--no-install', 'next', 'dev', '-H', '127.0.0.1', '-p', String(ctx.nextPort)],
@@ -431,9 +459,14 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
         },
       }
     );
+    console.log('Next.js startProcess called, waiting for server...');
 
     await waitForOutput(ctx.next, /Ready in/i, 120_000);
+    console.log('Next.js process reported "Ready"');
+
     await waitForServer(`http://127.0.0.1:${ctx.nextPort}`, 60_000);
+    console.log('Next.js dev server started successfully on port:', ctx.nextPort);
+    console.log('=== End Next.js Startup ===');
   }, 1_080_000);
 
   afterAll(async () => {
