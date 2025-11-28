@@ -18,7 +18,6 @@ import {
   waitForOutput,
 } from '../helpers/process';
 
-// Define Anvil chain with correct chain ID (31337)
 const anvil = defineChain({
   id: 31337,
   name: 'Anvil',
@@ -124,7 +123,6 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
           ...process.env,
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
-          // Line 154 - Change to:
           WEB_PROVER_API_URL:
             process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v1',
           WEB_PROVER_API_CLIENT_ID: ctx.proverEnv.clientId,
@@ -238,7 +236,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
       args: [decoded.repo, decoded.username],
     });
     expect(stored).toBe(decoded.contributions);
-  }, 400_000); // 6.5 minutes timeout for the test
+  }, 400_000); // 6.5 minutes
 
   test(
     'prove fails for private repo without access',
@@ -281,7 +279,6 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
       secret: proverSecret,
     };
 
-    // Log environment variables for debugging
     console.log('=== Boundless Test Environment Variables ===');
     console.log('WEB_PROVER_API_URL (from env):', process.env.WEB_PROVER_API_URL);
     console.log('ZK_PROVER_API_URL (from env):', process.env.ZK_PROVER_API_URL);
@@ -296,11 +293,9 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     console.log('ctx.imageId set to:', ctx.imageId);
     console.log('=== End Environment Variables ===');
 
-    // Use Base Sepolia RPC
     ctx.baseSepoliaRpcUrl = process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org';
     console.log('Base Sepolia RPC URL:', ctx.baseSepoliaRpcUrl);
 
-    // Always deploy fresh contract to ensure IMAGE_ID matches current ZK_PROVER_GUEST_ID
     console.log('=== Deploying Contract to Base Sepolia ===');
     const deployment = await deployContract({
       network: 'base-sepolia',
@@ -318,7 +313,6 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     console.log('=== Starting Next.js Server ===');
     console.log('Next.js port:', ctx.nextPort);
 
-    // Clean up any stale Next.js lock files from previous test suite
     const nextDevLockPath = path.join(projectRoot, '.next', 'dev');
     try {
       console.log('Cleaning Next.js dev lock files...');
@@ -345,7 +339,6 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
           ...process.env,
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
-          // Use v1.0_beta API for boundless test
           WEB_PROVER_API_URL:
             ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v1.0_beta',
           WEB_PROVER_API_CLIENT_ID: ctx.proverEnv.clientId,
@@ -398,17 +391,17 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
       login,
       owner,
       repoName,
-      600_000 // 10 minutes for boundless web proof generation
+      600_000
     );
 
     expect(typeof presentation).toBe('object');
     expect(presentation).not.toHaveProperty('error');
 
+    // undiciFetch used cause it allows setting higher timeouts than fetch
     const compressResponse = await undiciFetch(`http://127.0.0.1:${ctx.nextPort}/api/compress`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ presentation, username: login }),
-      // Use undici's timeout options for long-running boundless proving (20 minutes)
       headersTimeout: 1200000, // 20 minutes
       bodyTimeout: 1200000, // 20 minutes
     } as UndiciRequestInit);
@@ -466,15 +459,13 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     console.log('Gas used:', receipt.gasUsed);
 
     expect(receipt.status).toBe('success');
-  }, 1_200_000); // 20 minutes timeout for the boundless test (ZK proof takes 3-6 minutes)
+  }, 1_200_000); // 20 minutes
 
   test(
     'prove fails for private repo without access',
     createPrivateRepoFailureTest(() => ctx.nextPort)
   );
 });
-
-// Helper Functions
 
 function validateRequiredEnvVars() {
   const githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN;
