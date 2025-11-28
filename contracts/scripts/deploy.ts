@@ -8,6 +8,8 @@ import * as readline from 'readline';
 
 dotenv.config();
 
+const BASE_SEPOLIA_RISC_ZERO_VERIFIER = '0x2a098988600d87650Fb061FfAff08B97149Fa84D';
+
 // Contract bytecode and ABI (will be loaded from forge artifacts)
 function loadContractArtifact() {
   const artifactPath = path.join(
@@ -76,9 +78,8 @@ async function getOrDeployVerifier(
   }
 
   if (network === 'base-sepolia') {
-    const verifierAddress = '0x2a098988600d87650Fb061FfAff08B97149Fa84D';
-    console.log(`\nUsing existing RiscZeroGroth16Verifier at: ${verifierAddress}`);
-    return verifierAddress;
+    console.log(`\nUsing existing RiscZeroGroth16Verifier at: ${BASE_SEPOLIA_RISC_ZERO_VERIFIER}`);
+    return BASE_SEPOLIA_RISC_ZERO_VERIFIER;
   }
 
   console.log(`\nNo verifier address provided. Deploying RiscZeroMockVerifier...`);
