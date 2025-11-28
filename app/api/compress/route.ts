@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
         Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
       },
       body: JSON.stringify(requestBody),
-      headersTimeout: 1200000, // 20 minutes - wait for response headers
-      bodyTimeout: 1200000, // 20 minutes - wait for response body
+      headersTimeout: 1200000,
+      bodyTimeout: 1200000,
     } as RequestInit;
     const response = await fetch(`${zkProverUrl}/compress-web-proof`, fetchOptions);
 
