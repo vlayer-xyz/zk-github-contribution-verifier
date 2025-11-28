@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import { createPublicClient, createWalletClient, http, defineChain } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { baseSepolia } from 'viem/chains';
-import { fetch as undiciFetch, RequestInit as UndiciRequestInit } from 'undici';
+import { fetch as undiciFetch, Agent } from 'undici';
 import { GitHubContributionVerifierAbi } from '../../app/lib/abi';
 import { decodeJournalData } from '../../app/lib/utils';
 import { contractsDir, projectRoot } from '../helpers/env';
@@ -398,13 +398,16 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     expect(presentation).not.toHaveProperty('error');
 
     // undiciFetch used cause it allows setting higher timeouts than fetch
+    const agent = new Agent({
+      headersTimeout: 1200000, // 20 minutes
+      bodyTimeout: 1200000, // 20 minutes
+    });
     const compressResponse = await undiciFetch(`http://127.0.0.1:${ctx.nextPort}/api/compress`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ presentation, username: login }),
-      headersTimeout: 1200000, // 20 minutes
-      bodyTimeout: 1200000, // 20 minutes
-    } as UndiciRequestInit);
+      dispatcher: agent,
+    });
     expect(compressResponse.status).toBe(200);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const compressionPayload = (await compressResponse.json()) as any;

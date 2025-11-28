@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetch, RequestInit } from 'undici';
+import { fetch, Agent } from 'undici';
 
 // Configure max duration for Vercel (up to 90 seconds)
 export const maxDuration = 90;
@@ -33,6 +33,10 @@ export async function POST(request: NextRequest) {
     console.log('Extract config:', JSON.stringify(extractConfig, null, 2));
 
     const zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
+    const agent = new Agent({
+      headersTimeout: 1200000,
+      bodyTimeout: 1200000,
+    });
     const fetchOptions = {
       method: 'POST',
       headers: {
@@ -41,9 +45,8 @@ export async function POST(request: NextRequest) {
         Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
       },
       body: JSON.stringify(requestBody),
-      headersTimeout: 1200000,
-      bodyTimeout: 1200000,
-    } as RequestInit;
+      dispatcher: agent,
+    };
     const response = await fetch(`${zkProverUrl}/compress-web-proof`, fetchOptions);
 
     if (!response.ok) {
