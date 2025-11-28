@@ -36,7 +36,7 @@ const anvil = defineChain({
 const ZK_PROVER_API_V0_URL = 'https://zk-prover.vlayer.xyz/api/v0';
 const USE_CACHED_PRESENTATION = false;
 const UPDATE_CACHED_PRESENTATION = false;
-const PRESENTATION_CACHE_FILE = path.join(projectRoot, 'tests', '.cache', 'presentation.json');
+const PRESENTATION_CACHE_FILE = path.join(projectRoot, 'tests', 'testdata', 'cached_presentation.json');
 const CONTRIBUTIONS_GETTER_ABI = [
   {
     type: 'function',
