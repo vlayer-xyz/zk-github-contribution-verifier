@@ -33,10 +33,14 @@ const anvil = defineChain({
   },
 });
 
-const ZK_PROVER_API_V0_URL = 'https://zk-prover.vlayer.xyz/api/v0';
 const USE_CACHED_PRESENTATION = false;
 const UPDATE_CACHED_PRESENTATION = false;
-const PRESENTATION_CACHE_FILE = path.join(projectRoot, 'tests', 'testdata', 'cached_presentation.json');
+const PRESENTATION_CACHE_FILE = path.join(
+  projectRoot,
+  'tests',
+  'testdata',
+  'cached_presentation.json'
+);
 const CONTRIBUTIONS_GETTER_ABI = [
   {
     type: 'function',
@@ -85,7 +89,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
       clientId: proverClientId,
       secret: proverSecret,
     };
-    ctx.zkProverUrl = ZK_PROVER_API_V0_URL;
+    ctx.zkProverUrl = process.env.DEV_ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
@@ -284,7 +288,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     console.log('ZK_PROVER_API_URL (from env):', process.env.ZK_PROVER_API_URL);
     console.log('ZK_PROVER_GUEST_ID (from env):', process.env.ZK_PROVER_GUEST_ID);
 
-    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL;
+    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v1.0_beta';
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
