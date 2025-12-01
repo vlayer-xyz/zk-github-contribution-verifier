@@ -75,11 +75,6 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
   beforeAll(async () => {
     const { githubToken, proverClientId, proverSecret } = validateRequiredEnvVars();
 
-    const privateKey = process.env.PRIVATE_KEY;
-    if (!privateKey) {
-      throw new Error('PRIVATE_KEY not set - need private key with ETH for testing');
-    }
-
     const anvilPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
     ctx.githubToken = githubToken;
