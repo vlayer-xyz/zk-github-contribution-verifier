@@ -8,6 +8,7 @@ import * as readline from 'readline';
 
 dotenv.config();
 
+// https://dev.risczero.com/api/blockchain-integration/contracts/verifier#ethereum-sepolia-11155111
 const BASE_SEPOLIA_RISC_ZERO_VERIFIER = '0x2a098988600d87650Fb061FfAff08B97149Fa84D';
 
 // Contract bytecode and ABI (will be loaded from forge artifacts)
