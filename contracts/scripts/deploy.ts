@@ -8,6 +8,9 @@ import * as readline from 'readline';
 
 dotenv.config();
 
+// https://dev.risczero.com/api/blockchain-integration/contracts/verifier#ethereum-sepolia-11155111
+const BASE_SEPOLIA_RISC_ZERO_VERIFIER = '0x2a098988600d87650Fb061FfAff08B97149Fa84D';
+
 // Contract bytecode and ABI (will be loaded from forge artifacts)
 function loadContractArtifact() {
   const artifactPath = path.join(
@@ -62,6 +65,28 @@ async function deployMockVerifier(
     throw new Error('Mock verifier deployment failed - no contract address in receipt');
   }
   return receipt.contractAddress as Hex;
+}
+
+async function getOrDeployVerifier(
+  network: string,
+  providedVerifier: Hex | undefined,
+  walletClient: ReturnType<typeof createWalletClient>,
+  publicClient: ReturnType<typeof createPublicClient>,
+  account: ReturnType<typeof privateKeyToAccount>
+): Promise<Hex> {
+  if (providedVerifier) {
+    return providedVerifier;
+  }
+
+  if (network === 'base-sepolia') {
+    console.log(`\nUsing existing RiscZeroGroth16Verifier at: ${BASE_SEPOLIA_RISC_ZERO_VERIFIER}`);
+    return BASE_SEPOLIA_RISC_ZERO_VERIFIER;
+  }
+
+  console.log(`\nNo verifier address provided. Deploying RiscZeroMockVerifier...`);
+  const verifierAddress = await deployMockVerifier(walletClient, publicClient, account);
+  console.log(`RiscZeroMockVerifier deployed at: ${verifierAddress}`);
+  return verifierAddress;
 }
 
 interface DeployOptions {
@@ -124,12 +149,13 @@ async function deploy(options: DeployOptions) {
   }
 
   // Get or deploy verifier
-  let verifierAddress: Hex | undefined = providedVerifier;
-  if (!verifierAddress) {
-    console.log(`\nNo verifier address provided. Deploying RiscZeroMockVerifier...`);
-    verifierAddress = await deployMockVerifier(walletClient, publicClient, account);
-    console.log(`RiscZeroMockVerifier deployed at: ${verifierAddress}`);
-  }
+  const verifierAddress = await getOrDeployVerifier(
+    network,
+    providedVerifier,
+    walletClient,
+    publicClient,
+    account
+  );
   const imageId = process.env.ZK_PROVER_GUEST_ID as Hex;
   const notaryKeyFingerprint = process.env.NOTARY_KEY_FINGERPRINT as Hex;
   const queriesHash = process.env.QUERIES_HASH as Hex;
