@@ -5,3 +5,6 @@ node_modules
 pnpm-lock.yaml
 **/pnpm-lock.yaml
 .vercel
+
+# Test data with sensitive tokens
+tests/testdata/cached_presentation.json
