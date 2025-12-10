@@ -44,5 +44,5 @@ jobs:
           # ZK Prover
           DEV_ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v0"
           ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v1.0_beta"
-          ZK_PROVER_GUEST_ID: "0xae49d4cee6305038c2a13abc4f509010dafdea44aa3ba5b5e9a30f7a35cb7dc4"
+          ZK_PROVER_GUEST_ID: "0x6e251f4d993427d02a4199e1201f3b54462365d7c672a51be57f776d509b47eb"
           PRIVATE_KEY: ${{ secrets.TESTNET_ETH_PRIVATE_KEY }}
