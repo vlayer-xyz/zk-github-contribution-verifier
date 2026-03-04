@@ -243,231 +243,231 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
   );
 });
 
-// describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
-//   const ctx: {
-//     next?: ManagedProcess;
-//     baseSepoliaRpcUrl?: string;
-//     nextPort?: number;
-//     contractAddress?: string;
-//     githubToken?: string;
-//     imageId?: string;
-//     privateKey?: string;
-//     proverEnv?: {
-//       baseUrl?: string;
-//       webProverSecret: string;
-//       zkProverSecret: string;
-//     };
-//     zkProverUrl?: string;
-//   } = {};
+describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
+  const ctx: {
+    next?: ManagedProcess;
+    baseSepoliaRpcUrl?: string;
+    nextPort?: number;
+    contractAddress?: string;
+    githubToken?: string;
+    imageId?: string;
+    privateKey?: string;
+    proverEnv?: {
+      baseUrl?: string;
+      webProverSecret: string;
+      zkProverSecret: string;
+    };
+    zkProverUrl?: string;
+  } = {};
 
-//   beforeAll(async () => {
-//     console.log('\n=== Starting Boundless Test Suite Setup ===\n');
+  beforeAll(async () => {
+    console.log('\n=== Starting Boundless Test Suite Setup ===\n');
 
-//     const { githubToken, webProverSecret, zkProverSecret } = validateRequiredEnvVars();
+    const { githubToken, webProverSecret, zkProverSecret } = validateRequiredEnvVars();
 
-//     const privateKey = process.env.PRIVATE_KEY;
-//     if (!privateKey) {
-//       throw new Error('PRIVATE_KEY not set - need Base Sepolia private key with testnet ETH');
-//     }
+    const privateKey = process.env.PRIVATE_KEY;
+    if (!privateKey) {
+      throw new Error('PRIVATE_KEY not set - need Base Sepolia private key with testnet ETH');
+    }
 
-//     ctx.githubToken = githubToken;
-//     ctx.privateKey = privateKey;
-//     ctx.proverEnv = {
-//       baseUrl: process.env.WEB_PROVER_API_URL,
-//       webProverSecret,
-//       zkProverSecret,
-//     };
+    ctx.githubToken = githubToken;
+    ctx.privateKey = privateKey;
+    ctx.proverEnv = {
+      baseUrl: process.env.WEB_PROVER_API_URL,
+      webProverSecret,
+      zkProverSecret,
+    };
 
-//     console.log('=== Boundless Test Environment Variables ===');
-//     console.log('WEB_PROVER_API_URL (from env):', process.env.WEB_PROVER_API_URL);
-//     console.log('ZK_PROVER_API_URL (from env):', process.env.ZK_PROVER_API_URL);
-//     console.log('ZK_PROVER_GUEST_ID (from env):', process.env.ZK_PROVER_GUEST_ID);
+    console.log('=== Boundless Test Environment Variables ===');
+    console.log('WEB_PROVER_API_URL (from env):', process.env.WEB_PROVER_API_URL);
+    console.log('ZK_PROVER_API_URL (from env):', process.env.ZK_PROVER_API_URL);
+    console.log('ZK_PROVER_GUEST_ID (from env):', process.env.ZK_PROVER_GUEST_ID);
 
-//     ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v1.0_beta';
-//     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
-//     if (!ctx.imageId) {
-//       throw new Error('ZK_PROVER_GUEST_ID not set');
-//     }
-//     console.log('ctx.zkProverUrl set to:', ctx.zkProverUrl);
-//     console.log('ctx.imageId set to:', ctx.imageId);
-//     console.log('=== End Environment Variables ===');
+    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v1.0_beta';
+    ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
+    if (!ctx.imageId) {
+      throw new Error('ZK_PROVER_GUEST_ID not set');
+    }
+    console.log('ctx.zkProverUrl set to:', ctx.zkProverUrl);
+    console.log('ctx.imageId set to:', ctx.imageId);
+    console.log('=== End Environment Variables ===');
 
-//     ctx.baseSepoliaRpcUrl = process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org';
-//     console.log('Base Sepolia RPC URL:', ctx.baseSepoliaRpcUrl);
+    ctx.baseSepoliaRpcUrl = process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org';
+    console.log('Base Sepolia RPC URL:', ctx.baseSepoliaRpcUrl);
 
-//     console.log('=== Deploying Contract to Base Sepolia ===');
-//     const deployment = await deployContract({
-//       network: 'base-sepolia',
-//       privateKey,
-//       rpcUrl: ctx.baseSepoliaRpcUrl,
-//       imageId: ctx.imageId,
-//     });
-//     ctx.contractAddress = deployment.contractAddress;
-//     console.log('Contract deployed successfully!');
-//     console.log('Contract address:', ctx.contractAddress);
-//     console.log('Deployment imageId:', deployment.parameters?.imageId);
+    console.log('=== Deploying Contract to Base Sepolia ===');
+    const deployment = await deployContract({
+      network: 'base-sepolia',
+      privateKey,
+      rpcUrl: ctx.baseSepoliaRpcUrl,
+      imageId: ctx.imageId,
+    });
+    ctx.contractAddress = deployment.contractAddress;
+    console.log('Contract deployed successfully!');
+    console.log('Contract address:', ctx.contractAddress);
+    console.log('Deployment imageId:', deployment.parameters?.imageId);
 
-//     ctx.nextPort = await getAvailablePort();
+    ctx.nextPort = await getAvailablePort();
 
-//     console.log('=== Starting Next.js Server ===');
-//     console.log('Next.js port:', ctx.nextPort);
+    console.log('=== Starting Next.js Server ===');
+    console.log('Next.js port:', ctx.nextPort);
 
-//     const nextDevLockPath = path.join(projectRoot, '.next', 'dev');
-//     try {
-//       console.log('Cleaning Next.js dev lock files...');
-//       await rm(nextDevLockPath, { recursive: true, force: true });
-//       console.log('Next.js dev lock files cleaned');
-//     } catch {
-//       console.log('No lock files to clean (this is normal)');
-//     }
+    const nextDevLockPath = path.join(projectRoot, '.next', 'dev');
+    try {
+      console.log('Cleaning Next.js dev lock files...');
+      await rm(nextDevLockPath, { recursive: true, force: true });
+      console.log('Next.js dev lock files cleaned');
+    } catch {
+      console.log('No lock files to clean (this is normal)');
+    }
 
-//     console.log(
-//       'WEB_PROVER_API_URL will be:',
-//       ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
-//     );
-//     console.log('ZK_PROVER_API_URL will be:', ctx.zkProverUrl);
-//     console.log('CONTRACT_ADDRESS will be:', ctx.contractAddress);
+    console.log(
+      'WEB_PROVER_API_URL will be:',
+      ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
+    );
+    console.log('ZK_PROVER_API_URL will be:', ctx.zkProverUrl);
+    console.log('CONTRACT_ADDRESS will be:', ctx.contractAddress);
 
-//     ctx.next = startProcess(
-//       'npx',
-//       ['--no-install', 'next', 'dev', '-H', '127.0.0.1', '-p', String(ctx.nextPort)],
-//       'next',
-//       {
-//         cwd: projectRoot,
-//         env: {
-//           ...process.env,
-//           NODE_ENV: 'development',
-//           PORT: String(ctx.nextPort),
-//           WEB_PROVER_API_URL:
-//             ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased',
-//           WEB_PROVER_API_SECRET: ctx.proverEnv.webProverSecret,
-//           ZK_PROVER_API_URL: ctx.zkProverUrl,
-//           ZK_PROVER_API_SECRET: ctx.proverEnv.zkProverSecret,
-//           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
-//         },
-//       }
-//     );
-//     console.log('Next.js startProcess called, waiting for server...');
+    ctx.next = startProcess(
+      'npx',
+      ['--no-install', 'next', 'dev', '-H', '127.0.0.1', '-p', String(ctx.nextPort)],
+      'next',
+      {
+        cwd: projectRoot,
+        env: {
+          ...process.env,
+          NODE_ENV: 'development',
+          PORT: String(ctx.nextPort),
+          WEB_PROVER_API_URL:
+            ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased',
+          WEB_PROVER_API_SECRET: ctx.proverEnv.webProverSecret,
+          ZK_PROVER_API_URL: ctx.zkProverUrl,
+          ZK_PROVER_API_SECRET: ctx.proverEnv.zkProverSecret,
+          NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
+        },
+      }
+    );
+    console.log('Next.js startProcess called, waiting for server...');
 
-//     await waitForOutput(ctx.next, /Ready in/i, 120_000);
-//     console.log('Next.js process reported "Ready"');
+    await waitForOutput(ctx.next, /Ready in/i, 120_000);
+    console.log('Next.js process reported "Ready"');
 
-//     await waitForServer(`http://127.0.0.1:${ctx.nextPort}`, 60_000);
-//     console.log('Next.js dev server started successfully on port:', ctx.nextPort);
-//     console.log('=== End Next.js Startup ===');
-//   }, 1_080_000);
+    await waitForServer(`http://127.0.0.1:${ctx.nextPort}`, 60_000);
+    console.log('Next.js dev server started successfully on port:', ctx.nextPort);
+    console.log('=== End Next.js Startup ===');
+  }, 1_080_000);
 
-//   afterAll(async () => {
-//     await stopProcess(ctx.next);
+  afterAll(async () => {
+    await stopProcess(ctx.next);
 
-//     // Clean up Next.js lock files
-//     const nextDevLockPath = path.join(projectRoot, '.next', 'dev');
-//     try {
-//       await rm(nextDevLockPath, { recursive: true, force: true });
-//     } catch {
-//       // Ignore errors during cleanup
-//     }
-//   });
+    // Clean up Next.js lock files
+    const nextDevLockPath = path.join(projectRoot, '.next', 'dev');
+    try {
+      await rm(nextDevLockPath, { recursive: true, force: true });
+    } catch {
+      // Ignore errors during cleanup
+    }
+  });
 
-//   test('prove, compress, and submit contribution on-chain', async () => {
-//     if (
-//       !ctx.nextPort ||
-//       !ctx.githubToken ||
-//       !ctx.baseSepoliaRpcUrl ||
-//       !ctx.contractAddress ||
-//       !ctx.privateKey
-//     ) {
-//       throw new Error('Test context not initialized');
-//     }
+  test('prove, compress, and submit contribution on-chain', async () => {
+    if (
+      !ctx.nextPort ||
+      !ctx.githubToken ||
+      !ctx.baseSepoliaRpcUrl ||
+      !ctx.contractAddress ||
+      !ctx.privateKey
+    ) {
+      throw new Error('Test context not initialized');
+    }
 
-//     const login = process.env.GITHUB_LOGIN || 'Chmarusso';
-//     const owner = process.env.GITHUB_REPO_OWNER || 'vlayer-xyz';
-//     const repoName = process.env.GITHUB_REPO_NAME || 'vlayer';
+    const login = process.env.GITHUB_LOGIN || 'Chmarusso';
+    const owner = process.env.GITHUB_REPO_OWNER || 'vlayer-xyz';
+    const repoName = process.env.GITHUB_REPO_NAME || 'vlayer';
 
-//     const presentation = await getOrGeneratePresentation(
-//       ctx.nextPort,
-//       ctx.githubToken,
-//       login,
-//       owner,
-//       repoName,
-//       600_000
-//     );
+    const presentation = await getOrGeneratePresentation(
+      ctx.nextPort,
+      ctx.githubToken,
+      login,
+      owner,
+      repoName,
+      600_000
+    );
 
-//     expect(typeof presentation).toBe('object');
-//     expect(presentation).not.toHaveProperty('error');
+    expect(typeof presentation).toBe('object');
+    expect(presentation).not.toHaveProperty('error');
 
-//     // undiciFetch used cause it allows setting higher timeouts than fetch
-//     const agent = new Agent({
-//       headersTimeout: 1200000, // 20 minutes
-//       bodyTimeout: 1200000, // 20 minutes
-//     });
-//     const compressResponse = await undiciFetch(`http://127.0.0.1:${ctx.nextPort}/api/compress`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({ presentation, username: login }),
-//       dispatcher: agent,
-//     });
-//     expect(compressResponse.status).toBe(200);
-//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//     const compressionPayload = (await compressResponse.json()) as any;
+    // undiciFetch used cause it allows setting higher timeouts than fetch
+    const agent = new Agent({
+      headersTimeout: 1200000, // 20 minutes
+      bodyTimeout: 1200000, // 20 minutes
+    });
+    const compressResponse = await undiciFetch(`http://127.0.0.1:${ctx.nextPort}/api/compress`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ presentation, username: login }),
+      dispatcher: agent,
+    });
+    expect(compressResponse.status).toBe(200);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const compressionPayload = (await compressResponse.json()) as any;
 
-//     const zkProof = compressionPayload.success
-//       ? compressionPayload.data.zkProof
-//       : compressionPayload.zkProof;
-//     const journalDataAbi = compressionPayload.success
-//       ? compressionPayload.data.journalDataAbi
-//       : compressionPayload.journalDataAbi;
+    const zkProof = compressionPayload.success
+      ? compressionPayload.data.zkProof
+      : compressionPayload.zkProof;
+    const journalDataAbi = compressionPayload.success
+      ? compressionPayload.data.journalDataAbi
+      : compressionPayload.journalDataAbi;
 
-//     if (!zkProof || !journalDataAbi) {
-//       throw new Error('Compression response missing zkProof or journalDataAbi');
-//     }
+    if (!zkProof || !journalDataAbi) {
+      throw new Error('Compression response missing zkProof or journalDataAbi');
+    }
 
-//     const decoded = decodeJournalData(journalDataAbi as `0x${string}`);
-//     const journalData = journalDataAbi as `0x${string}`;
-//     const seal = zkProof as `0x${string}`;
+    const decoded = decodeJournalData(journalDataAbi as `0x${string}`);
+    const journalData = journalDataAbi as `0x${string}`;
+    const seal = zkProof as `0x${string}`;
 
-//     console.log('Decoded journal data:', {
-//       repo: decoded.repo,
-//       username: decoded.username,
-//       contributions: decoded.contributions.toString(),
-//     });
-//     expect(decoded.contributions).toBeGreaterThan(BigInt(0));
+    console.log('Decoded journal data:', {
+      repo: decoded.repo,
+      username: decoded.username,
+      contributions: decoded.contributions.toString(),
+    });
+    expect(decoded.contributions).toBeGreaterThan(BigInt(0));
 
-//     const account = privateKeyToAccount(ctx.privateKey as `0x${string}`);
-//     const walletClient = createWalletClient({
-//       account,
-//       chain: baseSepolia,
-//       transport: http(ctx.baseSepoliaRpcUrl),
-//     });
-//     const publicClient = createPublicClient({
-//       chain: baseSepolia,
-//       transport: http(ctx.baseSepoliaRpcUrl),
-//     });
+    const account = privateKeyToAccount(ctx.privateKey as `0x${string}`);
+    const walletClient = createWalletClient({
+      account,
+      chain: baseSepolia,
+      transport: http(ctx.baseSepoliaRpcUrl),
+    });
+    const publicClient = createPublicClient({
+      chain: baseSepolia,
+      transport: http(ctx.baseSepoliaRpcUrl),
+    });
 
-//     console.log('Submitting to contract:', ctx.contractAddress);
-//     console.log('Journal data length:', journalData.length);
-//     console.log('Seal length:', seal.length);
+    console.log('Submitting to contract:', ctx.contractAddress);
+    console.log('Journal data length:', journalData.length);
+    console.log('Seal length:', seal.length);
 
-//     const hash = await walletClient.writeContract({
-//       address: ctx.contractAddress as `0x${string}`,
-//       abi: GitHubContributionVerifierAbi,
-//       functionName: 'submitContribution',
-//       args: [journalData, seal],
-//     });
+    const hash = await walletClient.writeContract({
+      address: ctx.contractAddress as `0x${string}`,
+      abi: GitHubContributionVerifierAbi,
+      functionName: 'submitContribution',
+      args: [journalData, seal],
+    });
 
-//     console.log('Transaction hash:', hash);
-//     const receipt = await publicClient.waitForTransactionReceipt({ hash });
-//     console.log('Transaction status:', receipt.status);
-//     console.log('Gas used:', receipt.gasUsed);
+    console.log('Transaction hash:', hash);
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    console.log('Transaction status:', receipt.status);
+    console.log('Gas used:', receipt.gasUsed);
 
-//     expect(receipt.status).toBe('success');
-//   }, 1_200_000); // 20 minutes
+    expect(receipt.status).toBe('success');
+  }, 1_200_000); // 20 minutes
 
-//   test(
-//     'prove fails for private repo without access',
-//     createPrivateRepoFailureTest(() => ctx.nextPort)
-//   );
-// });
+  test(
+    'prove fails for private repo without access',
+    createPrivateRepoFailureTest(() => ctx.nextPort)
+  );
+});
 
 function validateRequiredEnvVars() {
   const githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_GRAPHQL_TOKEN;
