@@ -91,8 +91,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
+    const presentation = data.data;
 
-    return NextResponse.json(data);
+    return NextResponse.json(presentation);
   } catch (error) {
     console.error('Prove API error:', error);
 
