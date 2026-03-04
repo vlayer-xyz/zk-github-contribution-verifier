@@ -41,8 +41,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-client-id': process.env.WEB_PROVER_API_CLIENT_ID || '',
-        Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
+        Authorization: 'Bearer ' + process.env.ZK_PROVER_API_SECRET,
       },
       body: JSON.stringify(requestBody),
       dispatcher: agent,

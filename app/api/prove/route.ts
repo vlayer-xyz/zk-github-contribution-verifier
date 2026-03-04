@@ -73,13 +73,12 @@ export async function POST(request: NextRequest) {
     console.log('Headers being sent:', requestBody.headers);
 
     const baseUrl = (
-      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v1'
+      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
     ).replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-client-id': process.env.WEB_PROVER_API_CLIENT_ID || '',
         Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
       },
       body: JSON.stringify(requestBody),

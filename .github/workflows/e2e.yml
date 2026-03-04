@@ -37,12 +37,12 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           
           # Web Prover
-          WEB_PROVER_API_CLIENT_ID: ${{ secrets.WEB_PROVER_API_CLIENT_ID }}
           WEB_PROVER_API_SECRET: ${{ secrets.WEB_PROVER_API_SECRET }}
-          WEB_PROVER_API_URL: https://web-prover.vlayer.xyz/api/v1
+          WEB_PROVER_API_URL: https://web-prover.vlayer.xyz/api/v2.0_unreleased
 
           # ZK Prover
           DEV_ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v0"
           ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v1.0_beta"
+          ZK_PROVER_API_SECRET: ${{ secrets.ZK_PROVER_API_SECRET }}
           ZK_PROVER_GUEST_ID: "0x6e251f4d993427d02a4199e1201f3b54462365d7c672a51be57f776d509b47eb"
           PRIVATE_KEY: ${{ secrets.TESTNET_ETH_PRIVATE_KEY }}

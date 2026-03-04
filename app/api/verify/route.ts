@@ -8,12 +8,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const baseUrl = (
-      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v1'
+      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
     ).replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/verify`, {
       method: 'POST',
       headers: {
-        'x-client-id': process.env.WEB_PROVER_API_CLIENT_ID || '',
         Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
         'Content-Type': 'application/json',
       },
