@@ -37,12 +37,19 @@ export async function POST(request: NextRequest) {
       headersTimeout: 1200000,
       bodyTimeout: 1200000,
     });
+    const isV0 = zkProverUrl.includes('/api/v0');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (isV0) {
+      headers['x-client-id'] = `${process.env.ZK_PROVER_API_V0_CLIENT_ID}`;
+      headers['Authorization'] = 'Bearer ' + (process.env.ZK_PROVER_API_V0_SECRET || '');
+    } else if (process.env.ZK_PROVER_API_SECRET) {
+      headers['Authorization'] = 'Bearer ' + process.env.ZK_PROVER_API_SECRET;
+    }
     const fetchOptions = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + process.env.ZK_PROVER_API_SECRET,
-      },
+      headers,
       body: JSON.stringify(requestBody),
       dispatcher: agent,
     };
