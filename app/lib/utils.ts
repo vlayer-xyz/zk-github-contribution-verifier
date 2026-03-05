@@ -63,9 +63,7 @@ function parseBody(body: unknown): AnyRecord | null {
   return null;
 }
 
-function extractFromGraph(
-  graph: AnyRecord
-): { username: string; total: number } | null {
+function extractFromGraph(graph: AnyRecord): { username: string; total: number } | null {
   const userLogin = graph?.data?.user?.login;
   if (typeof userLogin !== 'string') return null;
 
