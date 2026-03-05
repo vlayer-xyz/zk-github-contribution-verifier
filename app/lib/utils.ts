@@ -24,23 +24,59 @@ export function parseOwnerRepo(input: string): { owner: string; name: string } {
 export function extractContributionData(
   graphLike: unknown
 ): { username: string; total: number } | null {
-  const body = (graphLike as any)?.response?.body ?? graphLike;
-  let graph: any = null;
+  for (const body of getCandidateBodies(graphLike)) {
+    const graph = parseBody(body);
+    if (!graph) continue;
+
+    const result = extractFromGraph(graph);
+    if (result) return result;
+  }
+  return null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>;
+
+function getCandidateBodies(root: unknown): unknown[] {
+  const r = root as AnyRecord;
+  const candidates: unknown[] = [];
+
+  if (r?.response?.body != null) candidates.push(r.response.body);
+  if (r?.data?.response?.body != null) candidates.push(r.data.response.body);
+  if (r?.data?.responseBody != null) candidates.push(r.data.responseBody);
+
+  candidates.push(r);
+  if (r?.data) candidates.push(r.data);
+
+  return candidates;
+}
+
+function parseBody(body: unknown): AnyRecord | null {
   if (typeof body === 'string') {
     try {
-      graph = JSON.parse(body);
+      return JSON.parse(body);
     } catch {
       return null;
     }
-  } else if (body && typeof body === 'object') {
-    graph = body;
   }
-  const userLogin = graph?.data?.user?.login;
-  const mergedCount = graph?.data?.mergedPRs?.issueCount;
-  if (typeof userLogin === 'string' && typeof mergedCount === 'number') {
-    return { username: userLogin, total: mergedCount };
-  }
+  if (body && typeof body === 'object') return body as AnyRecord;
   return null;
+}
+
+function extractFromGraph(graph: AnyRecord): { username: string; total: number } | null {
+  const userLogin = graph?.data?.user?.login;
+  if (typeof userLogin !== 'string') return null;
+
+  const mergedRaw =
+    graph?.data?.mergedPRs?.issueCount ??
+    graph?.data?.mergedPRs?.totalCount ??
+    graph?.data?.mergedPrs?.issueCount ??
+    graph?.data?.mergedPrs?.totalCount;
+
+  const total = typeof mergedRaw === 'number' ? mergedRaw : Number(mergedRaw);
+  if (Number.isNaN(total)) return null;
+
+  return { username: userLogin, total };
 }
 
 /**

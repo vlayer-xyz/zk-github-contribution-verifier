@@ -8,7 +8,7 @@
     node extract-zk-from-web-proof.js [PATH_TO_PRESENTATION_JSON] [--username GITHUB_USERNAME]
 
   Env vars (loaded via dotenv):
-    WEB_PROVER_API_CLIENT_ID, WEB_PROVER_API_SECRET
+    ZK_PROVER_API_V0_CLIENT_ID, ZK_PROVER_API_V0_SECRET
 */
 
 const fs = require('fs');
@@ -82,10 +82,10 @@ async function main() {
   console.log('Submitting saved web proof to compress endpoint...');
   console.log('');
 
-  const clientId = process.env.WEB_PROVER_API_CLIENT_ID;
-  const secret = process.env.WEB_PROVER_API_SECRET;
+  const clientId = process.env.ZK_PROVER_API_V0_CLIENT_ID;
+  const secret = process.env.ZK_PROVER_API_V0_SECRET;
   if (!clientId || !secret) {
-    console.error('Error: WEB_PROVER_API_CLIENT_ID and WEB_PROVER_API_SECRET must be set');
+    console.error('Error: ZK_PROVER_API_V0_CLIENT_ID and ZK_PROVER_API_V0_SECRET must be set');
     process.exit(1);
   }
 

@@ -66,14 +66,14 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
     privateKey?: string;
     proverEnv?: {
       baseUrl?: string;
-      clientId: string;
-      secret: string;
+      webProverSecret: string;
+      zkProverSecret: string;
     };
     zkProverUrl?: string;
   } = {};
 
   beforeAll(async () => {
-    const { githubToken, proverClientId, proverSecret } = validateRequiredEnvVars();
+    const { githubToken, webProverSecret, zkProverSecret } = validateRequiredEnvVars();
 
     const anvilPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
@@ -81,8 +81,8 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
     ctx.privateKey = anvilPrivateKey;
     ctx.proverEnv = {
       baseUrl: process.env.WEB_PROVER_API_URL,
-      clientId: proverClientId,
-      secret: proverSecret,
+      webProverSecret,
+      zkProverSecret,
     };
     ctx.zkProverUrl = process.env.DEV_ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
@@ -123,10 +123,10 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
           WEB_PROVER_API_URL:
-            process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v1',
-          WEB_PROVER_API_CLIENT_ID: ctx.proverEnv.clientId,
-          WEB_PROVER_API_SECRET: ctx.proverEnv.secret,
+            process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased',
+          WEB_PROVER_API_SECRET: ctx.proverEnv.webProverSecret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
+          ZK_PROVER_API_SECRET: ctx.proverEnv.zkProverSecret,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
       }
@@ -254,8 +254,8 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     privateKey?: string;
     proverEnv?: {
       baseUrl?: string;
-      clientId: string;
-      secret: string;
+      webProverSecret: string;
+      zkProverSecret: string;
     };
     zkProverUrl?: string;
   } = {};
@@ -263,7 +263,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
   beforeAll(async () => {
     console.log('\n=== Starting Boundless Test Suite Setup ===\n');
 
-    const { githubToken, proverClientId, proverSecret } = validateRequiredEnvVars();
+    const { githubToken, webProverSecret, zkProverSecret } = validateRequiredEnvVars();
 
     const privateKey = process.env.PRIVATE_KEY;
     if (!privateKey) {
@@ -274,8 +274,8 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     ctx.privateKey = privateKey;
     ctx.proverEnv = {
       baseUrl: process.env.WEB_PROVER_API_URL,
-      clientId: proverClientId,
-      secret: proverSecret,
+      webProverSecret,
+      zkProverSecret,
     };
 
     console.log('=== Boundless Test Environment Variables ===');
@@ -323,7 +323,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
 
     console.log(
       'WEB_PROVER_API_URL will be:',
-      ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v1.0_beta'
+      ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
     );
     console.log('ZK_PROVER_API_URL will be:', ctx.zkProverUrl);
     console.log('CONTRACT_ADDRESS will be:', ctx.contractAddress);
@@ -339,10 +339,10 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
           WEB_PROVER_API_URL:
-            ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v1.0_beta',
-          WEB_PROVER_API_CLIENT_ID: ctx.proverEnv.clientId,
-          WEB_PROVER_API_SECRET: ctx.proverEnv.secret,
+            ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased',
+          WEB_PROVER_API_SECRET: ctx.proverEnv.webProverSecret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
+          ZK_PROVER_API_SECRET: ctx.proverEnv.zkProverSecret,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
       }
@@ -474,14 +474,15 @@ function validateRequiredEnvVars() {
   if (!githubToken) {
     throw new Error('Set GITHUB_TOKEN (or GITHUB_GRAPHQL_TOKEN) for the GitHub GraphQL API call');
   }
-  const proverClientId = process.env.WEB_PROVER_API_CLIENT_ID;
-  const proverSecret = process.env.WEB_PROVER_API_SECRET;
-  if (!proverClientId || !proverSecret) {
-    throw new Error(
-      'Set WEB_PROVER_API_CLIENT_ID and WEB_PROVER_API_SECRET to reach the vlayer Web Prover API'
-    );
+  const webProverSecret = process.env.WEB_PROVER_API_SECRET;
+  if (!webProverSecret) {
+    throw new Error('Set WEB_PROVER_API_SECRET to reach the vlayer Web Prover API');
   }
-  return { githubToken, proverClientId, proverSecret };
+  const zkProverSecret = process.env.ZK_PROVER_API_SECRET;
+  if (!zkProverSecret) {
+    throw new Error('Set ZK_PROVER_API_SECRET to reach the vlayer ZK Prover API');
+  }
+  return { githubToken, webProverSecret, zkProverSecret };
 }
 
 async function getOrGeneratePresentation(
