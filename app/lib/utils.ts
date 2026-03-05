@@ -24,55 +24,61 @@ export function parseOwnerRepo(input: string): { owner: string; name: string } {
 export function extractContributionData(
   graphLike: unknown
 ): { username: string; total: number } | null {
-  const root = graphLike as any;
+  for (const body of getCandidateBodies(graphLike)) {
+    const graph = parseBody(body);
+    if (!graph) continue;
 
-  // Collect possible locations of the original GraphQL response body
-  const candidateBodies: unknown[] = [];
+    const result = extractFromGraph(graph);
+    if (result) return result;
+  }
+  return null;
+}
 
-  if (root?.response?.body != null) candidateBodies.push(root.response.body);
-  if (root?.data?.response?.body != null) candidateBodies.push(root.data.response.body);
-  if (root?.data?.responseBody != null) candidateBodies.push(root.data.responseBody);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>;
 
-  // Also consider the whole objects as fallbacks
-  candidateBodies.push(root);
-  if (root?.data) candidateBodies.push(root.data);
+function getCandidateBodies(root: unknown): unknown[] {
+  const r = root as AnyRecord;
+  const candidates: unknown[] = [];
 
-  for (const body of candidateBodies) {
-    let graph: any = null;
+  if (r?.response?.body != null) candidates.push(r.response.body);
+  if (r?.data?.response?.body != null) candidates.push(r.data.response.body);
+  if (r?.data?.responseBody != null) candidates.push(r.data.responseBody);
 
-    if (typeof body === 'string') {
-      try {
-        graph = JSON.parse(body);
-      } catch {
-        continue;
-      }
-    } else if (body && typeof body === 'object') {
-      graph = body;
-    } else {
-      continue;
-    }
+  candidates.push(r);
+  if (r?.data) candidates.push(r.data);
 
-    const userLogin = graph?.data?.user?.login;
-    const mergedRaw =
-      graph?.data?.mergedPRs?.issueCount ??
-      graph?.data?.mergedPRs?.totalCount ??
-      graph?.data?.mergedPrs?.issueCount ??
-      graph?.data?.mergedPrs?.totalCount;
+  return candidates;
+}
 
-    if (typeof userLogin === 'string') {
-      if (typeof mergedRaw === 'number') {
-        return { username: userLogin, total: mergedRaw };
-      }
-      if (typeof mergedRaw === 'string') {
-        const parsed = Number(mergedRaw);
-        if (!Number.isNaN(parsed)) {
-          return { username: userLogin, total: parsed };
-        }
-      }
+function parseBody(body: unknown): AnyRecord | null {
+  if (typeof body === 'string') {
+    try {
+      return JSON.parse(body);
+    } catch {
+      return null;
     }
   }
-
+  if (body && typeof body === 'object') return body as AnyRecord;
   return null;
+}
+
+function extractFromGraph(
+  graph: AnyRecord
+): { username: string; total: number } | null {
+  const userLogin = graph?.data?.user?.login;
+  if (typeof userLogin !== 'string') return null;
+
+  const mergedRaw =
+    graph?.data?.mergedPRs?.issueCount ??
+    graph?.data?.mergedPRs?.totalCount ??
+    graph?.data?.mergedPrs?.issueCount ??
+    graph?.data?.mergedPrs?.totalCount;
+
+  const total = typeof mergedRaw === 'number' ? mergedRaw : Number(mergedRaw);
+  if (Number.isNaN(total)) return null;
+
+  return { username: userLogin, total };
 }
 
 /**
