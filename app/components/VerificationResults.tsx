@@ -5,7 +5,7 @@ import type { PageResult } from '../lib/types';
 
 function redactSensitive(data: unknown): string {
   const json = JSON.stringify(data, null, 2);
-  return json.replace(/("authorization"\s*:\s*"Bearer )[^"]+"/gi, '$1[REDACTED]"');
+  return json.replace(/(Authorization:\s*Bearer\s+)[^"\\]+/gi, '$1[REDACTED]');
 }
 
 export function VerificationResults(props: { result: PageResult }) {
