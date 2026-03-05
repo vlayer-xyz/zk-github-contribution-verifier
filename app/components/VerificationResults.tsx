@@ -3,6 +3,11 @@
 import React from 'react';
 import type { PageResult } from '../lib/types';
 
+function redactSensitive(data: unknown): string {
+  const json = JSON.stringify(data, null, 2);
+  return json.replace(/("authorization"\s*:\s*"Bearer )[^"]+"/gi, '$1[REDACTED]"');
+}
+
 export function VerificationResults(props: { result: PageResult }) {
   const r = props.result;
   if (!r) return null;
@@ -31,7 +36,7 @@ export function VerificationResults(props: { result: PageResult }) {
           </summary>
           <div className="p-4 pt-0">
             <pre className="text-xs text-gray-400 overflow-x-auto bg-gray-800 p-3 rounded">
-              {JSON.stringify(r.data, null, 2)}
+              {redactSensitive(r.data)}
             </pre>
           </div>
         </details>
@@ -46,7 +51,7 @@ export function VerificationResults(props: { result: PageResult }) {
       </summary>
       <div className="p-4 pt-0">
         <pre className="text-xs text-gray-400 overflow-x-auto bg-gray-800 p-3 rounded">
-          {JSON.stringify(r.data, null, 2)}
+          {redactSensitive(r.data)}
         </pre>
       </div>
     </details>
