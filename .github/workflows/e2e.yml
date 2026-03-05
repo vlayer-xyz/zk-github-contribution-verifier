@@ -4,8 +4,8 @@ on:
     branches:
       - main
   merge_group:
-  # pull_request:
-  #   branches: ["main"]
+  pull_request:
+    branches: ["main"]
   repository_dispatch:
     types: [zk-prover-release]
 concurrency:
