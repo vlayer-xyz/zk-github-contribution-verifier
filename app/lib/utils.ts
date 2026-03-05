@@ -24,22 +24,54 @@ export function parseOwnerRepo(input: string): { owner: string; name: string } {
 export function extractContributionData(
   graphLike: unknown
 ): { username: string; total: number } | null {
-  const body = (graphLike as any)?.response?.body ?? graphLike;
-  let graph: any = null;
-  if (typeof body === 'string') {
-    try {
-      graph = JSON.parse(body);
-    } catch {
-      return null;
+  const root = graphLike as any;
+
+  // Collect possible locations of the original GraphQL response body
+  const candidateBodies: unknown[] = [];
+
+  if (root?.response?.body != null) candidateBodies.push(root.response.body);
+  if (root?.data?.response?.body != null) candidateBodies.push(root.data.response.body);
+  if (root?.data?.responseBody != null) candidateBodies.push(root.data.responseBody);
+
+  // Also consider the whole objects as fallbacks
+  candidateBodies.push(root);
+  if (root?.data) candidateBodies.push(root.data);
+
+  for (const body of candidateBodies) {
+    let graph: any = null;
+
+    if (typeof body === 'string') {
+      try {
+        graph = JSON.parse(body);
+      } catch {
+        continue;
+      }
+    } else if (body && typeof body === 'object') {
+      graph = body;
+    } else {
+      continue;
     }
-  } else if (body && typeof body === 'object') {
-    graph = body;
+
+    const userLogin = graph?.data?.user?.login;
+    const mergedRaw =
+      graph?.data?.mergedPRs?.issueCount ??
+      graph?.data?.mergedPRs?.totalCount ??
+      graph?.data?.mergedPrs?.issueCount ??
+      graph?.data?.mergedPrs?.totalCount;
+
+    if (typeof userLogin === 'string') {
+      if (typeof mergedRaw === 'number') {
+        return { username: userLogin, total: mergedRaw };
+      }
+      if (typeof mergedRaw === 'string') {
+        const parsed = Number(mergedRaw);
+        if (!Number.isNaN(parsed)) {
+          return { username: userLogin, total: parsed };
+        }
+      }
+    }
   }
-  const userLogin = graph?.data?.user?.login;
-  const mergedCount = graph?.data?.mergedPRs?.issueCount;
-  if (typeof userLogin === 'string' && typeof mergedCount === 'number') {
-    return { username: userLogin, total: mergedCount };
-  }
+
   return null;
 }
 
