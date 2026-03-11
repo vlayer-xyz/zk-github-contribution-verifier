@@ -216,7 +216,7 @@ contract GitHubContributionVerifierTest is Test {
 
         bytes32 EXPECTED_NOTARY_FINGERPRINT = 0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af;
         bytes32 EXPECTED_EXTRACTION_HASH = 0x85db70a06280c1096181df15a8c754a968a0eb669b34d686194ce1faceb5c6c6;
-        bytes32 EXPECTED_IMAGE_ID = 0x4a93930ccbef0c2d71b5fa0082d56f22ad12abf503065b1ea58990368eb3f88e;
+        bytes32 EXPECTED_IMAGE_ID = 0x6a7e93daf523b54f3edb5fba6c6390983adc7fbf962cbd5c9cac738b006bd36c;
 
         GitHubContributionVerifier realVerifier = new GitHubContributionVerifier(
             address(riscZeroMock),
