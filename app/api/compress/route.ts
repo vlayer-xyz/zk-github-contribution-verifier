@@ -44,8 +44,18 @@ export async function POST(request: NextRequest) {
     if (isV0) {
       headers['x-client-id'] = `${process.env.ZK_PROVER_API_V0_CLIENT_ID}`;
       headers['Authorization'] = 'Bearer ' + (process.env.ZK_PROVER_API_V0_SECRET || '');
-    } else if (process.env.ZK_PROVER_API_SECRET) {
-      headers['Authorization'] = 'Bearer ' + process.env.ZK_PROVER_API_SECRET;
+    } else {
+      const secret = process.env.VOUCH_API_SECRET;
+      if (!secret) {
+        return NextResponse.json(
+          {
+            error:
+              'Missing VOUCH_API_SECRET. Configure this env var to reach the vlayer ZK Prover API.',
+          },
+          { status: 500 }
+        );
+      }
+      headers['Authorization'] = `Bearer ${secret}`;
     }
     const fetchOptions = {
       method: 'POST',

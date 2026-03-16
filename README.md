@@ -25,12 +25,14 @@ npm install
 Create a `.env.local` file with your vlayer API credentials:
 
 ```
-WEB_PROVER_API_SECRET=your_web_prover_api_key
-ZK_PROVER_API_SECRET=your_zk_prover_api_key
+VOUCH_API_SECRET=your_api_key
 # Optional: override the Web Prover base URL (useful for local tests/mocking)
 WEB_PROVER_API_URL=https://web-prover.vlayer.xyz/api/v1
 # Optional: override the ZK Prover base URL (useful for local tests/mocking)
 ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0
+# For local ZK Prover v0 (fake mode), use separate v0 credentials:
+# ZK_PROVER_API_V0_CLIENT_ID=vouch_local_dev
+# ZK_PROVER_API_V0_SECRET=qwerty123
 ```
 
 ## Usage
@@ -69,7 +71,7 @@ Requirements:
 - `contracts` dependencies installed (`npm install` inside `contracts/`)
 - No other services bound to the random ports the test selects
 - Real network access plus the following environment variables (the test fails fast if any are missing):
-  - `WEB_PROVER_API_SECRET` and `ZK_PROVER_API_SECRET` (API keys)
+  - `VOUCH_API_CLIENT_ID` and `VOUCH_API_SECRET` (unified API credentials for Web Prover + ZK Prover)
   - `GITHUB_TOKEN` (or `GITHUB_GRAPHQL_TOKEN`) with GitHub GraphQL access
   - Optional overrides: `WEB_PROVER_API_URL`, `ZK_PROVER_API_URL`, `GITHUB_LOGIN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME` for the query target
 - The test calls `/api/prove`, `/api/compress`, and finally submits the compressed proof to the locally deployed contract via viem/wagmi-compatible logic.
@@ -80,8 +82,8 @@ Requirements:
   GITHUB_LOGIN=your-handle
   GITHUB_REPO_OWNER=vlayer-xyz
   GITHUB_REPO_NAME=vlayer
-  WEB_PROVER_API_SECRET=web-prover-key
-  ZK_PROVER_API_SECRET=zk-prover-key
+  VOUCH_API_CLIENT_ID=your_client_id
+  VOUCH_API_SECRET=your_api_key
   NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS=""
   NEXT_PUBLIC_DEFAULT_CHAIN_ID=31337
   ```
