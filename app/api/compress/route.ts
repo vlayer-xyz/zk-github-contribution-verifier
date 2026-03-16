@@ -45,19 +45,16 @@ export async function POST(request: NextRequest) {
       headers['x-client-id'] = `${process.env.ZK_PROVER_API_V0_CLIENT_ID}`;
       headers['Authorization'] = 'Bearer ' + (process.env.ZK_PROVER_API_V0_SECRET || '');
     } else {
-      const clientId =
-        process.env.ZK_PROVER_API_CLIENT_ID || process.env.WEB_PROVER_API_CLIENT_ID;
-      const secret = process.env.ZK_PROVER_API_SECRET;
-      if (!clientId || !secret) {
+      const secret = process.env.VOUCH_API_SECRET;
+      if (!secret) {
         return NextResponse.json(
           {
             error:
-              'Missing ZK_PROVER_API_CLIENT_ID or ZK_PROVER_API_SECRET. Configure these env vars to reach the vlayer ZK Prover API.',
+              'Missing VOUCH_API_SECRET. Configure this env var to reach the vlayer ZK Prover API.',
           },
           { status: 500 }
         );
       }
-      headers['x-client-id'] = clientId;
       headers['Authorization'] = `Bearer ${secret}`;
     }
     const fetchOptions = {

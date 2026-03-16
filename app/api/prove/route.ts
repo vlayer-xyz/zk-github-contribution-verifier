@@ -72,26 +72,25 @@ export async function POST(request: NextRequest) {
     console.log('Upstream URL being proved:', requestBody.url);
     console.log('Headers being sent:', requestBody.headers);
 
-    const clientId = process.env.WEB_PROVER_API_CLIENT_ID;
-    const secret = process.env.WEB_PROVER_API_SECRET;
-    if (!clientId || !secret) {
+    const secret =
+      process.env.VOUCH_API_SECRET;
+    if (!secret) {
       return NextResponse.json(
         {
           error:
-            'Missing WEB_PROVER_API_CLIENT_ID or WEB_PROVER_API_SECRET. Configure these env vars to reach the vlayer Web Prover API.',
+            'Missing VOUCH_API_SECRET. Configure this env var to reach the vlayer Web Prover API.',
         },
         { status: 500 }
       );
     }
 
     const baseUrl = (
-      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
+      process.env.WEB_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0'
     ).replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Client-Id': clientId,
         Authorization: `Bearer ${secret}`,
       },
       body: JSON.stringify(requestBody),
