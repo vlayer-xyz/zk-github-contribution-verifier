@@ -72,6 +72,18 @@ export async function POST(request: NextRequest) {
     console.log('Upstream URL being proved:', requestBody.url);
     console.log('Headers being sent:', requestBody.headers);
 
+    const clientId = process.env.WEB_PROVER_API_CLIENT_ID;
+    const secret = process.env.WEB_PROVER_API_SECRET;
+    if (!clientId || !secret) {
+      return NextResponse.json(
+        {
+          error:
+            'Missing WEB_PROVER_API_CLIENT_ID or WEB_PROVER_API_SECRET. Configure these env vars to reach the vlayer Web Prover API.',
+        },
+        { status: 500 }
+      );
+    }
+
     const baseUrl = (
       process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
     ).replace(/\/$/, '');
@@ -79,7 +91,8 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
+        'X-Client-Id': clientId,
+        Authorization: `Bearer ${secret}`,
       },
       body: JSON.stringify(requestBody),
     });
@@ -90,8 +103,21 @@ export async function POST(request: NextRequest) {
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json();
-    const presentation = data.data;
+    const data = (await response.json()) as {
+      data?: unknown;
+      version?: string;
+      meta?: { notaryUrl?: string };
+    };
+    // v2.0: { apiVersion, success, data: { data, version, meta } }
+    // v1: { success, data, version, meta } (flattened)
+    const presentation =
+      data.data && typeof data.data === 'object'
+        ? data.data
+        : {
+            data: data.data,
+            version: data.version ?? '0.1.0-alpha.12',
+            meta: data.meta ?? { notaryUrl: 'https://notary.vlayer.xyz/v0.1.0-alpha.12' },
+          };
 
     return NextResponse.json(presentation);
   } catch (error) {

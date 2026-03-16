@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     console.log('Compressing web proof for user:', username);
     console.log('Extract config:', JSON.stringify(extractConfig, null, 2));
 
-    const zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
+    const zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v1.0_beta';
     const agent = new Agent({
       headersTimeout: 1200000,
       bodyTimeout: 1200000,
@@ -44,8 +44,21 @@ export async function POST(request: NextRequest) {
     if (isV0) {
       headers['x-client-id'] = `${process.env.ZK_PROVER_API_V0_CLIENT_ID}`;
       headers['Authorization'] = 'Bearer ' + (process.env.ZK_PROVER_API_V0_SECRET || '');
-    } else if (process.env.ZK_PROVER_API_SECRET) {
-      headers['Authorization'] = 'Bearer ' + process.env.ZK_PROVER_API_SECRET;
+    } else {
+      const clientId =
+        process.env.ZK_PROVER_API_CLIENT_ID || process.env.WEB_PROVER_API_CLIENT_ID;
+      const secret = process.env.ZK_PROVER_API_SECRET;
+      if (!clientId || !secret) {
+        return NextResponse.json(
+          {
+            error:
+              'Missing ZK_PROVER_API_CLIENT_ID or ZK_PROVER_API_SECRET. Configure these env vars to reach the vlayer ZK Prover API.',
+          },
+          { status: 500 }
+        );
+      }
+      headers['x-client-id'] = clientId;
+      headers['Authorization'] = `Bearer ${secret}`;
     }
     const fetchOptions = {
       method: 'POST',

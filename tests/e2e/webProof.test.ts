@@ -73,7 +73,8 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
   } = {};
 
   beforeAll(async () => {
-    const { githubToken, webProverSecret, zkProverSecret } = validateRequiredEnvVars();
+    const { githubToken, webProverClientId, webProverSecret, zkProverSecret } =
+      validateRequiredEnvVars();
 
     const anvilPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
@@ -124,8 +125,11 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
           PORT: String(ctx.nextPort),
           WEB_PROVER_API_URL:
             process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased',
+          WEB_PROVER_API_CLIENT_ID: webProverClientId,
           WEB_PROVER_API_SECRET: ctx.proverEnv.webProverSecret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
+          ZK_PROVER_API_CLIENT_ID:
+            process.env.ZK_PROVER_API_CLIENT_ID || webProverClientId,
           ZK_PROVER_API_SECRET: ctx.proverEnv.zkProverSecret,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
@@ -263,7 +267,8 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
   beforeAll(async () => {
     console.log('\n=== Starting Boundless Test Suite Setup ===\n');
 
-    const { githubToken, webProverSecret, zkProverSecret } = validateRequiredEnvVars();
+    const { githubToken, webProverClientId, webProverSecret, zkProverSecret } =
+      validateRequiredEnvVars();
 
     const privateKey = process.env.PRIVATE_KEY;
     if (!privateKey) {
@@ -283,7 +288,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     console.log('ZK_PROVER_API_URL (from env):', process.env.ZK_PROVER_API_URL);
     console.log('ZK_PROVER_GUEST_ID (from env):', process.env.ZK_PROVER_GUEST_ID);
 
-    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v1.0_beta';
+    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v1.0';
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
@@ -340,8 +345,11 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
           PORT: String(ctx.nextPort),
           WEB_PROVER_API_URL:
             ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased',
+          WEB_PROVER_API_CLIENT_ID: webProverClientId,
           WEB_PROVER_API_SECRET: ctx.proverEnv.webProverSecret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
+          ZK_PROVER_API_CLIENT_ID:
+            process.env.ZK_PROVER_API_CLIENT_ID || webProverClientId,
           ZK_PROVER_API_SECRET: ctx.proverEnv.zkProverSecret,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
@@ -474,6 +482,10 @@ function validateRequiredEnvVars() {
   if (!githubToken) {
     throw new Error('Set GITHUB_TOKEN (or GITHUB_GRAPHQL_TOKEN) for the GitHub GraphQL API call');
   }
+  const webProverClientId = process.env.WEB_PROVER_API_CLIENT_ID;
+  if (!webProverClientId) {
+    throw new Error('Set WEB_PROVER_API_CLIENT_ID to reach the vlayer Web Prover API');
+  }
   const webProverSecret = process.env.WEB_PROVER_API_SECRET;
   if (!webProverSecret) {
     throw new Error('Set WEB_PROVER_API_SECRET to reach the vlayer Web Prover API');
@@ -482,7 +494,7 @@ function validateRequiredEnvVars() {
   if (!zkProverSecret) {
     throw new Error('Set ZK_PROVER_API_SECRET to reach the vlayer ZK Prover API');
   }
-  return { githubToken, webProverSecret, zkProverSecret };
+  return { githubToken, webProverClientId, webProverSecret, zkProverSecret };
 }
 
 async function getOrGeneratePresentation(
