@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     console.log('Compressing web proof for user:', username);
     console.log('Extract config:', JSON.stringify(extractConfig, null, 2));
 
-    const zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v1.0_beta';
+    const zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
     const agent = new Agent({
       headersTimeout: 1200000,
       bodyTimeout: 1200000,
