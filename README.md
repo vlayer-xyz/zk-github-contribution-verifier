@@ -69,6 +69,7 @@ Requirements:
 - Real network access plus the following environment variables (the test fails fast if any are missing):
   - `VLAYER_API_GATEWAY_KEY` — API key for the vlayer dashboard (Web Prover + ZK Prover)
   - `GITHUB_TOKEN` (or `GITHUB_GRAPHQL_TOKEN`) with GitHub GraphQL access
+  - `ZK_PROVER_GUEST_ID` — guest image ID for the ZK Prover (required for E2E runs)
   - `PRIVATE_KEY` — Base Sepolia private key with testnet ETH (Boundless suite only)
   - Optional overrides: `WEB_PROVER_API_URL`, `ZK_PROVER_API_URL`, `DEV_ZK_PROVER_API_URL`, `GITHUB_LOGIN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME`
 - The test calls `/api/prove`, `/api/compress`, and finally submits the compressed proof to the locally deployed contract via viem/wagmi-compatible logic.

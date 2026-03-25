@@ -279,7 +279,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     console.log('ZK_PROVER_API_URL (from env):', process.env.ZK_PROVER_API_URL);
     console.log('ZK_PROVER_GUEST_ID (from env):', process.env.ZK_PROVER_GUEST_ID);
 
-    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v1.0';
+    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0';
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
