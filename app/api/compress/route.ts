@@ -32,28 +32,33 @@ export async function POST(request: NextRequest) {
     console.log('Compressing web proof for user:', username);
     console.log('Extract config:', JSON.stringify(extractConfig, null, 2));
 
-    const zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
+    const zkProverBaseUrl = (
+      process.env.ZK_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0'
+    ).replace(/\/$/, '');
     const agent = new Agent({
       headersTimeout: 1200000,
       bodyTimeout: 1200000,
     });
-    const isV0 = zkProverUrl.includes('/api/v0');
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (isV0) {
-      headers['x-client-id'] = `${process.env.ZK_PROVER_API_V0_CLIENT_ID}`;
-      headers['Authorization'] = 'Bearer ' + (process.env.ZK_PROVER_API_V0_SECRET || '');
-    } else if (process.env.ZK_PROVER_API_SECRET) {
-      headers['Authorization'] = 'Bearer ' + process.env.ZK_PROVER_API_SECRET;
+    const secret = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!secret) {
+      return NextResponse.json(
+        {
+          error:
+            'Missing VLAYER_API_GATEWAY_KEY. Configure this env var to reach the vlayer ZK Prover API.',
+        },
+        { status: 500 }
+      );
     }
     const fetchOptions = {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${secret}`,
+      },
       body: JSON.stringify(requestBody),
       dispatcher: agent,
     };
-    const response = await fetch(`${zkProverUrl}/compress-web-proof`, fetchOptions);
+    const response = await fetch(`${zkProverBaseUrl}/evm/compress-web-proof`, fetchOptions);
 
     if (!response.ok) {
       const errorText = await response.text();
