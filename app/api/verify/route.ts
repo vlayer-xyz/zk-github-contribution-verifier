@@ -8,12 +8,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const baseUrl = (
-      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
+      process.env.WEB_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0'
     ).replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/verify`, {
       method: 'POST',
       headers: {
-        Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
+        Authorization: `Bearer ${process.env.VLAYER_API_GATEWAY_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),

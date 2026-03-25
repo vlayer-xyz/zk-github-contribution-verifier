@@ -72,14 +72,25 @@ export async function POST(request: NextRequest) {
     console.log('Upstream URL being proved:', requestBody.url);
     console.log('Headers being sent:', requestBody.headers);
 
+    const secret = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!secret) {
+      return NextResponse.json(
+        {
+          error:
+            'Missing VLAYER_API_GATEWAY_KEY. Configure this env var to reach the vlayer Web Prover API.',
+        },
+        { status: 500 }
+      );
+    }
+
     const baseUrl = (
-      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
+      process.env.WEB_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0'
     ).replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
+        Authorization: `Bearer ${secret}`,
       },
       body: JSON.stringify(requestBody),
     });
@@ -90,10 +101,11 @@ export async function POST(request: NextRequest) {
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json();
-    const presentation = data.data;
+    const data = (await response.json()) as {
+      data: { data: unknown; version: string; meta: { notaryUrl: string } };
+    };
 
-    return NextResponse.json(presentation);
+    return NextResponse.json(data.data);
   } catch (error) {
     console.error('Prove API error:', error);
 
