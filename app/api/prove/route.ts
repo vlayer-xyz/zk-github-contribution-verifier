@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
     console.log('Upstream URL being proved:', requestBody.url);
     console.log('Headers being sent:', requestBody.headers);
 
-    const secret = process.env.VLAYER_API_GATEWAY_KEY;
-    if (!secret) {
+    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!vlayerApiKey) {
       return NextResponse.json(
         {
           error:
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${secret}`,
+        Authorization: `Bearer ${vlayerApiKey}`,
       },
       body: JSON.stringify(requestBody),
     });

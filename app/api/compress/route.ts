@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
       headersTimeout: 1200000,
       bodyTimeout: 1200000,
     });
-    const secret = process.env.VLAYER_API_GATEWAY_KEY;
-    if (!secret) {
+    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!vlayerApiKey) {
       return NextResponse.json(
         {
           error:
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${secret}`,
+        Authorization: `Bearer ${vlayerApiKey}`,
       },
       body: JSON.stringify(requestBody),
       dispatcher: agent,

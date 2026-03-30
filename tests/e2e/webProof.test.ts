@@ -468,11 +468,11 @@ function validateRequiredEnvVars() {
   if (!githubToken) {
     throw new Error('Set GITHUB_TOKEN (or GITHUB_GRAPHQL_TOKEN) for the GitHub GraphQL API call');
   }
-  const secret = process.env.VLAYER_API_GATEWAY_KEY;
-  if (!secret) {
+  const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+  if (!vlayerApiKey) {
     throw new Error('Set VLAYER_API_GATEWAY_KEY to reach the vlayer API');
   }
-  return { githubToken, secret };
+  return { githubToken, secret: vlayerApiKey };
 }
 
 async function getOrGeneratePresentation(

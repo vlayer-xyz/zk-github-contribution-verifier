@@ -7,8 +7,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const secret = process.env.VLAYER_API_GATEWAY_KEY;
-    if (!secret) {
+    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!vlayerApiKey) {
       return NextResponse.json(
         {
           error:
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch(`${baseUrl}/verify`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${secret}`,
+        Authorization: `Bearer ${vlayerApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
