@@ -78,6 +78,9 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
 
     ctx.githubToken = githubToken;
     ctx.privateKey = anvilPrivateKey;
+    if (!process.env.WEB_PROVER_API_URL) {
+      throw new Error('WEB_PROVER_API_URL not set');
+    }
     ctx.proverEnv = {
       baseUrl: process.env.WEB_PROVER_API_URL,
       secret,
@@ -121,8 +124,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
           ...process.env,
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
-          WEB_PROVER_API_URL:
-            process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0',
+          WEB_PROVER_API_URL: ctx.proverEnv!.baseUrl,
           VLAYER_API_GATEWAY_KEY: ctx.proverEnv.secret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
@@ -269,6 +271,12 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
 
     ctx.githubToken = githubToken;
     ctx.privateKey = privateKey;
+    if (!process.env.WEB_PROVER_API_URL) {
+      throw new Error('WEB_PROVER_API_URL not set');
+    }
+    if (!process.env.ZK_PROVER_API_URL) {
+      throw new Error('ZK_PROVER_API_URL not set');
+    }
     ctx.proverEnv = {
       baseUrl: process.env.WEB_PROVER_API_URL,
       secret,
@@ -279,7 +287,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     console.log('ZK_PROVER_API_URL (from env):', process.env.ZK_PROVER_API_URL);
     console.log('ZK_PROVER_GUEST_ID (from env):', process.env.ZK_PROVER_GUEST_ID);
 
-    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v2.0';
+    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL;
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
@@ -317,10 +325,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
       console.log('No lock files to clean (this is normal)');
     }
 
-    console.log(
-      'WEB_PROVER_API_URL will be:',
-      ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0'
-    );
+    console.log('WEB_PROVER_API_URL will be:', ctx.proverEnv.baseUrl);
     console.log('ZK_PROVER_API_URL will be:', ctx.zkProverUrl);
     console.log('CONTRACT_ADDRESS will be:', ctx.contractAddress);
 
@@ -334,7 +339,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
           ...process.env,
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
-          WEB_PROVER_API_URL: ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0',
+          WEB_PROVER_API_URL: ctx.proverEnv.baseUrl,
           VLAYER_API_GATEWAY_KEY: ctx.proverEnv.secret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,

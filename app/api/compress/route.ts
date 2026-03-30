@@ -32,9 +32,14 @@ export async function POST(request: NextRequest) {
     console.log('Compressing web proof for user:', username);
     console.log('Extract config:', JSON.stringify(extractConfig, null, 2));
 
-    const zkProverBaseUrl = (
-      process.env.ZK_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0'
-    ).replace(/\/$/, '');
+    const zkProverApiUrl = process.env.ZK_PROVER_API_URL;
+    if (!zkProverApiUrl) {
+      return NextResponse.json(
+        { error: 'Missing ZK_PROVER_API_URL. Configure this env var to reach the vlayer ZK Prover API.' },
+        { status: 500 }
+      );
+    }
+    const zkProverBaseUrl = zkProverApiUrl.replace(/\/$/, '');
     const agent = new Agent({
       headersTimeout: 1200000,
       bodyTimeout: 1200000,

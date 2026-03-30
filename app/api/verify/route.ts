@@ -18,9 +18,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl = (
-      process.env.WEB_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0'
-    ).replace(/\/$/, '');
+    const webProverApiUrl = process.env.WEB_PROVER_API_URL;
+    if (!webProverApiUrl) {
+      return NextResponse.json(
+        { error: 'Missing WEB_PROVER_API_URL. Configure this env var to reach the vlayer Web Prover API.' },
+        { status: 500 }
+      );
+    }
+    const baseUrl = webProverApiUrl.replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/verify`, {
       method: 'POST',
       headers: {
