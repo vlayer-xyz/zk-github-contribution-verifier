@@ -35,7 +35,10 @@ export async function POST(request: NextRequest) {
     const zkProverApiUrl = process.env.ZK_PROVER_API_URL;
     if (!zkProverApiUrl) {
       return NextResponse.json(
-        { error: 'Missing ZK_PROVER_API_URL. Configure this env var to reach the vlayer ZK Prover API.' },
+        {
+          error:
+            'Missing ZK_PROVER_API_URL. Configure this env var to reach the vlayer ZK Prover API.',
+        },
         { status: 500 }
       );
     }

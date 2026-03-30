@@ -21,7 +21,10 @@ export async function POST(request: NextRequest) {
     const webProverApiUrl = process.env.WEB_PROVER_API_URL;
     if (!webProverApiUrl) {
       return NextResponse.json(
-        { error: 'Missing WEB_PROVER_API_URL. Configure this env var to reach the vlayer Web Prover API.' },
+        {
+          error:
+            'Missing WEB_PROVER_API_URL. Configure this env var to reach the vlayer Web Prover API.',
+        },
         { status: 500 }
       );
     }
