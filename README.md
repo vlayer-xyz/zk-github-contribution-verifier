@@ -27,8 +27,8 @@ Create a `.env.local` file with your vlayer API credentials:
 ```
 VLAYER_API_GATEWAY_KEY=your_api_key
 # Optional: override the Web Prover / ZK Prover base URL
-WEB_PROVER_API_URL=https://dashboard-20.vlayer.xyz/api/v2.0
-ZK_PROVER_API_URL=https://dashboard-20.vlayer.xyz/api/v2.0
+WEB_PROVER_API_URL=https://web-prover.vlayer.xyz/api/v2.0
+ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v2.0
 ```
 
 ## Usage
@@ -78,9 +78,9 @@ Requirements:
   ```
   GITHUB_TOKEN=ghp_xxx
   VLAYER_API_GATEWAY_KEY=your_api_key
-  WEB_PROVER_API_URL=https://dashboard-20.vlayer.xyz/api/v2.0
-  ZK_PROVER_API_URL=https://dashboard-20.vlayer.xyz/api/v2.0
-  DEV_ZK_PROVER_API_URL=https://dashboard-20.vlayer.xyz/api/v2.0/fake
+  WEB_PROVER_API_URL=https://web-prover.vlayer.xyz/api/v2.0
+  ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v2.0
+  DEV_ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v2.0/fake
   ZK_PROVER_GUEST_ID=0x6a7e93daf523b54f3edb5fba6c6390983adc7fbf962cbd5c9cac738b006bd36c
   PRIVATE_KEY=0x<base_sepolia_private_key>
   ```
@@ -192,7 +192,7 @@ export PRIVATE_KEY=0x<one_of_anvil_accounts_private_keys>
 
 # Fetch the ZK Prover guest ID from the dashboard
 export ZK_PROVER_GUEST_ID=$(curl -s -H "Authorization: Bearer $VLAYER_API_GATEWAY_KEY" \
-  https://dashboard-20.vlayer.xyz/api/v2.0/evm/guest-id | jq -r '.data.guestId')
+  https:/zk-prover.vlayer.xyz/api/v2.0/evm/guest-id | jq -r '.data.guestId')
 
 # Match these to your compressed proof (example from zk_proof_compress_*.json)
 export NOTARY_KEY_FINGERPRINT=0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af
