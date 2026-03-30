@@ -319,7 +319,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
 
     console.log(
       'WEB_PROVER_API_URL will be:',
-      ctx.proverEnv.baseUrl || 'https://dashboard-20.vlayer.xyz/api/v2.0'
+      ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0'
     );
     console.log('ZK_PROVER_API_URL will be:', ctx.zkProverUrl);
     console.log('CONTRACT_ADDRESS will be:', ctx.contractAddress);
