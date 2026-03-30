@@ -83,7 +83,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
       secret,
     };
     ctx.zkProverUrl =
-      process.env.DEV_ZK_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0/fake';
+      process.env.DEV_ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v2.0/fake';
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
@@ -122,7 +122,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
           WEB_PROVER_API_URL:
-            process.env.WEB_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0',
+            process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0',
           VLAYER_API_GATEWAY_KEY: ctx.proverEnv.secret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
@@ -279,7 +279,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
     console.log('ZK_PROVER_API_URL (from env):', process.env.ZK_PROVER_API_URL);
     console.log('ZK_PROVER_GUEST_ID (from env):', process.env.ZK_PROVER_GUEST_ID);
 
-    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://dashboard-20.vlayer.xyz/api/v2.0';
+    ctx.zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v2.0';
     ctx.imageId = process.env.ZK_PROVER_GUEST_ID;
     if (!ctx.imageId) {
       throw new Error('ZK_PROVER_GUEST_ID not set');
@@ -334,7 +334,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
           ...process.env,
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
-          WEB_PROVER_API_URL: ctx.proverEnv.baseUrl || 'https://dashboard-20.vlayer.xyz/api/v2.0',
+          WEB_PROVER_API_URL: ctx.proverEnv.baseUrl || 'https://web-prover.vlayer.xyz/api/v2.0',
           VLAYER_API_GATEWAY_KEY: ctx.proverEnv.secret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,

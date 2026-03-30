@@ -38,10 +38,10 @@ jobs:
           VLAYER_API_GATEWAY_KEY: ${{ secrets.VLAYER_API_GATEWAY_KEY }}
           
           # Web Prover
-          WEB_PROVER_API_URL: https://dashboard-20.vlayer.xyz/api/v2.0
+          WEB_PROVER_API_URL: https://web-prover.vlayer.xyz/api/v2.0
 
           # ZK Prover
-          DEV_ZK_PROVER_API_URL: "https://dashboard-20.vlayer.xyz/api/v2.0/fake"
-          ZK_PROVER_API_URL: "https://dashboard-20.vlayer.xyz/api/v2.0"
+          DEV_ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v2.0/fake"
+          ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v2.0"
           ZK_PROVER_GUEST_ID: "0x6a7e93daf523b54f3edb5fba6c6390983adc7fbf962cbd5c9cac738b006bd36c"
           PRIVATE_KEY: ${{ secrets.TESTNET_ETH_PRIVATE_KEY }}
