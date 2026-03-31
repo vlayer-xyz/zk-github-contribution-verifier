@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetch, Agent } from 'undici';
+import { requireEnv } from '@/app/lib/env';
 
 // Configure max duration for Vercel (up to 90 seconds)
 export const maxDuration = 90;
+
+const zkProverBaseUrl = requireEnv('ZK_PROVER_API_URL').replace(/\/$/, '');
+const vlayerApiKey = requireEnv('VLAYER_API_GATEWAY_KEY');
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,31 +36,10 @@ export async function POST(request: NextRequest) {
     console.log('Compressing web proof for user:', username);
     console.log('Extract config:', JSON.stringify(extractConfig, null, 2));
 
-    const zkProverApiUrl = process.env.ZK_PROVER_API_URL;
-    if (!zkProverApiUrl) {
-      return NextResponse.json(
-        {
-          error:
-            'Missing ZK_PROVER_API_URL. Configure this env var to reach the vlayer ZK Prover API.',
-        },
-        { status: 500 }
-      );
-    }
-    const zkProverBaseUrl = zkProverApiUrl.replace(/\/$/, '');
     const agent = new Agent({
       headersTimeout: 1200000,
       bodyTimeout: 1200000,
     });
-    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
-    if (!vlayerApiKey) {
-      return NextResponse.json(
-        {
-          error:
-            'Missing VLAYER_API_GATEWAY_KEY. Configure this env var to reach the vlayer ZK Prover API.',
-        },
-        { status: 500 }
-      );
-    }
     const fetchOptions = {
       method: 'POST',
       headers: {

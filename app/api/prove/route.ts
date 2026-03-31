@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyRepositoryAccess } from '@/app/lib/github-helpers';
+import { requireEnv } from '@/app/lib/env';
 
 // Configure max duration for Vercel (up to 90 seconds)
 export const maxDuration = 160;
+
+const vlayerApiKey = requireEnv('VLAYER_API_GATEWAY_KEY');
+const baseUrl = requireEnv('WEB_PROVER_API_URL').replace(/\/$/, '');
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,28 +76,6 @@ export async function POST(request: NextRequest) {
     console.log('Upstream URL being proved:', requestBody.url);
     console.log('Headers being sent:', requestBody.headers);
 
-    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
-    if (!vlayerApiKey) {
-      return NextResponse.json(
-        {
-          error:
-            'Missing VLAYER_API_GATEWAY_KEY. Configure this env var to reach the vlayer Web Prover API.',
-        },
-        { status: 500 }
-      );
-    }
-
-    const webProverApiUrl = process.env.WEB_PROVER_API_URL;
-    if (!webProverApiUrl) {
-      return NextResponse.json(
-        {
-          error:
-            'Missing WEB_PROVER_API_URL. Configure this env var to reach the vlayer Web Prover API.',
-        },
-        { status: 500 }
-      );
-    }
-    const baseUrl = webProverApiUrl.replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: {
