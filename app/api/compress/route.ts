@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetch, Agent } from 'undici';
-import { requireEnv } from '@/app/lib/env';
 
 // Configure max duration for Vercel (up to 90 seconds)
 export const maxDuration = 90;
-
-const zkProverBaseUrl = requireEnv('ZK_PROVER_API_URL').replace(/\/$/, '');
-const vlayerApiKey = requireEnv('VLAYER_API_GATEWAY_KEY');
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +16,12 @@ export async function POST(request: NextRequest) {
     if (!username) {
       return NextResponse.json({ error: 'Username is required for extraction' }, { status: 400 });
     }
+
+    const zkProverApiUrl = process.env.ZK_PROVER_API_URL;
+    if (!zkProverApiUrl) throw new Error('Missing ZK_PROVER_API_URL env var');
+
+    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!vlayerApiKey) throw new Error('Missing VLAYER_API_GATEWAY_KEY env var');
 
     // Build JMESPath queries to extract repo nameWithOwner, login and merged PRs count from GraphQL response
     const extractConfig = {
@@ -36,6 +38,7 @@ export async function POST(request: NextRequest) {
     console.log('Compressing web proof for user:', username);
     console.log('Extract config:', JSON.stringify(extractConfig, null, 2));
 
+    const zkProverBaseUrl = zkProverApiUrl.replace(/\/$/, '');
     const agent = new Agent({
       headersTimeout: 1200000,
       bodyTimeout: 1200000,

@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireEnv } from '@/app/lib/env';
 
 // Configure max duration for Vercel (up to 90 seconds)
 export const maxDuration = 90;
-
-const vlayerApiKey = requireEnv('VLAYER_API_GATEWAY_KEY');
-const baseUrl = requireEnv('WEB_PROVER_API_URL').replace(/\/$/, '');
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!vlayerApiKey) throw new Error('Missing VLAYER_API_GATEWAY_KEY env var');
+
+    const webProverApiUrl = process.env.WEB_PROVER_API_URL;
+    if (!webProverApiUrl) throw new Error('Missing WEB_PROVER_API_URL env var');
+
+    const baseUrl = webProverApiUrl.replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/verify`, {
       method: 'POST',
       headers: {
