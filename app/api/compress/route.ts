@@ -17,6 +17,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Username is required for extraction' }, { status: 400 });
     }
 
+    const zkProverApiUrl = process.env.ZK_PROVER_API_URL;
+    if (!zkProverApiUrl) throw new Error('Missing ZK_PROVER_API_URL env var');
+
+    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!vlayerApiKey) throw new Error('Missing VLAYER_API_GATEWAY_KEY env var');
+
     // Build JMESPath queries to extract repo nameWithOwner, login and merged PRs count from GraphQL response
     const extractConfig = {
       'response.body': {
@@ -32,28 +38,21 @@ export async function POST(request: NextRequest) {
     console.log('Compressing web proof for user:', username);
     console.log('Extract config:', JSON.stringify(extractConfig, null, 2));
 
-    const zkProverUrl = process.env.ZK_PROVER_API_URL || 'https://zk-prover.vlayer.xyz/api/v0';
+    const zkProverBaseUrl = zkProverApiUrl.replace(/\/$/, '');
     const agent = new Agent({
       headersTimeout: 1200000,
       bodyTimeout: 1200000,
     });
-    const isV0 = zkProverUrl.includes('/api/v0');
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (isV0) {
-      headers['x-client-id'] = `${process.env.ZK_PROVER_API_V0_CLIENT_ID}`;
-      headers['Authorization'] = 'Bearer ' + (process.env.ZK_PROVER_API_V0_SECRET || '');
-    } else if (process.env.ZK_PROVER_API_SECRET) {
-      headers['Authorization'] = 'Bearer ' + process.env.ZK_PROVER_API_SECRET;
-    }
     const fetchOptions = {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${vlayerApiKey}`,
+      },
       body: JSON.stringify(requestBody),
       dispatcher: agent,
     };
-    const response = await fetch(`${zkProverUrl}/compress-web-proof`, fetchOptions);
+    const response = await fetch(`${zkProverBaseUrl}/evm/compress-web-proof`, fetchOptions);
 
     if (!response.ok) {
       const errorText = await response.text();

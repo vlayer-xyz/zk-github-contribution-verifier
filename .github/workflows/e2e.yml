@@ -35,16 +35,13 @@ jobs:
         run: npm run test:e2e
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          VLAYER_API_GATEWAY_KEY: ${{ secrets.VLAYER_API_GATEWAY_KEY }}
           
           # Web Prover
-          WEB_PROVER_API_SECRET: ${{ secrets.WEB_PROVER_API_SECRET }}
-          WEB_PROVER_API_URL: https://web-prover.vlayer.xyz/api/v2.0_unreleased
+          WEB_PROVER_API_URL: https://web-prover.vlayer.xyz/api/v2.0
 
           # ZK Prover
-          DEV_ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v0"
-          ZK_PROVER_API_V0_CLIENT_ID: ${{ secrets.ZK_PROVER_API_V0_CLIENT_ID }}
-          ZK_PROVER_API_V0_SECRET: ${{ secrets.ZK_PROVER_API_V0_SECRET }}
-          ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v1.0_beta"
-          ZK_PROVER_API_SECRET: ${{ secrets.ZK_PROVER_API_SECRET }}
+          DEV_ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v2.0/fake"
+          ZK_PROVER_API_URL: "https://zk-prover.vlayer.xyz/api/v2.0"
           ZK_PROVER_GUEST_ID: "0x6a7e93daf523b54f3edb5fba6c6390983adc7fbf962cbd5c9cac738b006bd36c"
           PRIVATE_KEY: ${{ secrets.TESTNET_ETH_PRIVATE_KEY }}

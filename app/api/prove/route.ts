@@ -68,18 +68,23 @@ export async function POST(request: NextRequest) {
       }),
     } as const;
 
+    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!vlayerApiKey) throw new Error('Missing VLAYER_API_GATEWAY_KEY env var');
+
+    const webProverApiUrl = process.env.WEB_PROVER_API_URL;
+    if (!webProverApiUrl) throw new Error('Missing WEB_PROVER_API_URL env var');
+
+    const baseUrl = webProverApiUrl.replace(/\/$/, '');
+
     console.log('Sending to vlayer API (prove):', JSON.stringify(requestBody, null, 2));
     console.log('Upstream URL being proved:', requestBody.url);
     console.log('Headers being sent:', requestBody.headers);
 
-    const baseUrl = (
-      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
-    ).replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
+        Authorization: `Bearer ${vlayerApiKey}`,
       },
       body: JSON.stringify(requestBody),
     });
@@ -90,10 +95,11 @@ export async function POST(request: NextRequest) {
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json();
-    const presentation = data.data;
+    const data = (await response.json()) as {
+      data: { data: unknown; version: string; meta: { notaryUrl: string } };
+    };
 
-    return NextResponse.json(presentation);
+    return NextResponse.json(data.data);
   } catch (error) {
     console.error('Prove API error:', error);
 

@@ -7,13 +7,17 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const baseUrl = (
-      process.env.WEB_PROVER_API_URL || 'https://web-prover.vlayer.xyz/api/v2.0_unreleased'
-    ).replace(/\/$/, '');
+    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+    if (!vlayerApiKey) throw new Error('Missing VLAYER_API_GATEWAY_KEY env var');
+
+    const webProverApiUrl = process.env.WEB_PROVER_API_URL;
+    if (!webProverApiUrl) throw new Error('Missing WEB_PROVER_API_URL env var');
+
+    const baseUrl = webProverApiUrl.replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/verify`, {
       method: 'POST',
       headers: {
-        Authorization: 'Bearer ' + process.env.WEB_PROVER_API_SECRET,
+        Authorization: `Bearer ${vlayerApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),

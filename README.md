@@ -25,12 +25,10 @@ npm install
 Create a `.env.local` file with your vlayer API credentials:
 
 ```
-WEB_PROVER_API_SECRET=your_web_prover_api_key
-ZK_PROVER_API_SECRET=your_zk_prover_api_key
-# Optional: override the Web Prover base URL (useful for local tests/mocking)
-WEB_PROVER_API_URL=https://web-prover.vlayer.xyz/api/v1
-# Optional: override the ZK Prover base URL (useful for local tests/mocking)
-ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0
+VLAYER_API_GATEWAY_KEY=your_api_key
+# Optional: override the Web Prover / ZK Prover base URL
+WEB_PROVER_API_URL=https://web-prover.vlayer.xyz/api/v2.0
+ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v2.0
 ```
 
 ## Usage
@@ -69,21 +67,22 @@ Requirements:
 - `contracts` dependencies installed (`npm install` inside `contracts/`)
 - No other services bound to the random ports the test selects
 - Real network access plus the following environment variables (the test fails fast if any are missing):
-  - `WEB_PROVER_API_SECRET` and `ZK_PROVER_API_SECRET` (API keys)
+  - `VLAYER_API_GATEWAY_KEY` — API key for the vlayer dashboard (Web Prover + ZK Prover)
   - `GITHUB_TOKEN` (or `GITHUB_GRAPHQL_TOKEN`) with GitHub GraphQL access
-  - Optional overrides: `WEB_PROVER_API_URL`, `ZK_PROVER_API_URL`, `GITHUB_LOGIN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME` for the query target
+  - `ZK_PROVER_GUEST_ID` — guest image ID for the ZK Prover (required for E2E runs)
+  - `PRIVATE_KEY` — Base Sepolia private key with testnet ETH (Boundless suite only)
+  - Optional overrides: `WEB_PROVER_API_URL`, `ZK_PROVER_API_URL`, `DEV_ZK_PROVER_API_URL`, `GITHUB_LOGIN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME`
 - The test calls `/api/prove`, `/api/compress`, and finally submits the compressed proof to the locally deployed contract via viem/wagmi-compatible logic.
 - These env vars can be exported in your shell or placed in a `.env.test` file in the repo root, which the Vitest suite loads automatically before running.
 - Example `.env.test`:
   ```
   GITHUB_TOKEN=ghp_xxx
-  GITHUB_LOGIN=your-handle
-  GITHUB_REPO_OWNER=vlayer-xyz
-  GITHUB_REPO_NAME=vlayer
-  WEB_PROVER_API_SECRET=web-prover-key
-  ZK_PROVER_API_SECRET=zk-prover-key
-  NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS=""
-  NEXT_PUBLIC_DEFAULT_CHAIN_ID=31337
+  VLAYER_API_GATEWAY_KEY=your_api_key
+  WEB_PROVER_API_URL=https://web-prover.vlayer.xyz/api/v2.0
+  ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v2.0
+  DEV_ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v2.0/fake
+  ZK_PROVER_GUEST_ID=0x6a7e93daf523b54f3edb5fba6c6390983adc7fbf962cbd5c9cac738b006bd36c
+  PRIVATE_KEY=0x<base_sepolia_private_key>
   ```
 
 ### Testing Scripts
@@ -191,9 +190,9 @@ anvil
 export ANVIL_RPC_URL=http://127.0.0.1:8545
 export PRIVATE_KEY=0x<one_of_anvil_accounts_private_keys>
 
-# Fetch the ZK Prover guest ID from the server
-export ZK_PROVER_API_URL=https://zk-prover.vlayer.xyz/api/v0
-export ZK_PROVER_GUEST_ID=$(curl -s ${ZK_PROVER_API_URL}/guest-id | jq -r '.data.guestId')
+# Fetch the ZK Prover guest ID from the dashboard
+export ZK_PROVER_GUEST_ID=$(curl -s -H "Authorization: Bearer $VLAYER_API_GATEWAY_KEY" \
+  https:/zk-prover.vlayer.xyz/api/v2.0/evm/guest-id | jq -r '.data.guestId')
 
 # Match these to your compressed proof (example from zk_proof_compress_*.json)
 export NOTARY_KEY_FINGERPRINT=0xa7e62d7f17aa7a22c26bdb93b7ce9400e826ffb2c6f54e54d2ded015677499af
