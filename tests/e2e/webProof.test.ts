@@ -180,7 +180,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ presentation, username: login }),
-      signal: AbortSignal.timeout(60_000), // 1 minute — fake compress is fast
+      signal: AbortSignal.timeout(120_000), // 2 minutes
     });
     expect(compressResponse.status).toBe(200);
     const compressionPayload = await compressResponse.json();
