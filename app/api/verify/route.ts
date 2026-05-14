@@ -7,18 +7,18 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
-    if (!vlayerApiKey) throw new Error('Missing VLAYER_API_GATEWAY_KEY env var');
-
     const webProverApiUrl = process.env.WEB_PROVER_API_URL;
     if (!webProverApiUrl) throw new Error('Missing WEB_PROVER_API_URL env var');
+
+    const vlayerApiKey = process.env.WEB_PROVER_API_SECRET;
+    if (!vlayerApiKey) throw new Error('Missing WEB_PROVER_API_SECRET env var');
 
     const baseUrl = webProverApiUrl.replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/verify`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${vlayerApiKey}`,
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${vlayerApiKey}`,
       },
       body: JSON.stringify(body),
       // Add timeout to prevent hanging requests
