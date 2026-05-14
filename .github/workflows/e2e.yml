@@ -35,7 +35,7 @@ jobs:
         run: npm run test:e2e
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          VLAYER_API_GATEWAY_KEY: ${{ secrets.VLAYER_API_GATEWAY_KEY }}
+          WEB_PROVER_API_SECRET: ${{ secrets.WEB_PROVER_API_SECRET }}
           
           # Web Prover
           WEB_PROVER_API_URL: https://web-prover.vlayer.xyz/api/v2.0
