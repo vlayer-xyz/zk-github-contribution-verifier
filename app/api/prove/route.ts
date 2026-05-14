@@ -19,7 +19,18 @@ export async function POST(request: NextRequest) {
 
     console.log('prove body keys:', Object.keys(body));
     console.log('query present:', !!query, '| type:', typeof query);
-    console.log('githubToken present:', !!githubToken, '| source:', body.githubToken ? 'body' : process.env.GITHUB_TOKEN ? 'GITHUB_TOKEN' : process.env.GITHUB_GRAPHQL_TOKEN ? 'GITHUB_GRAPHQL_TOKEN' : 'none');
+    console.log(
+      'githubToken present:',
+      !!githubToken,
+      '| source:',
+      body.githubToken
+        ? 'body'
+        : process.env.GITHUB_TOKEN
+          ? 'GITHUB_TOKEN'
+          : process.env.GITHUB_GRAPHQL_TOKEN
+            ? 'GITHUB_GRAPHQL_TOKEN'
+            : 'none'
+    );
     console.log('variables:', JSON.stringify(variables));
 
     if (!query || typeof query !== 'string') {
