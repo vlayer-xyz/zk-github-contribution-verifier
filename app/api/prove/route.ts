@@ -17,29 +17,11 @@ export async function POST(request: NextRequest) {
       process.env.GITHUB_GRAPHQL_TOKEN ||
       '';
 
-    console.log('prove body keys:', Object.keys(body));
-    console.log('query present:', !!query, '| type:', typeof query);
-    console.log(
-      'githubToken present:',
-      !!githubToken,
-      '| source:',
-      body.githubToken
-        ? 'body'
-        : process.env.GITHUB_TOKEN
-          ? 'GITHUB_TOKEN'
-          : process.env.GITHUB_GRAPHQL_TOKEN
-            ? 'GITHUB_GRAPHQL_TOKEN'
-            : 'none'
-    );
-    console.log('variables:', JSON.stringify(variables));
-
     if (!query || typeof query !== 'string') {
-      console.error('400: missing or invalid query');
       return NextResponse.json({ error: 'Missing GraphQL query in body.query' }, { status: 400 });
     }
 
     if (!githubToken) {
-      console.error('400: missing github token');
       return NextResponse.json(
         { error: 'Missing GitHub token. Provide githubToken in body or set GITHUB_TOKEN' },
         { status: 400 }
@@ -50,10 +32,7 @@ export async function POST(request: NextRequest) {
     const owner = variables.owner as string | undefined;
     const name = variables.name as string | undefined;
 
-    console.log('owner:', owner, '| name:', name);
-
     if (!owner || typeof owner !== 'string' || !name || typeof name !== 'string') {
-      console.error('400: missing owner or name in variables');
       return NextResponse.json(
         { error: 'Missing repository information. Provide owner and name in body.variables' },
         { status: 400 }
@@ -97,10 +76,6 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = webProverApiUrl.replace(/\/$/, '');
 
-    console.log('Sending to vlayer API (prove):', JSON.stringify(requestBody, null, 2));
-    console.log('Upstream URL being proved:', requestBody.url);
-    console.log('Headers being sent:', requestBody.headers);
-
     const response = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: {
@@ -111,11 +86,7 @@ export async function POST(request: NextRequest) {
       signal: AbortSignal.timeout(155000),
     });
 
-    console.log('vlayer API response status:', response.status, response.statusText);
-    console.log('vlayer API response URL:', response.url);
-
     const responseText = await response.text();
-    console.log('vlayer API raw response (first 500 chars):', responseText.slice(0, 500));
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status} - ${responseText}`);
