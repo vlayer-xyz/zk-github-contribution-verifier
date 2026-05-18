@@ -68,17 +68,13 @@ export async function POST(request: NextRequest) {
       }),
     } as const;
 
-    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
-    if (!vlayerApiKey) throw new Error('Missing VLAYER_API_GATEWAY_KEY env var');
-
     const webProverApiUrl = process.env.WEB_PROVER_API_URL;
     if (!webProverApiUrl) throw new Error('Missing WEB_PROVER_API_URL env var');
 
-    const baseUrl = webProverApiUrl.replace(/\/$/, '');
+    const vlayerApiKey = process.env.WEB_PROVER_API_SECRET;
+    if (!vlayerApiKey) throw new Error('Missing WEB_PROVER_API_SECRET env var');
 
-    console.log('Sending to vlayer API (prove):', JSON.stringify(requestBody, null, 2));
-    console.log('Upstream URL being proved:', requestBody.url);
-    console.log('Headers being sent:', requestBody.headers);
+    const baseUrl = webProverApiUrl.replace(/\/$/, '');
 
     const response = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
@@ -87,17 +83,21 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${vlayerApiKey}`,
       },
       body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(155000),
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('vlayer API error response:', errorText);
-      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      throw new Error(`HTTP error! status: ${response.status} - ${responseText}`);
     }
 
-    const data = (await response.json()) as {
-      data: { data: unknown; version: string; meta: { notaryUrl: string } };
-    };
+    let data: { data: { data: unknown; version: string; meta: { notaryUrl: string } } };
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      throw new Error(`vlayer API returned non-JSON response: ${responseText.slice(0, 200)}`);
+    }
 
     return NextResponse.json(data.data);
   } catch (error) {

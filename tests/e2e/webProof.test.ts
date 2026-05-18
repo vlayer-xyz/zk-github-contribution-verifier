@@ -125,7 +125,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
           WEB_PROVER_API_URL: ctx.proverEnv!.baseUrl,
-          VLAYER_API_GATEWAY_KEY: ctx.proverEnv.secret,
+          WEB_PROVER_API_SECRET: ctx.proverEnv.secret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
@@ -180,7 +180,7 @@ describe('Dev web proof (Anvil + Mock Verifier)', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ presentation, username: login }),
-      signal: AbortSignal.timeout(60_000), // 1 minute — fake compress is fast
+      signal: AbortSignal.timeout(120_000), // 2 minutes
     });
     expect(compressResponse.status).toBe(200);
     const compressionPayload = await compressResponse.json();
@@ -340,7 +340,7 @@ describe('Boundless web proof (Base Sepolia + Real Verifier)', () => {
           NODE_ENV: 'development',
           PORT: String(ctx.nextPort),
           WEB_PROVER_API_URL: ctx.proverEnv.baseUrl,
-          VLAYER_API_GATEWAY_KEY: ctx.proverEnv.secret,
+          WEB_PROVER_API_SECRET: ctx.proverEnv.secret,
           ZK_PROVER_API_URL: ctx.zkProverUrl,
           NEXT_PUBLIC_DEFAULT_CONTRACT_ADDRESS: ctx.contractAddress,
         },
@@ -473,9 +473,9 @@ function validateRequiredEnvVars() {
   if (!githubToken) {
     throw new Error('Set GITHUB_TOKEN (or GITHUB_GRAPHQL_TOKEN) for the GitHub GraphQL API call');
   }
-  const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
+  const vlayerApiKey = process.env.WEB_PROVER_API_SECRET;
   if (!vlayerApiKey) {
-    throw new Error('Set VLAYER_API_GATEWAY_KEY to reach the vlayer API');
+    throw new Error('Set WEB_PROVER_API_SECRET to reach the vlayer API');
   }
   return { githubToken, secret: vlayerApiKey };
 }

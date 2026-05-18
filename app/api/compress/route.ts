@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
     const zkProverApiUrl = process.env.ZK_PROVER_API_URL;
     if (!zkProverApiUrl) throw new Error('Missing ZK_PROVER_API_URL env var');
 
-    const vlayerApiKey = process.env.VLAYER_API_GATEWAY_KEY;
-    if (!vlayerApiKey) throw new Error('Missing VLAYER_API_GATEWAY_KEY env var');
+    const vlayerApiKey = process.env.WEB_PROVER_API_SECRET;
+    if (!vlayerApiKey) throw new Error('Missing WEB_PROVER_API_SECRET env var');
 
     // Build JMESPath queries to extract repo nameWithOwner, login and merged PRs count from GraphQL response
     const extractConfig = {
