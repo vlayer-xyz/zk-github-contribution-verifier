@@ -22,7 +22,7 @@ export async function waitForServer(url: string, timeoutMs = 30_000) {
         redirect: 'manual',
         signal: AbortSignal.timeout(2_000),
       });
-      if (response.ok || response.status >= 300) {
+      if (response.ok || (response.status >= 300 && response.status < 400)) {
         return;
       }
     } catch {
