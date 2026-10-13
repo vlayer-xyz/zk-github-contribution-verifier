@@ -1,5 +1,8 @@
 # GitHub Contribution Verifier
 
+> [!WARNING]
+> **This repository is archived and no longer maintained.** It calls vlayer API hosts that have since been shut down (`web-prover.vlayer.xyz`, `zk-prover.vlayer.xyz`), so it no longer works as written. For the current Web Proofs API, see the [vlayer platform docs](https://platform.vlayer.xyz/server-side/rest-api/prove).
+
 > IMPORTANT: This project is not production-ready. Mainnets are not supported. Testnets only (Sepolia, Base Sepolia, OP Sepolia, and local Anvil).
 
 A Next.js application that uses web proofs / zkTLS to verify GitHub contributions through vlayer's Web Prover API.
